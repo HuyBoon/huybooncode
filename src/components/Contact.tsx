@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaLinkedin, FaGithub, FaEnvelope } from "react-icons/fa";
+import Image from "next/image";
+import { toast } from "sonner";
 
 const containerVariants = {
 	hidden: { opacity: 0, y: 20 },
@@ -28,39 +30,61 @@ const Contact = () => {
 		email: "",
 		message: "",
 	});
-	const [isSubmitted, setIsSubmitted] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
-		setError(null); // Clear error on input change
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!formData.name || !formData.email || !formData.message) {
-			setError("Please fill in all fields.");
+			toast.error("Please fill in all fields.");
 			return;
 		}
-		const currentTime = new Date().toLocaleString("en-US", {
-			timeZone: "Asia/Ho_Chi_Minh",
-			hour12: true,
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-		console.log("Submitted:", { ...formData, submittedAt: currentTime });
-		setIsSubmitted(true);
-		setFormData({ name: "", email: "", message: "" }); // Reset form
-		setTimeout(() => setIsSubmitted(false), 5000); // Hide message after 5s
+
+		setIsSubmitting(true);
+
+		try {
+			const response = await fetch("/api/send-email", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(formData),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to send email.");
+			}
+
+			const currentTime = new Date().toLocaleString("en-US", {
+				timeZone: "Asia/Ho_Chi_Minh",
+				hour12: true,
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+
+			console.log("Submitted:", { ...formData, submittedAt: currentTime });
+			toast.success("Thank you! Your message has been sent successfully.", {
+				duration: 5000,
+			});
+			setFormData({ name: "", email: "", message: "" }); // Reset form
+		} catch (err) {
+			toast.error("Something went wrong. Please try again later.");
+			console.error(err);
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	return (
-		<section className="relative px-4 sm:px-6 lg:px-12 xl:px-24 ">
+		<section className="relative px-4 sm:px-6 lg:px-12 xl:px-24">
 			<div className="max-w-7xl mx-auto">
 				<motion.div
 					variants={containerVariants}
@@ -75,7 +99,6 @@ const Contact = () => {
 					>
 						Get in <span className="text-primary">Touch</span>
 					</motion.h2>
-
 					<motion.div
 						variants={itemVariants}
 						className="w-20 sm:w-24 h-1 bg-gradient-to-r from-primary to-[#7c3aed] rounded-full mx-auto"
@@ -120,37 +143,27 @@ const Contact = () => {
 								</a>
 							</li>
 						</ul>
+						<motion.div
+							variants={itemVariants}
+							className="hidden sm:block mt-8 rounded-2xl overflow-hidden shadow-lg border border-gray-200"
+						>
+							<Image
+								src={"/huybooncode.png"}
+								alt="huybooncode."
+								width={600}
+								height={400}
+							/>
+						</motion.div>
 					</motion.div>
 
 					{/* Contact Form */}
 					<motion.div
 						variants={itemVariants}
-						className=" p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200"
+						className="p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200"
 					>
 						<h3 className="text-xl sm:text-2xl font-semibold text-content mb-6">
 							Send Me a Message
 						</h3>
-						{isSubmitted && (
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								aria-live="polite"
-								className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm"
-							>
-								Thank you! Message submitted at 08:51 PM +07, Wednesday, June
-								18, 2025.
-							</motion.div>
-						)}
-						{error && (
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm"
-							>
-								{error}
-							</motion.div>
-						)}
 						<form onSubmit={handleSubmit} className="space-y-5">
 							<div>
 								<label className="block text-sm font-medium text-content mb-2">
@@ -199,9 +212,12 @@ const Contact = () => {
 								whileHover={{ scale: 1.05, y: -2 }}
 								whileTap={{ scale: 0.98 }}
 								type="submit"
-								className="cursor-pointer w-full relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+								disabled={isSubmitting}
+								className={`cursor-pointer w-full relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-[#7c3aed] text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all ${
+									isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+								}`}
 							>
-								Send Message
+								{isSubmitting ? "Sending..." : "Send Message"}
 							</motion.button>
 						</form>
 					</motion.div>

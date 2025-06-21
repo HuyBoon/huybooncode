@@ -3,6 +3,7 @@ import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Toaster } from "sonner";
 
 const robotoMono = Roboto_Mono({
 	subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
 				<Header />
 				{children}
 				<Footer />
+				<Toaster position="top-right" theme="light" richColors />
 			</body>
 		</html>
 	);

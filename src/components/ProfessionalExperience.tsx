@@ -34,9 +34,10 @@ const experiences = [
 		company: "Independent",
 		location: "Remote",
 		details: [
-			"Developed websites for Hiddensun and Kyleskincare.",
-			"Completed various client projects with modern web technologies.",
+			"Developed responsive websites for multiple brands and small businesses.",
+			"Completed various client projects using modern web technologies.",
 		],
+
 		technologies: ["HTML", "CSS", "JavaScript", "React", "Next.js"],
 	},
 	{
@@ -54,16 +55,16 @@ const experiences = [
 		start: "2020",
 		end: "2020",
 		title: "Graduation",
-		company: "Ho Chi Minh City University of Technology",
+		company: "HCMC University of Technology",
 		location: "Ho Chi Minh City, Vietnam",
-		details: ["Graduated with a degree in Information Technology."],
+		details: ["Graduated with a degree in Mechatronics."],
 		technologies: [],
 	},
 	{
 		start: "2019",
 		end: "2020",
 		title: "Manual Tester",
-		company: "Software Outsourcing Company",
+		company: "TMA Solutions",
 		location:
 			"10 Dang Van Ngu Street, Phu Nhuan District, Ho Chi Minh City, Vietnam",
 		details: [
@@ -95,7 +96,8 @@ const ProfessionalExperience = () => {
 					variants={itemVariants}
 					className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-content mb-3 sm:mb-4"
 				>
-					Professional Experience
+					Professional
+					<span className="text-primary"> Experiences</span>
 				</motion.h2>
 				<motion.div
 					variants={itemVariants}
@@ -120,7 +122,7 @@ const ProfessionalExperience = () => {
 									<motion.div
 										key={exp.start + exp.end}
 										variants={itemVariants}
-										className={`mb-8 flex w-full  ${
+										className={`mb-8 flex w-full ${
 											isLeft
 												? "sm:justify-start justify-start"
 												: "sm:justify-end justify-start"
@@ -128,7 +130,7 @@ const ProfessionalExperience = () => {
 									>
 										<div className="absolute left-0 sm:left-1/2 transform sm:-translate-x-1/2  w-3 h-3 bg-primary rounded-full" />
 										<div
-											className={`w-full sm:max-w-[45%] p-4 sm:p-6 rounded-lg shadow-lg border border-gray-50 ${
+											className={`w-full sm:max-w-[45%] p-4 sm:p-6 rounded-lg shadow-lg shadow-white/10 border border-gray-50 ${
 												isLeft
 													? "sm:mr-4 md:mr-8 ml-8 sm:ml-0"
 													: "sm:ml-4 md:ml-6 ml-8"
@@ -136,7 +138,7 @@ const ProfessionalExperience = () => {
 										>
 											<div className="flex items-center mb-2 relative">
 												<div>
-													<p className="text-sm sm:text-base text-content">
+													<p className="text-sm sm:text-base font-bold text-content">
 														{exp.start} - {exp.end || "Present"}
 													</p>
 												</div>
@@ -172,7 +174,7 @@ const ProfessionalExperience = () => {
 						<motion.div variants={itemVariants} className="mt-6 text-center">
 							<button
 								onClick={() => setShowAll(true)}
-								className="cursor-pointer relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+								className="cursor-pointer relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-[#7c3aed] text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
 								aria-label="View more experience"
 							>
 								View More
@@ -183,7 +185,7 @@ const ProfessionalExperience = () => {
 						<motion.div variants={itemVariants} className="mt-6 text-center">
 							<button
 								onClick={() => setShowAll(false)}
-								className="cursor-pointer relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+								className="cursor-pointer relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-[#7c3aed] text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
 								aria-label="Collapse experience"
 							>
 								Collapse

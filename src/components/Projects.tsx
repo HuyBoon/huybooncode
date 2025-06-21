@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 import { FaReact, FaNodeJs, FaHtml5, FaCss3Alt } from "react-icons/fa";
 import {
@@ -24,41 +26,40 @@ const techIcons: Record<string, React.ReactNode> = {
 
 const projects = [
 	{
-		title: "E-commerce Platform",
+		title: "E-commerce Website",
 		description:
-			"A modern shopping experience built with Next.js and TypeScript",
+			"An online store featuring product management, shopping cart, and user authentication, built with Next.js and TypeScript.",
 		tech: ["React", "Next.js", "Tailwind"],
 		image: "/projects/ecommerce.png",
-		demoLink: "https://demo.com/ecommerce",
-		sourceLink: "https://github.com/username/ecommerce",
+		demoLink: "https://kimvinhstore.vercel.app/",
 		status: "Completed",
 	},
 	{
-		title: "Analytics Dashboard",
-		description: "Real-time data dashboard with robust backend integration",
+		title: "Phú Quốc's Travel Website",
+		description:
+			"A travel website showcasing destinations, tours, and travel guides for Phú Quốc with a user-friendly interface.",
 		tech: ["TypeScript", "Node.js", "Tailwind"],
 		image: "/projects/tour.png",
-		demoLink: "https://demo.com/analytics",
-		sourceLink: "https://github.com/username/analytics-dashboard",
+		demoLink: "https://hiddensun.vn/",
 		status: "Completed",
 	},
 	{
-		title: "Mobile App Tracker",
-		description: "Cross-platform health tracking app with Firebase backend",
+		title: "Blog Platform",
+		description:
+			"A blogging platform where users can read, write, and manage blog posts, with support for multilingual content.",
 		tech: ["React", "Firebase", "Tailwind"],
-		image: "/projects/mobile.png",
-		demoLink: "https://demo.com/mobile-tracker",
-		sourceLink: "https://github.com/username/mobile-app-tracker",
+		image: "/projects/blog.png",
+		demoLink: "https://mereview.vercel.app/vi",
 		status: "Completed",
 	},
 	{
-		title: "Task Management Tool",
-		description: "Productivity app with real-time collaboration features",
-		tech: ["React", "Node.js", "TypeScript", "Tailwind"],
-		image: "/projects/portfolio.png",
-		demoLink: "https://demo.com/taskmanager",
-		sourceLink: "https://github.com/username/taskmanager",
-		status: "In Progress",
+		title: "Kyles Skincare",
+		description:
+			"A landing page for a skincare brand designed to showcase products, introduce the brand story, and collect customer leads through a contact form. The website is responsive and optimized for marketing campaigns.",
+		tech: ["React", "Next.js", "TypeScript", "Tailwind"],
+		image: "/projects/landing.png",
+		demoLink: "https://kyleskincare.vn/",
+		status: "Completed",
 	},
 ];
 
@@ -80,11 +81,33 @@ const itemVariants = {
 	},
 };
 
+const cardVariants = {
+	hover: {
+		boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)",
+	},
+};
+
 export default function Projects() {
+	const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+	const handleMouseEnter = (index: number) => {
+		setActiveIndex(index);
+		if (typeof window !== "undefined" && window.innerWidth <= 768) {
+			setTimeout(() => {
+				setActiveIndex(null);
+			}, 1000);
+		}
+	};
+
+	const handleMouseLeave = () => {
+		if (typeof window !== "undefined" && window.innerWidth > 768) {
+			setActiveIndex(null);
+		}
+	};
+
 	return (
-		<section className="py-10 sm:py-12 md:py-16 relative" id="work">
-			<div className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-12 xl:px-24">
-				{/* Section Heading */}
+		<section className="relative">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-24">
 				<motion.div
 					variants={containerVariants}
 					initial="hidden"
@@ -94,97 +117,87 @@ export default function Projects() {
 				>
 					<motion.h2
 						variants={itemVariants}
-						className="text-3xl sm:text-4xl md:text-5xl font-bold text-content mb-4"
+						className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-content mb-3 sm:mb-4"
 					>
-						Featured Projects
+						Featured
+						<span className="text-primary"> Projects</span>
 					</motion.h2>
-
 					<motion.div
 						variants={itemVariants}
 						className="w-20 sm:w-24 h-1 bg-gradient-to-r from-primary to-[#7c3aed] rounded-full mx-auto"
 					/>
 				</motion.div>
 
-				{/* Project Grid */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8 relative z-10">
 					{projects.map((project, index) => (
 						<motion.div
 							key={index}
-							variants={itemVariants}
-							whileHover={{
-								scale: 1.03,
-								rotate: 0.5,
-								boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)",
-							}}
-							className="group relative h-[450px] rounded-xl overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer"
+							variants={cardVariants}
+							whileHover="hover"
+							onMouseEnter={() => handleMouseEnter(index)}
+							onMouseLeave={handleMouseLeave}
+							onClick={() => handleMouseEnter(index)}
+							className="group relative rounded-xl overflow-hidden cursor-pointer border border-gray-200 shadow-lg shadow-white/10 transition-transform duration-300 ease-in-out "
 						>
-							{/* Image Section with Overlay */}
-							<div className="h-[250px] relative">
+							<div className="relative aspect-[2/1] overflow-hidden">
+								<div
+									className={`absolute inset-0 pointer-events-none z-10 ${
+										activeIndex === index
+											? "after:animate-[shineEffect_1s_ease-out_forwards]"
+											: ""
+									} after:absolute after:content-[''] after:left-1/2 after:top-1/2 after:w-[200%] after:h-0 after:translate-x-[-50%] after:translate-y-[-50%] after:rotate-[-45deg] after:bg-white/30 after:z-10`}
+								/>
 								<Image
 									src={project.image}
 									alt={project.title}
 									fill
-									sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-									className="object-cover transition-transform duration-300 group-hover:scale-105"
+									sizes="(max-width: 1000px) 100vw, (max-width: 1000px) 50vw, 33vw"
+									className={`object-cover transition-transform duration-500 ease-out ${
+										activeIndex === index ? "" : ""
+									}`}
 								/>
 								<div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
 							</div>
 
-							{/* Content Section */}
-							<div className="p-6 h-[200px] flex flex-col justify-between">
+							<div className="p-6 flex flex-col justify-between">
 								<div>
-									<div className="flex justify-between items-start mb-2">
-										<h3 className="text-xl sm:text-2xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
+									<div className="flex justify-between items-start mb-1">
+										<h3 className="text-xl sm:text-2xl font-semibold text-white group-hover:text-primary transition-colors">
 											{project.title}
 										</h3>
-										<span className="text-xs sm:text-sm bg-gray-200 text-gray-700 px-2 py-1 rounded-full">
-											{project.status}
-										</span>
 									</div>
-									<p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">
+									<p className="text-sm sm:text-base text-content/70 mb-4 line-clamp-3 min-h-[60px]">
 										{project.description}
 									</p>
-									<div className="flex flex-wrap gap-2">
-										{project.tech.map((tech, i) => (
-											<span
-												key={i}
-												className="px-2 py-1 rounded-full bg-white text-gray-700 text-xs sm:text-sm border border-gray-300 hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
+									<div className="flex sm:items-center flex-col md:flex-row md:justify-between gap-4">
+										<div className="flex flex-wrap gap-2">
+											{project.tech.map((tech, i) => (
+												<span
+													key={i}
+													className="px-2 py-1 rounded-full bg-white text-black text-xs sm:text-sm border border-gray-300 hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
+												>
+													{techIcons[tech]}
+													{tech}
+												</span>
+											))}
+										</div>
+										<div>
+											<Link
+												href={project.demoLink}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="mx-auto px-2 py-1 w-[100px] text-center block rounded-full text-sm sm:text-base text-content bg-primary "
 											>
-												{techIcons[tech]}
-												{tech}
-											</span>
-										))}
+												View Demo
+											</Link>
+										</div>
 									</div>
 								</div>
-								<div className="flex gap-4">
-									<a
-										href={project.demoLink}
-										target="_blank"
-										className="text-primary hover:text-primary-dark text-sm sm:text-base font-medium underline-offset-2 hover:underline"
-										aria-label={`Visit demo for ${project.title}`}
-									>
-										Demo
-									</a>
-									<a
-										href={project.sourceLink}
-										target="_blank"
-										className="text-primary hover:text-primary-dark text-sm sm:text-base font-medium underline-offset-2 hover:underline"
-										aria-label={`View source for ${project.title}`}
-									>
-										Source
-									</a>
-								</div>
-							</div>
-
-							{/* Gradient Border on Hover */}
-							<div className="absolute inset-0 border-2 border-transparent rounded-xl pointer-events-none">
-								<div className="absolute inset-0 border-2 border-transparent rounded-xl group-hover:border-[gradient-to-r from-primary to-[#7c3aed]] transition-all duration-300" />
 							</div>
 						</motion.div>
 					))}
 				</div>
 
-				{/* View All Projects Button (Placeholder) */}
 				<motion.div
 					variants={containerVariants}
 					initial="hidden"
@@ -194,13 +207,10 @@ export default function Projects() {
 					className="flex justify-center mt-12 sm:mt-16"
 				>
 					<button
-						className="relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+						className="cursor-pointer  relative px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-[#7c3aed] text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
 						aria-label="View all projects"
 					>
-						<span className="cursor-pointer relative z-10">
-							View All Projects
-						</span>
-						<div className="absolute inset-0 bg-black/10 rounded-lg opacity-0 hover:opacity-20 transition-opacity" />
+						<span className="relative z-10">View All Projects</span>
 					</button>
 				</motion.div>
 			</div>

@@ -119,29 +119,6 @@ export default function Hero() {
 									className="object-cover scale-102 group-hover:scale-100 transition-transform duration-500"
 								/>
 								<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-								{/* <motion.div
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ delay: 0.6 }}
-									className="absolute bottom-8 left-8"
-								>
-									<div className="text-2xl font-bold text-content">
-										Based in{" "}
-										<motion.span
-											className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
-											animate={{ backgroundPosition: ["0% 50%", "100% 50%"] }}
-											transition={{
-												duration: 3,
-												repeat: Infinity,
-												repeatType: "mirror",
-											}}
-											style={{ backgroundSize: "200% 200%" }}
-										>
-											Ho Chi Minh City
-										</motion.span>
-									</div>
-								</motion.div> */}
 							</motion.div>
 						</div>
 					</motion.div>
