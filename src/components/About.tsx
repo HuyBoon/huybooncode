@@ -46,10 +46,10 @@ const About = () => {
 							<motion.div
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
-								className="relative mx-auto w-48 h-48 sm:w-64 sm:h-64 rounded-full overflow-hidden shadow-md"
+								className="relative mx-auto w-52 h-52 sm:w-64 sm:h-64 rounded-full overflow-hidden shadow-md"
 							>
 								<Image
-									src="/Huyboon'sAvatar.png"
+									src="/avatar.png"
 									alt="Profile photo"
 									fill
 									className="object-cover"
@@ -76,12 +76,13 @@ const About = () => {
 								variants={itemVariants}
 								className="text-sm sm:text-base md:text-lg text-content/90 mb-4 sm:mb-6 leading-relaxed"
 							>
-								I'm a passionate full-stack developer with over 2 years of
-								experience building modern web applications. I specialize in
-								React, Next.js, and Node.js, delivering clean, scalable, and
-								user-focused solutions. When I'm not coding, you can find me
-								exploring new tech trends or contributing to open-source
-								projects.
+								I'm a frontend developer with 2 years of experience working on
+								real-world web projects. I specialize in building clean,
+								scalable, and user-friendly interfaces using React and Next.js.
+								I'm also familiar with Node.js and constantly learning more
+								about backend development as I work toward becoming a full-stack
+								developer. Outside of work, I enjoy exploring new technologies
+								and contributing to open-source projects.
 							</motion.p>
 							{/* <motion.div
 								variants={containerVariants}

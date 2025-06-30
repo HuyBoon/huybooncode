@@ -89,7 +89,7 @@ export default function Hero() {
 						className="md:w-1/2 relative hidden md:block"
 						style={{ y }}
 					>
-						<div className="relative w-[80%] lg:w-[70%] mx-auto aspect-[1/1] group">
+						<div className="relative w-[90%] mx-auto aspect-[3/2] group">
 							{/* Animated Border */}
 							<motion.div
 								initial={{ scale: 0.98 }}
