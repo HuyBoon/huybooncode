@@ -3,7 +3,7 @@
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Github, Linkedin } from "lucide-react";
 
@@ -24,15 +24,12 @@ const Header = () => {
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [language, setLanguage] = useState("VN");
+
 	const { scrollY } = useScroll();
 
 	useMotionValueEvent(scrollY, "change", (latest) => {
 		setIsScrolled(latest > 50);
 	});
-
-	const toggleLanguage = () => {
-		setLanguage(language === "VN" ? "EN" : "VN");
-	};
 
 	return (
 		<motion.nav
@@ -85,24 +82,24 @@ const Header = () => {
 						<div className="h-6 w-px bg-white/20 mx-2" />
 
 						<div className="flex items-center gap-2">
-							<a
+							<Link
 								href={socialLinks.github}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="p-2 rounded-lg bg-white/10 hover:bg-primary/20 transition-colors"
-								aria-label="Truy cập GitHub DHU-TECH"
+								aria-label="Truy cập GitHub HuyBoonCode."
 							>
 								<Github className="h-5 w-5 text-white hover:text-primary transition-colors" />
-							</a>
-							<a
+							</Link>
+							<Link
 								href={socialLinks.linkedin}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="p-2 rounded-lg bg-white/10 hover:bg-primary/20 transition-colors"
-								aria-label="Truy cập LinkedIn DHU-TECH"
+								aria-label="Truy cập LinkedIn HuyBoonCode"
 							>
 								<Linkedin className="h-5 w-5 text-white hover:text-primary transition-colors" />
-							</a>
+							</Link>
 						</div>
 					</div>
 
@@ -142,7 +139,7 @@ const Header = () => {
 							</Link>
 						))}
 						<div className="pt-4 border-t border-white/10 flex items-center gap-4 px-4">
-							<a
+							<Link
 								href={socialLinks.github}
 								target="_blank"
 								rel="noopener noreferrer"
@@ -150,8 +147,8 @@ const Header = () => {
 								aria-label="Truy cập GitHub DHU-TECH"
 							>
 								<Github className="h-5 w-5 text-white hover:text-primary transition-colors" />
-							</a>
-							<a
+							</Link>
+							<Link
 								href={socialLinks.linkedin}
 								target="_blank"
 								rel="noopener noreferrer"
@@ -159,7 +156,7 @@ const Header = () => {
 								aria-label="Truy cập LinkedIn DHU-TECH"
 							>
 								<Linkedin className="h-5 w-5 text-white hover:text-primary transition-colors" />
-							</a>
+							</Link>
 						</div>
 					</motion.div>
 				)}
