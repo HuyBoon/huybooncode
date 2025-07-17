@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Grid from "@mui/material/Grid";
+
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -16,6 +16,7 @@ import Divider from "@mui/material/Divider";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { Camera, User, Mail, Lock } from "lucide-react";
+import { Grid } from "@mui/material";
 
 export default function ProfilePage(): React.ReactNode {
 	const { data: session, status, update } = useSession();
@@ -36,6 +37,19 @@ export default function ProfilePage(): React.ReactNode {
 		severity: "success" as "success" | "error",
 	});
 	const [isLoading, setIsLoading] = useState(false);
+
+	// Initialize formData when session changes
+	React.useEffect(() => {
+		if (session?.user) {
+			setFormData({
+				name: session.user.name || "",
+				email: session.user.email || "",
+				password: "",
+				confirmPassword: "",
+			});
+			setAvatarPreview(session.user.avatar || "/avatar.png");
+		}
+	}, [session]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -63,14 +77,27 @@ export default function ProfilePage(): React.ReactNode {
 
 		setIsLoading(true);
 		try {
-			const updatedData = {
-				name: formData.name,
-				email: formData.email,
-				...(formData.password && { password: formData.password }),
-				...(avatar && { avatar: avatarPreview }),
-			};
+			const formDataToSend = new FormData();
+			formDataToSend.append("name", formData.name);
+			formDataToSend.append("email", formData.email);
+			if (formData.password) {
+				formDataToSend.append("password", formData.password);
+			}
+			if (avatar) {
+				formDataToSend.append("avatar", avatar);
+			}
 
-			await update({ ...session, user: { ...session?.user, ...updatedData } });
+			const res = await fetch("/api/profile", {
+				method: "PUT",
+				body: formDataToSend,
+			});
+
+			if (!res.ok) {
+				throw new Error("Failed to update profile");
+			}
+
+			const updatedUser = await res.json();
+			await update({ ...session, user: updatedUser });
 
 			setSnackbar({
 				open: true,
@@ -78,6 +105,7 @@ export default function ProfilePage(): React.ReactNode {
 				severity: "success",
 			});
 			setFormData((prev) => ({ ...prev, password: "", confirmPassword: "" }));
+			setAvatar(null);
 		} catch (error) {
 			setSnackbar({
 				open: true,
@@ -112,7 +140,7 @@ export default function ProfilePage(): React.ReactNode {
 			</Typography>
 
 			<Grid container spacing={3}>
-				<Grid item xs={12} md={4} lg={4}>
+				<Grid size={{ xs: 12, md: 4, lg: 4 }}>
 					<Card sx={{ boxShadow: 3, bgcolor: "background.paper" }}>
 						<CardContent sx={{ textAlign: "center", py: 4 }}>
 							<div className="relative inline-block">
@@ -156,7 +184,7 @@ export default function ProfilePage(): React.ReactNode {
 					</Card>
 				</Grid>
 
-				<Grid item xs={12} md={8} lg={8}>
+				<Grid size={{ xs: 12, md: 8, lg: 8 }}>
 					<Card sx={{ boxShadow: 3, bgcolor: "background.paper" }}>
 						<CardContent>
 							<Typography variant="h6" sx={{ mb: 3, fontWeight: "medium" }}>

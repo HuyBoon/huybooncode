@@ -24,3 +24,17 @@ const FinanceSchema: Schema = new Schema(
 );
 
 export default mongoose.models.Finance || mongoose.model<IFinance>("Finance", FinanceSchema);
+
+
+export interface Finance {
+    id: string;
+    userId: string;
+    type: "income" | "expense";
+    amount: number;
+    category: string; // Category ID as string for client-side
+    categoryName?: string; // Populated category name
+    description?: string;
+    date: string;
+    createdAt: string;
+    updatedAt: string;
+}

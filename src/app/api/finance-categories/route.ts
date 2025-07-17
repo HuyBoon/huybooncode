@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
-
 import FinanceCategory from "@/models/FinanceCategory";
 import { dbConnect } from "@/libs/dbConnect";
+
+interface FinanceCategory {
+    id: string;
+    name: string;
+    type: "Income" | "Expense" | "Other";
+    createdAt: string;
+    updatedAt: string;
+}
 
 export async function GET() {
     await dbConnect();
     try {
-        const categories = await FinanceCategory.find().sort({ name: 1 });
-        return NextResponse.json(categories);
+        const categories: FinanceCategory[] = await FinanceCategory.find().sort({ type: 1, name: 1 });
+        return NextResponse.json(categories, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
     }
@@ -16,11 +23,14 @@ export async function GET() {
 export async function POST(request: Request) {
     await dbConnect();
     try {
-        const { name } = await request.json();
-        if (!name) {
-            return NextResponse.json({ error: "Category name is required" }, { status: 400 });
+        const { name, type } = await request.json();
+        if (!name || typeof name !== "string" || !name.trim()) {
+            return NextResponse.json({ error: "Category name is required and must be a non-empty string" }, { status: 400 });
         }
-        const category = await FinanceCategory.create({ name });
+        if (!type || !["Income", "Expense", "Other"].includes(type)) {
+            return NextResponse.json({ error: "Valid category type (Income, Expense, Other) is required" }, { status: 400 });
+        }
+        const category: FinanceCategory = await FinanceCategory.create({ name: name.trim(), type });
         return NextResponse.json(category, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to create category" }, { status: 500 });
@@ -30,27 +40,25 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     await dbConnect();
     try {
-        const { id, name } = await request.json();
-        const category = await FinanceCategory.findByIdAndUpdate(id, { name }, { new: true });
+        const { id, name, type } = await request.json();
+        if (!id || !name || typeof name !== "string" || !name.trim()) {
+            return NextResponse.json({ error: "Valid category ID and name are required" }, { status: 400 });
+        }
+        if (!type || !["Income", "Expense", "Other"].includes(type)) {
+            return NextResponse.json({ error: "Valid category type (Income, Expense, Other) is required" }, { status: 400 });
+        }
+        const category: FinanceCategory | null = await FinanceCategory.findByIdAndUpdate(
+            id,
+            { name: name.trim(), type },
+            { new: true }
+        );
         if (!category) {
             return NextResponse.json({ error: "Category not found" }, { status: 404 });
         }
-        return NextResponse.json(category);
+        return NextResponse.json(category, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error: "Failed to update category" }, { status: 500 });
     }
 }
 
-export async function DELETE(request: Request) {
-    await dbConnect();
-    try {
-        const { id } = await request.json();
-        const category = await FinanceCategory.findByIdAndDelete(id);
-        if (!category) {
-            return NextResponse.json({ error: "Category not found" }, { status: 404 });
-        }
-        return NextResponse.json({ message: "Category deleted" });
-    } catch (error) {
-        return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });
-    }
-}
+

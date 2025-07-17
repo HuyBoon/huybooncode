@@ -12,19 +12,52 @@ import {
 	TableRow,
 	Typography,
 	IconButton,
+	MenuItem,
+	Select,
+	InputLabel,
+	FormControl,
 } from "@mui/material";
 import { Trash2 } from "lucide-react";
 
 interface FinanceCategory {
 	id: string;
 	name: string;
+	type: "Income" | "Expense" | "Other";
 	createdAt: string;
 	updatedAt: string;
 }
 
+const defaultCategories: Omit<
+	FinanceCategory,
+	"id" | "createdAt" | "updatedAt"
+>[] = [
+	{ name: "Salary", type: "Income" },
+	{ name: "Freelance", type: "Income" },
+	{ name: "Investments", type: "Income" },
+	{ name: "Gifts", type: "Income" },
+	{ name: "Rental Income", type: "Income" },
+	{ name: "Side Hustle", type: "Income" },
+	{ name: "Food", type: "Expense" },
+	{ name: "Rent/Mortgage", type: "Expense" },
+	{ name: "Utilities", type: "Expense" },
+	{ name: "Transportation", type: "Expense" },
+	{ name: "Entertainment", type: "Expense" },
+	{ name: "Healthcare", type: "Expense" },
+	{ name: "Shopping", type: "Expense" },
+	{ name: "Travel", type: "Expense" },
+	{ name: "Education", type: "Expense" },
+	{ name: "Debt Repayment", type: "Expense" },
+	{ name: "Savings", type: "Other" },
+	{ name: "Transfers", type: "Other" },
+	{ name: "Miscellaneous", type: "Other" },
+];
+
 const CategoryManagementPage = () => {
 	const [categories, setCategories] = useState<FinanceCategory[]>([]);
 	const [newCategory, setNewCategory] = useState("");
+	const [newCategoryType, setNewCategoryType] = useState<
+		"Income" | "Expense" | "Other"
+	>("Expense");
 
 	useEffect(() => {
 		const fetchCategories = async () => {
@@ -34,7 +67,20 @@ const CategoryManagementPage = () => {
 					throw new Error("Failed to fetch categories");
 				}
 				const data: FinanceCategory[] = await res.json();
-				setCategories(data);
+				if (data.length === 0) {
+					// Seed default categories if none exist
+					const seedRes = await fetch("/api/finance-categories/seed", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ categories: defaultCategories }),
+					});
+					if (seedRes.ok) {
+						const seededData: FinanceCategory[] = await seedRes.json();
+						setCategories(seededData);
+					}
+				} else {
+					setCategories(data);
+				}
 			} catch (error) {
 				console.error(error);
 			}
@@ -48,7 +94,7 @@ const CategoryManagementPage = () => {
 			const res = await fetch("/api/finance-categories", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: newCategory }),
+				body: JSON.stringify({ name: newCategory, type: newCategoryType }),
 			});
 			if (!res.ok) {
 				throw new Error("Failed to create category");
@@ -56,6 +102,7 @@ const CategoryManagementPage = () => {
 			const category: FinanceCategory = await res.json();
 			setCategories((prev) => [...prev, category]);
 			setNewCategory("");
+			setNewCategoryType("Expense");
 		} catch (error) {
 			console.error(error);
 		}
@@ -89,6 +136,22 @@ const CategoryManagementPage = () => {
 					onChange={(e) => setNewCategory(e.target.value)}
 					fullWidth
 				/>
+				<FormControl sx={{ minWidth: 120 }}>
+					<InputLabel>Type</InputLabel>
+					<Select
+						value={newCategoryType}
+						onChange={(e) =>
+							setNewCategoryType(
+								e.target.value as "Income" | "Expense" | "Other"
+							)
+						}
+						label="Type"
+					>
+						<MenuItem value="Income">Income</MenuItem>
+						<MenuItem value="Expense">Expense</MenuItem>
+						<MenuItem value="Other">Other</MenuItem>
+					</Select>
+				</FormControl>
 				<Button
 					variant="contained"
 					onClick={handleAdd}
@@ -101,6 +164,7 @@ const CategoryManagementPage = () => {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
+						<TableCell>Type</TableCell>
 						<TableCell>Actions</TableCell>
 					</TableRow>
 				</TableHead>
@@ -108,6 +172,7 @@ const CategoryManagementPage = () => {
 					{categories.map((category) => (
 						<TableRow key={category.id}>
 							<TableCell>{category.name}</TableCell>
+							<TableCell>{category.type}</TableCell>
 							<TableCell>
 								<IconButton onClick={() => handleDelete(category.id)}>
 									<Trash2 size={20} />
