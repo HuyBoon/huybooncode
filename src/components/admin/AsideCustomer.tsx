@@ -80,6 +80,11 @@ export default function AsideCustomer({
 			label: "HB's Finance",
 			submenu: [
 				{
+					url: "/admin/finance/categories",
+					label: "Categories",
+					icon: <Shapes size={16} />,
+				},
+				{
 					url: "/admin/finance/income",
 					label: "Income",
 					icon: <TrendingUp size={16} />,
@@ -137,7 +142,7 @@ export default function AsideCustomer({
 		collapsed: { height: 0, opacity: 0 },
 	};
 
-	const animationDuration = 0.5;
+	const animationDuration = 0.3;
 
 	return (
 		<motion.aside

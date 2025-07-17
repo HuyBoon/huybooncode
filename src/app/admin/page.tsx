@@ -1,7 +1,5 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
-const AdminPage = () => {
-	return <div className="p-4">HBcode</div>;
-};
-
-export default AdminPage;
+export default function Page(): never {
+	redirect("/admin/dashboard");
+}

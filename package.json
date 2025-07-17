@@ -10,8 +10,13 @@
 	},
 	"dependencies": {
 		"@auth/mongodb-adapter": "^3.10.0",
+		"@emotion/react": "^11.14.0",
+		"@emotion/styled": "^11.14.1",
 		"@heroicons/react": "^2.2.0",
+		"@mui/material": "^7.2.0",
+		"@mui/x-charts": "^8.8.0",
 		"bcrypt": "^6.0.0",
+		"dayjs": "^1.11.13",
 		"framer-motion": "^12.16.0",
 		"lucide-react": "^0.515.0",
 		"mongodb": "^6.17.0",
