@@ -3,42 +3,43 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 const demoData = [
 	{
 		title: "Demo1",
 		description: "Website hiện đại, tối ưu đặt hàng online.",
-		image: "/demo/demo1.png",
+		image: "/demo/demo1.jpg",
 		link: "https://demo.leebrosus.com/baloca/home-2/",
 	},
 	{
 		title: "Demo2",
 		description: "Website bán dụng cụ học tập và văn phòng phẩm.",
-		image: "/demo/demo2.png",
+		image: "/demo/demo2.jpg",
 		link: "https://htmldemo.net/boighor/boighor/index.html",
 	},
 	{
 		title: "Nhà sách Phương Nam",
 		description: "Thiết kế đơn giản, dễ sử dụng cho người dùng.",
-		image: "/demo/demo3.png",
+		image: "/demo/demo3.jpg",
 		link: "https://nhasachphuongnam.com/",
 	},
 	{
-		title: "Nhà sách cá chép",
+		title: "Nhà sách Cá Chép",
 		description: "Giao diện chuẩn SEO, tải nhanh.",
-		image: "/demo/demo4.png",
+		image: "/demo/demo4.jpg",
 		link: "https://cachep.vn/",
 	},
 	{
-		title: "thaihabooks",
+		title: "Thaihabooks",
 		description: "Hỗ trợ quản lý sản phẩm và đơn hàng.",
-		image: "/demo/demo5.png",
+		image: "/demo/demo5.jpg",
 		link: "https://thaihabooks.com/",
 	},
 	{
 		title: "EbookStore",
 		description: "Website trẻ trung phù hợp học sinh & sinh viên.",
-		image: "/demo/demo5.png",
+		image: "/demo/demo5.jpg",
 		link: "https://ebookstore.com.vn/",
 	},
 ];
@@ -63,28 +64,34 @@ const DemoShowcase = () => {
 							initial={{ opacity: 0, y: 40 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.4, delay: i * 0.1 }}
-							className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
 						>
-							<div className="aspect-[4/3] overflow-hidden">
-								<img
-									src={demo.image}
-									alt={demo.title}
-									className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-								/>
-							</div>
-							<div className="p-5">
-								<h3 className="text-xl font-semibold text-gray-800 mb-2">
-									{demo.title}
-								</h3>
-								<p className="text-sm text-gray-600 mb-4">{demo.description}</p>
-								<Link
-									href={demo.link}
-									target="_blank"
-									className="inline-block bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition"
-								>
-									View Demo
-								</Link>
-							</div>
+							<Link
+								href={demo.link}
+								target="_blank"
+								aria-label={`Xem demo ${demo.title}`}
+								className="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group"
+							>
+								<div className="aspect-[4/3] relative">
+									<Image
+										src={demo.image}
+										alt={`Ảnh demo của ${demo.title}`}
+										fill
+										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+										className="object-cover transition-transform duration-300 group-hover:scale-105"
+									/>
+								</div>
+								<div className="p-5">
+									<h3 className="text-xl font-semibold text-gray-800 mb-2">
+										{demo.title}
+									</h3>
+									<p className="text-sm text-gray-600 mb-4">
+										{demo.description}
+									</p>
+									<p className="inline-block text-primary text-sm font-medium">
+										Xem Demo &rarr;
+									</p>
+								</div>
+							</Link>
 						</motion.div>
 					))}
 				</div>
