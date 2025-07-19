@@ -114,7 +114,7 @@ export default function FooterNavigation() {
 
 	return (
 		<footer className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-100 border-t border-gray-700 z-30">
-			<div className="flex justify-around items-center py-2">
+			<div className="flex justify-around items-center py-3">
 				{navLinks.map((item) => {
 					const isItemActive = isActive(item.url);
 					const hasSubmenu = item.submenu && item.submenu.length > 0;

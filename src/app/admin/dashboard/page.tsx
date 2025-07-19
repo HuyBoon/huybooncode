@@ -284,7 +284,7 @@ export default function DashboardPage() {
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5 }}
 		>
-			<Stack spacing={3} sx={{ maxWidth: "lg", mx: "auto", py: 4 }}>
+			<Stack spacing={3} sx={{ maxWidth: "lg", mx: "auto", py: 8 }}>
 				{/* Header */}
 				<Typography
 					variant="h4"

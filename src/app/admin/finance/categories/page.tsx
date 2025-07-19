@@ -20,42 +20,10 @@ import {
 	Alert,
 } from "@mui/material";
 import { Trash2 } from "lucide-react";
-
-interface FinanceCategory {
-	id: string;
-	name: string;
-	type: "Income" | "Expense" | "Other";
-	createdAt: string;
-	updatedAt: string;
-}
-
-const defaultCategories: Omit<
-	FinanceCategory,
-	"id" | "createdAt" | "updatedAt"
->[] = [
-	{ name: "Salary", type: "Income" },
-	{ name: "Freelance", type: "Income" },
-	{ name: "Investments", type: "Income" },
-	{ name: "Gifts", type: "Income" },
-	{ name: "Rental Income", type: "Income" },
-	{ name: "Side Hustle", type: "Income" },
-	{ name: "Food", type: "Expense" },
-	{ name: "Rent/Mortgage", type: "Expense" },
-	{ name: "Utilities", type: "Expense" },
-	{ name: "Transportation", type: "Expense" },
-	{ name: "Entertainment", type: "Expense" },
-	{ name: "Healthcare", type: "Expense" },
-	{ name: "Shopping", type: "Expense" },
-	{ name: "Travel", type: "Expense" },
-	{ name: "Education", type: "Expense" },
-	{ name: "Debt Repayment", type: "Expense" },
-	{ name: "Savings", type: "Other" },
-	{ name: "Transfers", type: "Other" },
-	{ name: "Miscellaneous", type: "Other" },
-];
+import { FinanceCategoryType } from "@/types/interface";
 
 const CategoryManagementPage = () => {
-	const [categories, setCategories] = useState<FinanceCategory[]>([]);
+	const [categories, setCategories] = useState<FinanceCategoryType[]>([]);
 	const [newCategory, setNewCategory] = useState("");
 	const [newCategoryType, setNewCategoryType] = useState<
 		"Income" | "Expense" | "Other"
@@ -72,66 +40,24 @@ const CategoryManagementPage = () => {
 			setIsLoading(true);
 			try {
 				const res = await fetch("/api/finance-categories");
-				if (!res.ok) {
-					throw new Error(`Failed to fetch categories: ${res.statusText}`);
-				}
-				const data: FinanceCategory[] = await res.json();
-				if (data.length === 0) {
-					try {
-						const seedRes = await fetch("/api/finance-categories/seed", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({ categories: defaultCategories }),
-						});
-						if (!seedRes.ok) {
-							if (seedRes.status === 404) {
-								throw new Error(
-									"Seeding endpoint not found. Please check server configuration."
-								);
-							}
-							const errorData = await seedRes.json();
-							throw new Error(errorData.error || "Failed to seed categories");
-						}
-						const seededData: FinanceCategory[] = await seedRes.json();
-						setCategories(seededData);
-						setSnackbar({
-							open: true,
-							message: "Default categories seeded successfully",
-							severity: "success",
-						});
-					} catch (seedError) {
-						setSnackbar({
-							open: true,
-							message:
-								seedError instanceof Error
-									? seedError.message
-									: "Failed to seed categories",
-							severity: "error",
-						});
-						// Fallback to default categories locally if seeding fails
-						setCategories(
-							defaultCategories.map((cat, index) => ({
-								id: `temp-${index}`,
-								name: cat.name,
-								type: cat.type,
-								createdAt: new Date().toISOString(),
-								updatedAt: new Date().toISOString(),
-							}))
-						);
-					}
-				} else {
-					setCategories(data);
-				}
+				if (!res.ok) throw new Error("Failed to fetch categories");
+
+				const data: FinanceCategoryType[] = await res.json();
+				setCategories(data);
 			} catch (error) {
 				setSnackbar({
 					open: true,
-					message: error instanceof Error ? error.message : "An error occurred",
+					message:
+						error instanceof Error
+							? error.message
+							: "Failed to load categories",
 					severity: "error",
 				});
 			} finally {
 				setIsLoading(false);
 			}
 		};
+
 		fetchCategories();
 	}, []);
 
@@ -148,7 +74,7 @@ const CategoryManagementPage = () => {
 				const errorData = await res.json();
 				throw new Error(errorData.error || "Failed to create category");
 			}
-			const category: FinanceCategory = await res.json();
+			const category: FinanceCategoryType = await res.json();
 			setCategories((prev) => [...prev, category]);
 			setNewCategory("");
 			setNewCategoryType("Expense");
@@ -172,7 +98,7 @@ const CategoryManagementPage = () => {
 	const handleDelete = async (id: string) => {
 		setIsLoading(true);
 		try {
-			const res = await fetch("/api/finance-categories", {
+			const res = await fetch(`/api/finance-categories/${id}`, {
 				method: "DELETE",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ id }),

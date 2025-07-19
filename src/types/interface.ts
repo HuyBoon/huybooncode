@@ -9,9 +9,8 @@ export interface UserType {
     createdAt: Date;
 }
 
-export interface Finance {
+export interface FinanceType {
     id: string;
-    userId: string;
     type: "income" | "expense";
     amount: number;
     category: string; // References FinanceCategory _id
@@ -22,9 +21,10 @@ export interface Finance {
     updatedAt: string;
 }
 
-export interface FinanceCategory {
+export interface FinanceCategoryType {
     id: string;
     name: string;
+    type: "Income" | "Expense" | "Other";
     createdAt: string;
     updatedAt: string;
 }
