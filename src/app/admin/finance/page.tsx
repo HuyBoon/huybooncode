@@ -20,7 +20,7 @@ import {
 	Select,
 	Stack,
 } from "@mui/material";
-import { DollarSign } from "lucide-react";
+import { Bitcoin } from "lucide-react";
 import { Bar } from "react-chartjs-2";
 import {
 	Chart as ChartJS,
@@ -34,6 +34,7 @@ import {
 import { FinanceType, FinanceCategoryType } from "@/types/interface";
 import Loader from "@/components/admin/Loader";
 import TransactionHistory from "@/components/admin/TransactionHistory";
+import FinanceSummary from "@/components/admin/FinanceSummary";
 
 ChartJS.register(
 	CategoryScale,
@@ -64,7 +65,19 @@ const FinancePage = () => {
 		message: "",
 		severity: "success" as "success" | "error",
 	});
-	const [filteredFinances, setFilteredFinances] = useState<FinanceType[]>([]);
+	const [pagination, setPagination] = useState({
+		page: 1,
+		limit: 10,
+		total: 0,
+		totalPages: 1,
+	});
+	const [filters, setFilters] = useState({
+		month: new Date().getMonth() + 1,
+		year: new Date().getFullYear(),
+		type: "all" as "all" | "income" | "expense",
+		category: "all",
+		dayOfWeek: "all" as "all" | number,
+	});
 	const transactionHistoryRef = useRef<{ filteredFinances: FinanceType[] }>({
 		filteredFinances: [],
 	});
@@ -95,11 +108,22 @@ const FinancePage = () => {
 
 		const fetchFinances = async () => {
 			try {
-				const response = await fetch("/api/finance");
+				const { page, limit } = pagination;
+				const { month, year, type, category, dayOfWeek } = filters;
+				const params = new URLSearchParams({
+					page: page.toString(),
+					limit: limit.toString(),
+					month: month.toString(),
+					year: year.toString(),
+					...(type !== "all" && { type }),
+					...(category !== "all" && { category }),
+					...(dayOfWeek !== "all" && { dayOfWeek: dayOfWeek.toString() }),
+				});
+				const response = await fetch(`/api/finance?${params}`);
 				if (response.ok) {
-					const data = await response.json();
+					const { data, pagination: newPagination } = await response.json();
 					setFinances(data);
-					setFilteredFinances(data); // Initialize filteredFinances
+					setPagination((prev) => ({ ...prev, ...newPagination }));
 				} else {
 					setSnackbar({
 						open: true,
@@ -119,7 +143,7 @@ const FinancePage = () => {
 		if (status === "authenticated") {
 			fetchCategories().then(() => fetchFinances());
 		}
-	}, [status]);
+	}, [status, pagination.page, pagination.limit, filters]);
 
 	// Handle form submission
 	const handleSubmit = async () => {
@@ -168,11 +192,6 @@ const FinancePage = () => {
 			if (response.ok) {
 				const updatedFinance = await response.json();
 				setFinances((prev) =>
-					isEditing
-						? prev.map((f) => (f.id === updatedFinance.id ? updatedFinance : f))
-						: [...prev, updatedFinance]
-				);
-				setFilteredFinances((prev) =>
 					isEditing
 						? prev.map((f) => (f.id === updatedFinance.id ? updatedFinance : f))
 						: [...prev, updatedFinance]
@@ -226,7 +245,11 @@ const FinancePage = () => {
 			});
 			if (response.ok) {
 				setFinances((prev) => prev.filter((f) => f.id !== id));
-				setFilteredFinances((prev) => prev.filter((f) => f.id !== id));
+				setPagination((prev) => ({
+					...prev,
+					total: prev.total - 1,
+					totalPages: Math.ceil((prev.total - 1) / prev.limit),
+				}));
 				setSnackbar({
 					open: true,
 					message: "Finance deleted!",
@@ -273,38 +296,6 @@ const FinancePage = () => {
 		);
 	}, [categories, formData.type]);
 
-	// Calculate totals from filtered finances
-	const totals = useMemo(() => {
-		return filteredFinances.reduce(
-			(acc, finance) => {
-				if (finance.type === "income") {
-					acc.income += finance.amount;
-				} else if (finance.type === "expense") {
-					acc.expense += finance.amount;
-				}
-				return acc;
-			},
-			{ income: 0, expense: 0 }
-		);
-	}, [filteredFinances]);
-
-	// Chart data
-	const chartData = useMemo(
-		() => ({
-			labels: ["Income", "Expense"],
-			datasets: [
-				{
-					label: "Amount (VND)",
-					data: [totals.income, totals.expense],
-					backgroundColor: ["#4caf50", "#f44336"],
-					borderColor: ["#388e3c", "#d32f2f"],
-					borderWidth: 1,
-				},
-			],
-		}),
-		[totals]
-	);
-
 	const handleCloseSnackbar = () => {
 		setSnackbar({ ...snackbar, open: false });
 	};
@@ -327,50 +318,6 @@ const FinancePage = () => {
 			>
 				Manage Finances
 			</Typography>
-
-			{/* Totals and Chart */}
-			<Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
-				<CardContent>
-					<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-						Summary
-					</Typography>
-					<Grid container spacing={2}>
-						<Grid size={{ xs: 12, md: 4 }}>
-							<Typography variant="body1" sx={{ fontWeight: 500 }}>
-								Total Income: {totals.income.toLocaleString()} VND
-							</Typography>
-							<Typography variant="body1" sx={{ fontWeight: 500 }}>
-								Total Expense: {totals.expense.toLocaleString()} VND
-							</Typography>
-							<Typography
-								variant="body1"
-								sx={{
-									fontWeight: 500,
-									color:
-										totals.income >= totals.expense
-											? "success.main"
-											: "error.main",
-								}}
-							>
-								Balance: {(totals.income - totals.expense).toLocaleString()} VND
-							</Typography>
-						</Grid>
-						<Grid size={{ xs: 12, md: 8 }}>
-							<Bar
-								data={chartData}
-								options={{
-									responsive: true,
-									plugins: {
-										legend: { display: false },
-										title: { display: true, text: "Income vs Expense" },
-									},
-								}}
-							/>
-						</Grid>
-					</Grid>
-				</CardContent>
-			</Card>
-
 			{/* Form */}
 			<Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
 				<CardContent>
@@ -410,7 +357,7 @@ const FinancePage = () => {
 									setFormData({ ...formData, amount: e.target.value })
 								}
 								disabled={loading}
-								InputProps={{ startAdornment: <DollarSign size={20} /> }}
+								InputProps={{ startAdornment: <Bitcoin size={20} /> }}
 								aria-label="Enter amount"
 							/>
 						</Grid>
@@ -503,6 +450,9 @@ const FinancePage = () => {
 				</CardContent>
 			</Card>
 
+			{/* Summary */}
+			<FinanceSummary finances={finances} />
+
 			{/* Transaction History */}
 			<TransactionHistory
 				finances={finances}
@@ -510,7 +460,10 @@ const FinancePage = () => {
 				loading={loading}
 				handleEdit={handleEdit}
 				handleDelete={handleDelete}
-				onFilteredFinancesChange={setFilteredFinances}
+				onFilteredFinancesChange={() => {}}
+				pagination={pagination}
+				setPagination={setPagination}
+				setFilters={setFilters}
 				ref={transactionHistoryRef}
 			/>
 

@@ -22,6 +22,7 @@ import {
 	MenuItem,
 	TextField,
 	Button,
+	Stack,
 } from "@mui/material";
 import { Edit, Trash2 } from "lucide-react";
 import { FinanceType, FinanceCategoryType } from "@/types/interface";
@@ -33,6 +34,29 @@ interface TransactionHistoryProps {
 	handleEdit: (finance: FinanceType) => void;
 	handleDelete: (id: string) => Promise<void>;
 	onFilteredFinancesChange: (filteredFinances: FinanceType[]) => void;
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+	};
+	setPagination: React.Dispatch<
+		React.SetStateAction<{
+			page: number;
+			limit: number;
+			total: number;
+			totalPages: number;
+		}>
+	>;
+	setFilters: React.Dispatch<
+		React.SetStateAction<{
+			month: number;
+			year: number;
+			type: "all" | "income" | "expense";
+			category: string;
+			dayOfWeek: "all" | number;
+		}>
+	>;
 }
 
 const TransactionHistory = forwardRef<
@@ -47,6 +71,9 @@ const TransactionHistory = forwardRef<
 			handleEdit,
 			handleDelete,
 			onFilteredFinancesChange,
+			pagination,
+			setPagination,
+			setFilters,
 		},
 		ref
 	) => {
@@ -58,52 +85,66 @@ const TransactionHistory = forwardRef<
 			dayOfWeek: "all" as "all" | number,
 		});
 
-		// Memoize filteredFinances to prevent unnecessary recalculations
-		const filteredFinances = useMemo(() => {
-			const result = finances.filter((finance) => {
-				const financeDate = new Date(finance.date);
-				const matchMonth = financeDate.getMonth() + 1 === filter.month;
-				const matchYear = financeDate.getFullYear() === filter.year;
-				const matchType = filter.type === "all" || finance.type === filter.type;
-				const matchCategory =
-					filter.category === "all" || finance.category === filter.category;
-				const matchDayOfWeek =
-					filter.dayOfWeek === "all" ||
-					financeDate.getDay() === filter.dayOfWeek;
-				return (
-					matchMonth &&
-					matchYear &&
-					matchType &&
-					matchCategory &&
-					matchDayOfWeek
-				);
-			});
-			onFilteredFinancesChange(result); // Update parent when filters change
-			return result;
-		}, [
-			finances,
-			filter.month,
-			filter.year,
-			filter.type,
-			filter.category,
-			filter.dayOfWeek,
-			onFilteredFinancesChange,
-		]);
-
 		// Expose filteredFinances via ref
 		useImperativeHandle(ref, () => ({
-			filteredFinances,
+			filteredFinances: finances,
 		}));
 
-		// Reset filters
+		// Reset filters and update parent
 		const resetFilters = () => {
-			setFilter({
+			const defaultFilters = {
 				month: new Date().getMonth() + 1,
 				year: new Date().getFullYear(),
-				type: "all",
+				type: "all" as "all" | "income" | "expense",
 				category: "all",
-				dayOfWeek: "all",
-			});
+				dayOfWeek: "all" as "all" | number,
+			};
+			setFilter(defaultFilters);
+			setFilters(defaultFilters);
+			setPagination((prev) => ({ ...prev, page: 1 }));
+		};
+
+		// Update parent filters when local filters change
+		const handleFilterChange = (
+			newFilter: Partial<typeof filter>,
+			resetPage: boolean = false
+		) => {
+			setFilter((prev) => ({ ...prev, ...newFilter }));
+			setFilters((prev) => ({ ...prev, ...newFilter }));
+			if (resetPage) {
+				setPagination((prev) => ({ ...prev, page: 1 }));
+			}
+		};
+
+		// Generate page numbers for pagination
+		const generatePageNumbers = () => {
+			const { page, totalPages } = pagination;
+			const maxPagesToShow = 5;
+			const pages: (number | string)[] = [];
+
+			if (totalPages <= maxPagesToShow) {
+				for (let i = 1; i <= totalPages; i++) {
+					pages.push(i);
+				}
+			} else {
+				pages.push(1);
+				const leftBound = Math.max(2, page - 2);
+				const rightBound = Math.min(totalPages - 1, page + 2);
+				if (leftBound > 2) {
+					pages.push("...");
+				}
+				for (let i = leftBound; i <= rightBound; i++) {
+					pages.push(i);
+				}
+				if (rightBound < totalPages - 1) {
+					pages.push("...");
+				}
+				if (totalPages > 1) {
+					pages.push(totalPages);
+				}
+			}
+
+			return pages;
 		};
 
 		return (
@@ -121,7 +162,7 @@ const TransactionHistory = forwardRef<
 								<Select
 									value={filter.month}
 									onChange={(e) =>
-										setFilter({ ...filter, month: Number(e.target.value) })
+										handleFilterChange({ month: Number(e.target.value) }, true)
 									}
 									label="Month"
 									disabled={loading}
@@ -144,7 +185,7 @@ const TransactionHistory = forwardRef<
 								type="number"
 								value={filter.year}
 								onChange={(e) =>
-									setFilter({ ...filter, year: Number(e.target.value) })
+									handleFilterChange({ year: Number(e.target.value) }, true)
 								}
 								disabled={loading}
 								InputProps={{
@@ -159,10 +200,10 @@ const TransactionHistory = forwardRef<
 								<Select
 									value={filter.type}
 									onChange={(e) =>
-										setFilter({
-											...filter,
-											type: e.target.value as "all" | "income" | "expense",
-										})
+										handleFilterChange(
+											{ type: e.target.value as "all" | "income" | "expense" },
+											true
+										)
 									}
 									label="Type"
 									disabled={loading}
@@ -180,7 +221,7 @@ const TransactionHistory = forwardRef<
 								<Select
 									value={filter.category}
 									onChange={(e) =>
-										setFilter({ ...filter, category: e.target.value })
+										handleFilterChange({ category: e.target.value }, true)
 									}
 									label="Category"
 									disabled={loading}
@@ -201,10 +242,10 @@ const TransactionHistory = forwardRef<
 								<Select
 									value={filter.dayOfWeek}
 									onChange={(e) =>
-										setFilter({
-											...filter,
-											dayOfWeek: e.target.value as "all" | number,
-										})
+										handleFilterChange(
+											{ dayOfWeek: e.target.value as "all" | number },
+											true
+										)
 									}
 									label="Day of Week"
 									disabled={loading}
@@ -253,7 +294,7 @@ const TransactionHistory = forwardRef<
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{filteredFinances.map((finance) => {
+							{finances.map((finance) => {
 								const category = categories.find(
 									(cat) => cat.id === finance.category
 								);
@@ -293,7 +334,7 @@ const TransactionHistory = forwardRef<
 									</TableRow>
 								);
 							})}
-							{filteredFinances.length === 0 && (
+							{finances.length === 0 && (
 								<TableRow>
 									<TableCell colSpan={6} align="center">
 										No transactions found
@@ -302,6 +343,90 @@ const TransactionHistory = forwardRef<
 							)}
 						</TableBody>
 					</Table>
+
+					{/* Pagination Controls */}
+					<Stack
+						direction="row"
+						spacing={1}
+						justifyContent="center"
+						alignItems="center"
+						mt={3}
+					>
+						<Button
+							variant="outlined"
+							disabled={loading || pagination.page === 1}
+							onClick={() =>
+								setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+							}
+							sx={{
+								minWidth: 40,
+								height: 40,
+								borderRadius: "50%",
+								fontWeight: 500,
+							}}
+							aria-label="Previous page"
+						>
+							&lt;
+						</Button>
+						{generatePageNumbers().map((pageNum, index) =>
+							typeof pageNum === "string" ? (
+								<Typography
+									key={index}
+									sx={{ display: "flex", alignItems: "center", mx: 1 }}
+								>
+									...
+								</Typography>
+							) : (
+								<Button
+									key={pageNum}
+									variant={
+										pageNum === pagination.page ? "contained" : "outlined"
+									}
+									onClick={() =>
+										setPagination((prev) => ({ ...prev, page: pageNum }))
+									}
+									disabled={loading}
+									sx={{
+										minWidth: 40,
+										height: 40,
+										borderRadius: "50%",
+										fontWeight: pageNum === pagination.page ? 700 : 500,
+										bgcolor:
+											pageNum === pagination.page
+												? "primary.main"
+												: "transparent",
+										color:
+											pageNum === pagination.page ? "white" : "text.primary",
+										"&:hover": {
+											bgcolor:
+												pageNum === pagination.page
+													? "primary.dark"
+													: "grey.100",
+										},
+									}}
+									aria-label={`Go to page ${pageNum}`}
+								>
+									{pageNum}
+								</Button>
+							)
+						)}
+						<Button
+							variant="outlined"
+							disabled={loading || pagination.page === pagination.totalPages}
+							onClick={() =>
+								setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
+							}
+							sx={{
+								minWidth: 40,
+								height: 40,
+								borderRadius: "50%",
+								fontWeight: 500,
+							}}
+							aria-label="Next page"
+						>
+							&gt;
+						</Button>
+					</Stack>
 				</CardContent>
 			</Card>
 		);

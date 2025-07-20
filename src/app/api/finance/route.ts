@@ -4,12 +4,56 @@ import Finance from "@/models/Finance";
 import { FinanceType } from "@/types/interface";
 import mongoose from "mongoose";
 
-export async function GET() {
+export async function GET(request: Request) {
     await dbConnect();
     try {
-        const finances = await Finance.find()
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
+        const month = searchParams.get("month") ? parseInt(searchParams.get("month")!) : null;
+        const year = searchParams.get("year") ? parseInt(searchParams.get("year")!) : null;
+        const type = searchParams.get("type") || null;
+        const category = searchParams.get("category") || null;
+        const dayOfWeek = searchParams.get("dayOfWeek") ? parseInt(searchParams.get("dayOfWeek")!) : null;
+
+        // Build query
+        const query: any = {};
+        if (month && year) {
+            query.date = {
+                $gte: new Date(year, month - 1, 1),
+                $lt: new Date(year, month, 1),
+            };
+        } else if (year) {
+            query.date = {
+                $gte: new Date(year, 0, 1),
+                $lt: new Date(year + 1, 0, 1),
+            };
+        }
+        if (type && ["income", "expense"].includes(type)) {
+            query.type = type;
+        }
+        if (category && mongoose.Types.ObjectId.isValid(category)) {
+            query.category = category;
+        }
+        if (dayOfWeek !== null && Number.isInteger(dayOfWeek) && dayOfWeek >= 0 && dayOfWeek <= 6) {
+            query.date = query.date || {};
+            query.date.$expr = {
+                $eq: [{ $dayOfWeek: "$date" }, dayOfWeek + 1], // MongoDB $dayOfWeek: 1=Sunday, 7=Saturday
+            };
+        }
+
+        // Calculate pagination
+        const skip = (page - 1) * limit;
+        const total = await Finance.countDocuments(query);
+        const totalPages = Math.ceil(total / limit);
+
+        // Fetch finances
+        const finances = await Finance.find(query)
             .populate("category", "name type")
-            .sort({ date: -1 });
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
         const formattedFinances: FinanceType[] = finances.map((fin) => ({
             id: fin._id.toString(),
             type: fin.type,
@@ -20,7 +64,19 @@ export async function GET() {
             createdAt: fin.createdAt.toISOString(),
             updatedAt: fin.updatedAt.toISOString(),
         }));
-        return NextResponse.json(formattedFinances, { status: 200 });
+
+        return NextResponse.json(
+            {
+                data: formattedFinances,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages,
+                },
+            },
+            { status: 200 }
+        );
     } catch (error) {
         console.error("Error fetching finances:", error);
         return NextResponse.json(
