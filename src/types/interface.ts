@@ -28,3 +28,19 @@ export interface FinanceCategoryType {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface JournalType {
+    id: string;
+    title: string;
+    content: string;
+    mood: string;
+    date: string; // ISO date string (e.g., "2025-07-20")
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface MoodType {
+    id: string;
+    name: string; // e.g., "Happy", "Sad", "Neutral"
+    emoji: string; // e.g., "😊", "😢", "😐"
+}
