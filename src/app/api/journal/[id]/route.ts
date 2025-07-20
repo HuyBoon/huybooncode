@@ -4,9 +4,11 @@ import Journal from "@/models/Journal";
 import { JournalType } from "@/types/interface";
 import mongoose from "mongoose";
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest,
+    context: { params: Promise<{ id: string }> }) {
+
     await dbConnect();
-    const { id } = params;
+    const { id } = await context.params;
 
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -64,9 +66,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest,
+    context: { params: Promise<{ id: string }> }) {
     await dbConnect();
-    const { id } = params;
+    const { id } = await context.params;
 
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) {
