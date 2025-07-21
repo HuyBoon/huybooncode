@@ -17,8 +17,7 @@ const defaultCategories = [
 const formatCategory = (cat: any): CategoryType => ({
     id: cat._id.toString(),
     name: cat.name,
-    createdAt: cat.createdAt.toISOString(),
-    updatedAt: cat.updatedAt.toISOString(),
+
 });
 
 export async function POST() {
