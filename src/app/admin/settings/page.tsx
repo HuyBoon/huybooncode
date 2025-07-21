@@ -52,22 +52,68 @@ const SettingPage = () => {
 		}
 	};
 
-	const handleSeedCategories = () =>
+	const handleSeedFinanceCategories = () =>
 		apiAction(
 			"/api/finance-categories/seed",
 			"POST",
-			"Categories seeded successfully",
-			"Failed to seed categories",
+			"Finance categories seeded successfully",
+			"Failed to seed finance categories",
 			setLoading
 		);
 
-	const handleDeleteAllCategories = () => {
-		if (window.confirm("Are you sure you want to delete all categories?")) {
+	const handleDeleteAllFinanceCategories = () => {
+		if (
+			window.confirm("Are you sure you want to delete all finance categories?")
+		) {
 			apiAction(
 				"/api/finance-categories/delete-all",
 				"DELETE",
-				"All categories deleted successfully",
-				"Failed to delete categories",
+				"All finance categories deleted successfully",
+				"Failed to delete finance categories",
+				setIsDeleting
+			);
+		}
+	};
+
+	const handleSeedTodoCategories = () =>
+		apiAction(
+			"/api/categories/seed",
+			"POST",
+			"Todo categories seeded successfully",
+			"Failed to seed todo categories",
+			setLoading
+		);
+
+	const handleDeleteAllTodoCategories = () => {
+		if (
+			window.confirm("Are you sure you want to delete all todo categories?")
+		) {
+			apiAction(
+				"/api/categories/delete-all",
+				"DELETE",
+				"All todo categories deleted successfully",
+				"Failed to delete todo categories",
+				setIsDeleting
+			);
+		}
+	};
+
+	const handleSeedStatuses = () =>
+		apiAction(
+			"/api/statuses/seed",
+			"POST",
+			"Statuses seeded successfully",
+			"Failed to seed statuses",
+			setLoading
+		);
+
+	const handleDeleteAllStatuses = () => {
+		if (window.confirm("Are you sure you want to delete all statuses?")) {
+			apiAction(
+				"/api/statuses/delete-all",
+				"DELETE",
+				"All statuses deleted successfully",
+				"Failed to delete statuses",
 				setIsDeleting
 			);
 		}
@@ -134,6 +180,7 @@ const SettingPage = () => {
 					p: { xs: 2, sm: 3 },
 					borderRadius: 2,
 					bgcolor: "background.paper",
+					mb: 4,
 				}}
 			>
 				<Grid container spacing={3}>
@@ -155,7 +202,7 @@ const SettingPage = () => {
 						>
 							<Button
 								variant="contained"
-								onClick={handleSeedCategories}
+								onClick={handleSeedFinanceCategories}
 								disabled={loading}
 								startIcon={
 									loading ? (
@@ -175,7 +222,7 @@ const SettingPage = () => {
 							<Button
 								variant="outlined"
 								color="error"
-								onClick={handleDeleteAllCategories}
+								onClick={handleDeleteAllFinanceCategories}
 								disabled={isDeleting}
 								sx={{
 									minWidth: { xs: "100%", sm: 160 },
@@ -184,6 +231,112 @@ const SettingPage = () => {
 									fontWeight: 500,
 								}}
 								aria-label="Delete all finance categories"
+							>
+								Delete All
+							</Button>
+						</Stack>
+					</Grid>
+
+					{/* Todo Categories Row */}
+					<Grid size={{ xs: 12, sm: 4, md: 3 }}>
+						<Typography
+							variant="body1"
+							sx={{ fontWeight: 600, color: "text.primary" }}
+							aria-label="Todo Categories"
+						>
+							Todo Categories
+						</Typography>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 8, md: 9 }}>
+						<Stack
+							direction={{ xs: "column", sm: "row" }}
+							spacing={2}
+							sx={{ alignItems: { xs: "stretch", sm: "center" } }}
+						>
+							<Button
+								variant="contained"
+								onClick={handleSeedTodoCategories}
+								disabled={loading}
+								startIcon={
+									loading ? (
+										<CircularProgress size={20} color="inherit" />
+									) : null
+								}
+								sx={{
+									minWidth: { xs: "100%", sm: 160 },
+									py: 1,
+									textTransform: "none",
+									fontWeight: 500,
+								}}
+								aria-label="Seed default todo categories"
+							>
+								{loading ? "Seeding..." : "Seed Default"}
+							</Button>
+							<Button
+								variant="outlined"
+								color="error"
+								onClick={handleDeleteAllTodoCategories}
+								disabled={isDeleting}
+								sx={{
+									minWidth: { xs: "100%", sm: 160 },
+									py: 1,
+									textTransform: "none",
+									fontWeight: 500,
+								}}
+								aria-label="Delete all todo categories"
+							>
+								Delete All
+							</Button>
+						</Stack>
+					</Grid>
+
+					{/* Statuses Row */}
+					<Grid size={{ xs: 12, sm: 4, md: 3 }}>
+						<Typography
+							variant="body1"
+							sx={{ fontWeight: 600, color: "text.primary" }}
+							aria-label="Statuses"
+						>
+							Statuses
+						</Typography>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 8, md: 9 }}>
+						<Stack
+							direction={{ xs: "column", sm: "row" }}
+							spacing={2}
+							sx={{ alignItems: { xs: "stretch", sm: "center" } }}
+						>
+							<Button
+								variant="contained"
+								onClick={handleSeedStatuses}
+								disabled={loading}
+								startIcon={
+									loading ? (
+										<CircularProgress size={20} color="inherit" />
+									) : null
+								}
+								sx={{
+									minWidth: { xs: "100%", sm: 160 },
+									py: 1,
+									textTransform: "none",
+									fontWeight: 500,
+								}}
+								aria-label="Seed default statuses"
+							>
+								{loading ? "Seeding..." : "Seed Default"}
+							</Button>
+							<Button
+								variant="outlined"
+								color="error"
+								onClick={handleDeleteAllStatuses}
+								disabled={isDeleting}
+								sx={{
+									minWidth: { xs: "100%", sm: 160 },
+									py: 1,
+									textTransform: "none",
+									fontWeight: 500,
+								}}
+								aria-label="Delete all statuses"
 							>
 								Delete All
 							</Button>

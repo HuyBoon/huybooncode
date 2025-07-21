@@ -44,3 +44,26 @@ export interface MoodType {
     name: string; // e.g., "Happy", "Sad", "Neutral"
     emoji: string; // e.g., "😊", "😢", "😐"
 }
+
+export interface TodoType {
+    id: string;
+    title: string;
+    description: string;
+    status: string; // References StatusType.id (MongoDB ObjectId)
+    priority: "low" | "medium" | "high";
+    category: string; // References CategoryType.id
+    dueDate: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface StatusType {
+    id: string;
+    name: string;
+    icon: string;
+}
+
+export interface CategoryType {
+    id: string;
+    name: string;
+}
