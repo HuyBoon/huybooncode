@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
 	Card,
 	CardContent,
@@ -32,57 +32,144 @@ ChartJS.register(
 
 interface FinanceSummaryProps {
 	finances: FinanceType[];
+	filters: {
+		month: number;
+		year: number;
+		type:
+			| "all"
+			| "income"
+			| "expense"
+			| "saving"
+			| "investment"
+			| "debt"
+			| "loan"
+			| "other";
+		category: string;
+		dayOfWeek: number | "all";
+		period: "today" | "month" | "year";
+	};
+	setFilters: React.Dispatch<
+		React.SetStateAction<{
+			month: number;
+			year: number;
+			type:
+				| "all"
+				| "income"
+				| "expense"
+				| "saving"
+				| "investment"
+				| "debt"
+				| "loan"
+				| "other";
+			category: string;
+			dayOfWeek: number | "all";
+			period: "today" | "month" | "year";
+		}>
+	>;
 }
 
-const FinanceSummary: React.FC<FinanceSummaryProps> = ({ finances }) => {
-	const [timeRange, setTimeRange] = useState<"week" | "month" | "year">(
-		"month"
-	);
-
-	// Filter finances based on time range
+const FinanceSummary: React.FC<FinanceSummaryProps> = ({
+	finances,
+	filters,
+	setFilters,
+}) => {
+	// Filter finances based on period
 	const filteredFinances = useMemo(() => {
 		const now = new Date();
 		const startDate = new Date();
 
-		if (timeRange === "week") {
-			startDate.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
-		} else if (timeRange === "month") {
-			startDate.setDate(1); // Start of current month
-		} else if (timeRange === "year") {
-			startDate.setMonth(0, 1); // Start of current year
+		if (filters.period === "today") {
+			startDate.setHours(0, 0, 0, 0);
+		} else if (filters.period === "month") {
+			startDate.setFullYear(filters.year, filters.month - 1, 1);
+		} else if (filters.period === "year") {
+			startDate.setFullYear(filters.year, 0, 1);
 		}
 
 		return finances.filter((finance) => {
 			const financeDate = new Date(finance.date);
-			return financeDate >= startDate && financeDate <= now;
+			return (
+				financeDate >= startDate &&
+				financeDate <=
+					(filters.period === "today"
+						? new Date()
+						: new Date(filters.year, filters.month, 0))
+			);
 		});
-	}, [finances, timeRange]);
+	}, [finances, filters.period, filters.month, filters.year]);
 
-	// Calculate totals
+	// Calculate totals for all finance types
 	const totals = useMemo(() => {
+		const types = [
+			"income",
+			"expense",
+			"saving",
+			"investment",
+			"debt",
+			"loan",
+			"other",
+		];
 		return filteredFinances.reduce(
 			(acc, finance) => {
-				if (finance.type === "income") {
-					acc.income += finance.amount;
-				} else if (finance.type === "expense") {
-					acc.expense += finance.amount;
+				if (types.includes(finance.type)) {
+					acc[finance.type] = (acc[finance.type] || 0) + finance.amount;
 				}
 				return acc;
 			},
-			{ income: 0, expense: 0 }
+			{
+				income: 0,
+				expense: 0,
+				saving: 0,
+				investment: 0,
+				debt: 0,
+				loan: 0,
+				other: 0,
+			}
 		);
 	}, [filteredFinances]);
 
 	// Chart data
 	const chartData = useMemo(
 		() => ({
-			labels: ["Income", "Expense"],
+			labels: [
+				"Income",
+				"Expense",
+				"Saving",
+				"Investment",
+				"Debt",
+				"Loan",
+				"Other",
+			],
 			datasets: [
 				{
 					label: "Amount (VND)",
-					data: [totals.income, totals.expense],
-					backgroundColor: ["#4caf50", "#f44336"],
-					borderColor: ["#388e3c", "#d32f2f"],
+					data: [
+						totals.income,
+						totals.expense,
+						totals.saving,
+						totals.investment,
+						totals.debt,
+						totals.loan,
+						totals.other,
+					],
+					backgroundColor: [
+						"#4caf50", // Income: Green
+						"#f44336", // Expense: Red
+						"#2196f3", // Saving: Blue
+						"#ff9800", // Investment: Orange
+						"#9c27b0", // Debt: Purple
+						"#ffeb3b", // Loan: Yellow
+						"#607d8b", // Other: Grey
+					],
+					borderColor: [
+						"#388e3c",
+						"#d32f2f",
+						"#1976d2",
+						"#f57c00",
+						"#7b1fa2",
+						"#fbc02d",
+						"#455a64",
+					],
 					borderWidth: 1,
 				},
 			],
@@ -91,7 +178,7 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({ finances }) => {
 	);
 
 	return (
-		<Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
+		<Card sx={{ borderRadius: 2, boxShadow: 3, height: "100%" }}>
 			<CardContent>
 				<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 					Summary
@@ -101,14 +188,17 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({ finances }) => {
 						<FormControl fullWidth sx={{ mb: 2 }}>
 							<InputLabel>Time Range</InputLabel>
 							<Select
-								value={timeRange}
+								value={filters.period}
 								onChange={(e) =>
-									setTimeRange(e.target.value as "week" | "month" | "year")
+									setFilters((prev) => ({
+										...prev,
+										period: e.target.value as "today" | "month" | "year",
+									}))
 								}
 								label="Time Range"
 								aria-label="Select time range"
 							>
-								<MenuItem value="week">Week</MenuItem>
+								<MenuItem value="today">Today</MenuItem>
 								<MenuItem value="month">Month</MenuItem>
 								<MenuItem value="year">Year</MenuItem>
 							</Select>
@@ -119,20 +209,45 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({ finances }) => {
 						<Typography variant="body1" sx={{ fontWeight: 500 }}>
 							Total Expense: {totals.expense.toLocaleString()} VND
 						</Typography>
+						<Typography variant="body1" sx={{ fontWeight: 500 }}>
+							Total Saving: {totals.saving.toLocaleString()} VND
+						</Typography>
+						<Typography variant="body1" sx={{ fontWeight: 500 }}>
+							Total Investment: {totals.investment.toLocaleString()} VND
+						</Typography>
+						<Typography variant="body1" sx={{ fontWeight: 500 }}>
+							Total Debt: {totals.debt.toLocaleString()} VND
+						</Typography>
+						<Typography variant="body1" sx={{ fontWeight: 500 }}>
+							Total Loan: {totals.loan.toLocaleString()} VND
+						</Typography>
+						<Typography variant="body1" sx={{ fontWeight: 500 }}>
+							Total Other: {totals.other.toLocaleString()} VND
+						</Typography>
 						<Typography
 							variant="body1"
 							sx={{
 								fontWeight: 500,
 								color:
-									totals.income >= totals.expense
+									totals.income + totals.saving + totals.investment >=
+									totals.expense + totals.debt + totals.loan
 										? "success.main"
 										: "error.main",
 							}}
 						>
-							Balance: {(totals.income - totals.expense).toLocaleString()} VND
+							Balance:{" "}
+							{(
+								totals.income +
+								totals.saving +
+								totals.investment -
+								totals.expense -
+								totals.debt -
+								totals.loan
+							).toLocaleString()}{" "}
+							VND
 						</Typography>
 					</Grid>
-					<Grid size={{ xs: 12, md: 4 }}>
+					<Grid size={{ xs: 12, md: 8 }}>
 						<Bar
 							data={chartData}
 							options={{
@@ -141,7 +256,7 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({ finances }) => {
 									legend: { display: false },
 									title: {
 										display: true,
-										text: `Income vs Expense (${timeRange})`,
+										text: `Finance Summary (${filters.period})`,
 									},
 								},
 							}}

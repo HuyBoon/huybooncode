@@ -20,7 +20,7 @@ export default function ClientLayoutWrapper({
 			</div>
 			<AdminHeader collapsed={collapsed} />
 			<main
-				className={`transition-all duration-300 px-4 py-[50px] min-h-[calc(100vh-100px)] md:min-h-screen ${
+				className={`transition-all duration-300 py-[50px] min-h-[calc(100vh-100px)] md:min-h-screen ${
 					collapsed ? "md:ml-16" : "md:ml-64"
 				}`}
 			>

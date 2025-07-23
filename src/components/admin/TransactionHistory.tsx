@@ -52,9 +52,18 @@ interface TransactionHistoryProps {
 		React.SetStateAction<{
 			month: number;
 			year: number;
-			type: "all" | "income" | "expense";
+			type:
+				| "all"
+				| "income"
+				| "expense"
+				| "saving"
+				| "investment"
+				| "debt"
+				| "loan"
+				| "other";
 			category: string;
 			dayOfWeek: "all" | number;
+			period: "today" | "month" | "year";
 		}>
 	>;
 }
@@ -80,9 +89,18 @@ const TransactionHistory = forwardRef<
 		const [filter, setFilter] = useState({
 			month: new Date().getMonth() + 1,
 			year: new Date().getFullYear(),
-			type: "all" as "all" | "income" | "expense",
+			type: "all" as
+				| "all"
+				| "income"
+				| "expense"
+				| "saving"
+				| "investment"
+				| "debt"
+				| "loan"
+				| "other",
 			category: "all",
 			dayOfWeek: "all" as "all" | number,
+			period: "today" as "today" | "month" | "year",
 		});
 
 		// Expose filteredFinances via ref
@@ -95,9 +113,18 @@ const TransactionHistory = forwardRef<
 			const defaultFilters = {
 				month: new Date().getMonth() + 1,
 				year: new Date().getFullYear(),
-				type: "all" as "all" | "income" | "expense",
+				type: "all" as
+					| "all"
+					| "income"
+					| "expense"
+					| "saving"
+					| "investment"
+					| "debt"
+					| "loan"
+					| "other",
 				category: "all",
 				dayOfWeek: "all" as "all" | number,
+				period: "today" as "today" | "month" | "year",
 			};
 			setFilter(defaultFilters);
 			setFilters(defaultFilters);
@@ -156,8 +183,29 @@ const TransactionHistory = forwardRef<
 
 					{/* Filters */}
 					<Grid container spacing={2} sx={{ mb: 3 }}>
-						<Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+						<Grid size={{ xs: 12, sm: 6, md: 2 }}>
 							<FormControl fullWidth>
+								<InputLabel>Period</InputLabel>
+								<Select
+									value={filter.period}
+									onChange={(e) =>
+										handleFilterChange(
+											{ period: e.target.value as "today" | "month" | "year" },
+											true
+										)
+									}
+									label="Period"
+									disabled={loading}
+									aria-label="Select period"
+								>
+									<MenuItem value="today">Today</MenuItem>
+									<MenuItem value="month">Month</MenuItem>
+									<MenuItem value="year">Year</MenuItem>
+								</Select>
+							</FormControl>
+						</Grid>
+						<Grid size={{ xs: 12, sm: 6, md: 2 }}>
+							<FormControl fullWidth disabled={filter.period === "today"}>
 								<InputLabel>Month</InputLabel>
 								<Select
 									value={filter.month}
@@ -165,7 +213,7 @@ const TransactionHistory = forwardRef<
 										handleFilterChange({ month: Number(e.target.value) }, true)
 									}
 									label="Month"
-									disabled={loading}
+									disabled={loading || filter.period === "today"}
 									aria-label="Select month"
 								>
 									{Array.from({ length: 12 }, (_, i) => (
@@ -178,7 +226,7 @@ const TransactionHistory = forwardRef<
 								</Select>
 							</FormControl>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+						<Grid size={{ xs: 12, sm: 6, md: 2 }}>
 							<TextField
 								fullWidth
 								label="Year"
@@ -187,21 +235,31 @@ const TransactionHistory = forwardRef<
 								onChange={(e) =>
 									handleFilterChange({ year: Number(e.target.value) }, true)
 								}
-								disabled={loading}
+								disabled={loading || filter.period === "today"}
 								InputProps={{
 									inputProps: { min: 2000, max: new Date().getFullYear() },
 								}}
 								aria-label="Enter year"
 							/>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+						<Grid size={{ xs: 12, sm: 6, md: 2 }}>
 							<FormControl fullWidth>
 								<InputLabel>Type</InputLabel>
 								<Select
 									value={filter.type}
 									onChange={(e) =>
 										handleFilterChange(
-											{ type: e.target.value as "all" | "income" | "expense" },
+											{
+												type: e.target.value as
+													| "all"
+													| "income"
+													| "expense"
+													| "saving"
+													| "investment"
+													| "debt"
+													| "loan"
+													| "other",
+											},
 											true
 										)
 									}
@@ -212,10 +270,15 @@ const TransactionHistory = forwardRef<
 									<MenuItem value="all">All</MenuItem>
 									<MenuItem value="income">Income</MenuItem>
 									<MenuItem value="expense">Expense</MenuItem>
+									<MenuItem value="saving">Saving</MenuItem>
+									<MenuItem value="investment">Investment</MenuItem>
+									<MenuItem value="debt">Debt</MenuItem>
+									<MenuItem value="loan">Loan</MenuItem>
+									<MenuItem value="other">Other</MenuItem>
 								</Select>
 							</FormControl>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+						<Grid size={{ xs: 12, sm: 6, md: 2 }}>
 							<FormControl fullWidth>
 								<InputLabel>Category</InputLabel>
 								<Select
@@ -236,7 +299,7 @@ const TransactionHistory = forwardRef<
 								</Select>
 							</FormControl>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+						<Grid size={{ xs: 12, sm: 6, md: 2 }}>
 							<FormControl fullWidth>
 								<InputLabel>Day of Week</InputLabel>
 								<Select
@@ -248,7 +311,7 @@ const TransactionHistory = forwardRef<
 										)
 									}
 									label="Day of Week"
-									disabled={loading}
+									disabled={loading || filter.period === "today"}
 									aria-label="Select day of week"
 								>
 									<MenuItem value="all">All</MenuItem>
@@ -303,7 +366,17 @@ const TransactionHistory = forwardRef<
 										<TableCell>
 											<Chip
 												label={finance.type}
-												color={finance.type === "income" ? "success" : "error"}
+												color={
+													finance.type === "income" ||
+													finance.type === "saving" ||
+													finance.type === "investment"
+														? "success"
+														: finance.type === "expense" ||
+														  finance.type === "debt" ||
+														  finance.type === "loan"
+														? "error"
+														: "default"
+												}
 												size="small"
 											/>
 										</TableCell>
@@ -366,7 +439,7 @@ const TransactionHistory = forwardRef<
 							}}
 							aria-label="Previous page"
 						>
-							&lt;
+							{"<"}
 						</Button>
 						{generatePageNumbers().map((pageNum, index) =>
 							typeof pageNum === "string" ? (
@@ -424,7 +497,7 @@ const TransactionHistory = forwardRef<
 							}}
 							aria-label="Next page"
 						>
-							&gt;
+							{">"}
 						</Button>
 					</Stack>
 				</CardContent>

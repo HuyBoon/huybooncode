@@ -10,6 +10,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
+        const today = searchParams.get("today") === "true";
         const month = searchParams.get("month") ? parseInt(searchParams.get("month")!) : null;
         const year = searchParams.get("year") ? parseInt(searchParams.get("year")!) : null;
         const type = searchParams.get("type") || null;
@@ -18,7 +19,16 @@ export async function GET(request: Request) {
 
         // Build query
         const query: any = {};
-        if (month && year) {
+        if (today) {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999);
+            query.date = {
+                $gte: startOfDay,
+                $lte: endOfDay,
+            };
+        } else if (month && year) {
             query.date = {
                 $gte: new Date(year, month - 1, 1),
                 $lt: new Date(year, month, 1),
@@ -29,7 +39,7 @@ export async function GET(request: Request) {
                 $lt: new Date(year + 1, 0, 1),
             };
         }
-        if (type && ["income", "expense"].includes(type)) {
+        if (type && ["income", "expense", "saving", "investment", "debt", "loan", "other"].includes(type)) {
             query.type = type;
         }
         if (category && mongoose.Types.ObjectId.isValid(category)) {
@@ -92,9 +102,9 @@ export async function POST(request: Request) {
         const { type, amount, category, description, date } = await request.json();
 
         // Validate inputs
-        if (!type || !["income", "expense"].includes(type)) {
+        if (!type || !["income", "expense", "saving", "investment", "debt", "loan", "other"].includes(type)) {
             return NextResponse.json(
-                { error: "Valid type (income, expense) is required" },
+                { error: "Valid type (income, expense, saving, investment, debt, loan, other) is required" },
                 { status: 400 }
             );
         }

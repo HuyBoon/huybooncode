@@ -10,20 +10,29 @@ export interface UserType {
 
 export interface FinanceType {
     id: string;
-    type: "income" | "expense";
+    type:
+    | "income"
+    | "expense"
+    | "saving"
+    | "investment"
+    | "debt"
+    | "loan"
+    | "other";
     amount: number;
-    category: string; // References FinanceCategory _id
-    categoryName?: string; // Populated name for display
+    category: string;
+    categoryName?: string;
     description?: string;
     date: string;
     createdAt: string;
     updatedAt: string;
 }
 
+
+
 export interface FinanceCategoryType {
     id: string;
     name: string;
-    type: "Income" | "Expense" | "Other";
+    type: "Income" | "Expense" | "Saving" | "Investment" | "Debt" | "Loan" | "Other";
     createdAt: string;
     updatedAt: string;
 }

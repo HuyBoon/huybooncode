@@ -4,45 +4,75 @@ import { dbConnect } from "@/libs/dbConnect";
 import FinanceCategory from "@/models/FinanceCategory";
 
 const defaultCategories = [
-    // Income Categories
-    { name: "Freelance Web Development", type: "Income" }, // Specific to primary freelance work
-    { name: "International Clients", type: "Income" }, // For payments in USD/EUR from overseas clients
-    { name: "Local Clients", type: "Income" }, // For VND-based local projects
-    { name: "Digital Products", type: "Income" }, // e.g., selling templates, plugins, or courses
-    { name: "Affiliate Income", type: "Income" }, // From referrals or affiliate marketing
-    { name: "Consulting", type: "Income" }, // For one-off consulting or training sessions
-    { name: "Gifts", type: "Income" }, // Retained from original
-    { name: "Investments", type: "Income" }, // Retained from original
-    { name: "Side Hustle", type: "Income" }, // Retained for other side projects
+    // Income
+    { name: "Monthly Salary", type: "Income" },              // Lương cố định hằng tháng
+    { name: "Freelance Web Development", type: "Income" },
+    { name: "International Clients", type: "Income" },
+    { name: "Local Clients", type: "Income" },
+    { name: "Digital Products", type: "Income" },
+    { name: "Affiliate Income", type: "Income" },
+    { name: "Consulting", type: "Income" },
+    { name: "Side Hustle", type: "Income" },
+    { name: "Gifts Received", type: "Income" },
+    { name: "Dividends & Investments Return", type: "Income" },
+    { name: "Other Income", type: "Income" },
 
-    // Expense Categories
-    { name: "Rent", type: "Expense" }, // Specific to HCMC, where rent is a major cost
-    { name: "Utilities", type: "Expense" }, // Electricity, water, internet
-    { name: "Internet Subscription", type: "Expense" }, // Critical for freelancers, separated for clarity
-    { name: "Food & Groceries", type: "Expense" }, // Daily meals, street food, groceries
-    { name: "Dining Out", type: "Expense" }, // Common in HCMC's vibrant food scene
-    { name: "Transportation", type: "Expense" }, // Motorbike fuel, Grab rides, or public transport
-    { name: "Motorbike Maintenance", type: "Expense" }, // Common in HCMC due to heavy motorbike use
-    { name: "Co-working Space", type: "Expense" }, // For freelancers needing a workspace
-    { name: "Software Subscriptions", type: "Expense" }, // e.g., Adobe, Figma, or IDE licenses
-    { name: "Cloud Services", type: "Expense" }, // e.g., AWS, Firebase, or hosting costs
-    { name: "Hardware & Equipment", type: "Expense" }, // Laptops, monitors, or upgrades
-    { name: "Professional Development", type: "Expense" }, // Courses, certifications, or workshops
-    { name: "Networking Events", type: "Expense" }, // Meetups or tech events in HCMC
-    { name: "Healthcare", type: "Expense" }, // Insurance or medical costs
-    { name: "Entertainment", type: "Expense" }, // Movies, events, or nightlife
-    { name: "Shopping", type: "Expense" }, // Clothing, electronics, etc.
-    { name: "Travel", type: "Expense" }, // Domestic or international trips
-    { name: "Taxes & Fees", type: "Expense" }, // Freelance taxes or bank fees
-    { name: "Debt Repayment", type: "Expense" }, // Retained from original
-    { name: "Charity & Gifts", type: "Expense" }, // Donations or gifts for family/friends
+    // Expense
+    { name: "Rent", type: "Expense" },
+    { name: "Utilities", type: "Expense" },
+    { name: "Internet Subscription", type: "Expense" },
+    { name: "Food & Groceries", type: "Expense" },
+    { name: "Dining Out", type: "Expense" },
+    { name: "Coffee & Drinks", type: "Expense" },            // ☕ Đi café, trà sữa, nước uống
+    { name: "Transportation", type: "Expense" },
+    { name: "Motorbike Maintenance", type: "Expense" },
+    { name: "Co-working Space", type: "Expense" },
+    { name: "Software Subscriptions", type: "Expense" },
+    { name: "Cloud Services", type: "Expense" },
+    { name: "Hardware & Equipment", type: "Expense" },
+    { name: "Professional Development", type: "Expense" },
+    { name: "Networking Events", type: "Expense" },
+    { name: "Healthcare", type: "Expense" },
+    { name: "Insurance Premiums", type: "Expense" },
+    { name: "Entertainment", type: "Expense" },
+    { name: "Shopping", type: "Expense" },
+    { name: "Travel", type: "Expense" },
+    { name: "Taxes & Fees", type: "Expense" },
+    { name: "Charity & Donations", type: "Expense" },
+    { name: "Gifts for Others", type: "Expense" },
+    { name: "Debt Repayment", type: "Expense" },
+    { name: "Bank Charges", type: "Expense" },
+    { name: "Other Expenses", type: "Expense" },
 
-    // Other Categories
-    { name: "Savings", type: "Other" }, // Retained from original
-    { name: "Emergency Fund", type: "Other" }, // For unexpected expenses
-    { name: "Investments", type: "Other" }, // For allocating funds to investments
-    { name: "Transfers", type: "Other" }, // Bank transfers or moving money
-    { name: "Miscellaneous", type: "Other" }, // Catch-all for unclassified expenses
+    // Saving
+    { name: "Savings", type: "Saving" },
+    { name: "Emergency Fund", type: "Saving" },
+    { name: "Retirement Fund", type: "Saving" },
+
+    // Investment
+    { name: "Stocks", type: "Investment" },
+    { name: "Crypto", type: "Investment" },
+    { name: "Real Estate", type: "Investment" },
+    { name: "Business Investment", type: "Investment" },
+    { name: "P2P Lending", type: "Investment" },
+    { name: "Other Investments", type: "Investment" },
+
+    // Debt
+    { name: "Credit Card Debt", type: "Debt" },
+    { name: "Personal Loan (Bank)", type: "Debt" },
+    { name: "Mortgage", type: "Debt" },
+    { name: "Family/Friends Loan", type: "Debt" },
+
+    // Loan
+    { name: "Loan to Friend/Family", type: "Loan" },
+    { name: "Business Loan Given", type: "Loan" },
+    { name: "Personal Lending", type: "Loan" },
+
+    // Other
+    { name: "Transfers", type: "Other" },
+    { name: "Wallet Top-up", type: "Other" },
+    { name: "Withdrawals", type: "Other" },
+    { name: "Miscellaneous", type: "Other" }
 ];
 
 export async function POST() {
@@ -50,6 +80,7 @@ export async function POST() {
 
     try {
         const count = await FinanceCategory.countDocuments();
+        console.log("Existing categories count:", count);
         if (count > 0) {
             return NextResponse.json(
                 { error: "Categories already exist" },

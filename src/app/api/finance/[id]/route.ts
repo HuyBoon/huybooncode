@@ -58,7 +58,7 @@ export async function PUT(
         const { type, amount, category, description, date } = await req.json();
 
         // Validate inputs
-        if (!type || !["income", "expense"].includes(type)) {
+        if (!type || !["income", "expense", "saving", "investment", "debt", "loan", "other"].includes(type)) {
             return NextResponse.json(
                 { error: "Valid type (income, expense) is required" },
                 { status: 400 }

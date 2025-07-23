@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Stack, CircularProgress } from "@mui/material";
+import { Box, Stack, CircularProgress, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import {
 	CheckCircle,
 	TrendingUp,
 	TrendingDown,
+	Download,
 } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import OverviewSection from "@/components/dashboard/OverviewSection";
@@ -36,7 +37,17 @@ export default function DashboardPage() {
 	} = useDashboardData();
 
 	console.log("data", data);
+	const handleExport = async () => {
+		const res = await fetch("/api/finance/export");
+		if (!res.ok) return alert("Export failed");
 
+		const blob = await res.blob();
+		const url = window.URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = "finances.xlsx";
+		link.click();
+	};
 	if (status === "loading") {
 		return <Loader />;
 	}
@@ -85,6 +96,14 @@ export default function DashboardPage() {
 					onClose={handleCloseSnackbar}
 				/>
 			</Stack>
+			<Button
+				variant="contained"
+				startIcon={<Download />}
+				onClick={handleExport}
+				sx={{ alignSelf: "flex-end" }}
+			>
+				Export Excel
+			</Button>
 		</Box>
 	);
 }

@@ -124,7 +124,7 @@ const SettingPage = () => {
 			window.confirm("Are you sure you want to delete all finance records?")
 		) {
 			apiAction(
-				"/api/finances/delete-all",
+				"/api/finance/delete-all",
 				"DELETE",
 				"All finance records deleted",
 				"Failed to delete finances",
