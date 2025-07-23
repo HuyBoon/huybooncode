@@ -45,7 +45,7 @@ export default function EventList({ events }: EventListProps) {
 									<Calendar size={20} color="#0288d1" />
 									<Typography variant="body2">{event.title}</Typography>
 									<Typography variant="body2" color="text.secondary">
-										{new Date(event.date).toLocaleDateString()}
+										{new Date(event.createdAt).toLocaleDateString()}
 									</Typography>
 								</Box>
 							))
