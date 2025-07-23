@@ -12,6 +12,7 @@ import {
 	Typography,
 	Box,
 	TablePagination,
+	IconButton,
 } from "@mui/material";
 import { Edit, Delete } from "lucide-react";
 import { TodoType, StatusType, CategoryType } from "@/types/interface";
@@ -60,6 +61,8 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			handleComplete,
 			pagination,
 			setPagination,
+			// setFilters is not used in this component, but passed in props.
+			// Consider removing it if it's not needed, or use it if it is.
 		},
 		ref
 	) => {
@@ -80,7 +83,7 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			setPagination((prev) => ({
 				...prev,
 				limit: parseInt(event.target.value, 10),
-				page: 1,
+				page: 1, // Reset to first page when rows per page changes
 			}));
 		};
 
@@ -136,24 +139,22 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 									<TableCell>
 										{new Date(todo.dueDate).toLocaleDateString()}
 									</TableCell>
-									<TableCell>
-										<Button
+									{/* Adjusted className here */}
+									<TableCell align="left">
+										<IconButton
 											onClick={() => handleEdit(todo)}
 											disabled={loading}
-											startIcon={<Edit size={16} />}
 											aria-label={`Edit ${todo.title}`}
 										>
-											Edit
-										</Button>
-										<Button
+											<Edit size={16} />
+										</IconButton>
+										<IconButton
 											onClick={() => handleDelete(todo.id)}
 											disabled={loading}
-											startIcon={<Delete size={16} />}
-											color="error"
 											aria-label={`Delete ${todo.title}`}
 										>
-											Delete
-										</Button>
+											<Delete size={16} color="red" />
+										</IconButton>
 									</TableCell>
 								</TableRow>
 							))
@@ -165,7 +166,7 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 					component="div"
 					count={pagination.total}
 					rowsPerPage={pagination.limit}
-					page={pagination.page - 1}
+					page={pagination.page - 1} // MUI TablePagination is 0-indexed
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>
@@ -173,7 +174,5 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 		);
 	}
 );
-
-TodoHistory.displayName = "TodoHistory";
 
 export default TodoHistory;

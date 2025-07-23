@@ -53,7 +53,7 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 					<input
 						type="text"
 						placeholder="Search..."
-						className="pl-8 pr-2 py-1 w-full text-sm bg-gray-800 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+						className="pl-8 pr-2 py-1 w-full text-[16px] bg-gray-800 text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
 					/>
 				</div>
 			</div>

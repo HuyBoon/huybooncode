@@ -1,16 +1,16 @@
+"use client";
 import ClientLayoutWrapper from "@/components/admin/ClientLayoutWrapper";
-import { Metadata } from "next";
-import { ReactNode } from "react";
 
-export const metadata: Metadata = {
-	title: "HBoonCode || Dashboard ",
-	description: "HuyBoonCode.'s Portfolio",
-};
+import { ReactNode } from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+const theme = createTheme();
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
 	return (
-		<main className="">
+		<ThemeProvider theme={theme}>
+			<CssBaseline />
 			<ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-		</main>
+		</ThemeProvider>
 	);
 }

@@ -44,6 +44,7 @@ const defaultCategories = [
     { name: "Transfers", type: "Other" }, // Bank transfers or moving money
     { name: "Miscellaneous", type: "Other" }, // Catch-all for unclassified expenses
 ];
+
 export async function POST() {
     await dbConnect();
 

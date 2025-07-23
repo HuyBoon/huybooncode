@@ -1,4 +1,4 @@
-// /app/api/finance-categories/delete-all/route.ts
+
 import { NextResponse } from "next/server";
 
 import FinanceCategory from "@/models/FinanceCategory";

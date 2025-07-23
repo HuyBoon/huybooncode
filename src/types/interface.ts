@@ -1,4 +1,3 @@
-
 export interface UserType {
     _id: string;
     name: string;
@@ -66,4 +65,36 @@ export interface StatusType {
 export interface CategoryType {
     id: string;
     name: string;
+}
+
+export interface EventType {
+    id: string;
+    title: string;
+    description: string;
+    start: string; // ISO date string (e.g., "2025-07-21T10:00:00.000Z")
+    end: string; // ISO date string (e.g., "2025-07-21T11:00:00.000Z")
+    todo?: string; // References TodoType.id (MongoDB ObjectId)
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CategoryBlogType {
+    id: string;
+    name: string;
+}
+export interface BlogType {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    introductions: string;
+    blogcategory: string; // References CategoryType.id
+    thumbnail: string;
+    content: string;
+    status: "draft" | "published" | "archived";
+    tags: string[];
+    author?: string; // References UserType._id
+    views: number;
+    createdAt: string;
+    updatedAt: string;
 }

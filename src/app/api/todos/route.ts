@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnect";
 import Todo from "@/models/Todo";
 import Status from "@/models/Status";
+import "@/models/Category";
 import { TodoType } from "@/types/interface";
 import mongoose from "mongoose";
 
