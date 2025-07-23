@@ -13,6 +13,7 @@ import {
 	EventType,
 	BlogType,
 } from "@/types/interface";
+import moment from "moment";
 
 interface DashboardData {
 	stats: Array<{
@@ -113,20 +114,81 @@ export default function useDashboardData() {
 			{
 				id: "1",
 				title: "Daily reflection",
-				content: "",
+				content: "Reflected on daily tasks",
 				mood: "neutral",
 				date: "2025-07-20",
-				createdAt: "",
-				updatedAt: "",
+				createdAt: "2025-07-20T00:00:00.000Z",
+				updatedAt: "2025-07-20T00:00:00.000Z",
 			},
 			{
 				id: "2",
 				title: "Project ideas",
-				content: "",
+				content: "Brainstormed new project concepts",
 				mood: "positive",
 				date: "2025-07-19",
-				createdAt: "",
-				updatedAt: "",
+				createdAt: "2025-07-19T00:00:00.000Z",
+				updatedAt: "2025-07-19T00:00:00.000Z",
+			},
+		];
+	};
+
+	// Fetch events for the current month
+	const fetchEvents = async (): Promise<EventType[]> => {
+		const start = moment().startOf("month").toISOString();
+		const end = moment().endOf("month").toISOString();
+		const params = new URLSearchParams({ start, end });
+		const response = await fetch(`/api/events?${params}`);
+		if (response.ok) {
+			const { data }: { data: EventType[] } = await response.json();
+			return data;
+		}
+		console.warn("Events API failed, using static data");
+		return [
+			{
+				id: "1",
+				title: "Team meeting",
+				description: "Weekly sync",
+				start: "2025-07-22T10:00:00.000Z",
+				end: "2025-07-22T11:00:00.000Z",
+				createdAt: "2025-07-22T00:00:00.000Z",
+				updatedAt: "2025-07-22T00:00:00.000Z",
+			},
+			{
+				id: "2",
+				title: "Project deadline",
+				description: "Final submission",
+				start: "2025-07-25T00:00:00.000Z",
+				end: "2025-07-25T23:59:59.999Z",
+				createdAt: "2025-07-22T00:00:00.000Z",
+				updatedAt: "2025-07-22T00:00:00.000Z",
+			},
+		];
+	};
+
+	// Fetch recent blogs (limit to 5)
+	const fetchBlogs = async (): Promise<BlogType[]> => {
+		const params = new URLSearchParams({ limit: "5" });
+		const response = await fetch(`/api/blogs?${params}`);
+		if (response.ok) {
+			const { data }: { data: BlogType[] } = await response.json();
+			return data;
+		}
+		console.warn("Blogs API failed, using static data");
+		return [
+			{
+				id: "1",
+				title: "Sample Blog",
+				slug: "sample-blog",
+				description: "A sample blog post",
+				introductions: "Introduction to the sample blog",
+				blogcategory: "66a4b3c2d4f5e6a7890b2c1f",
+				thumbnail: "https://example.com/thumbnail.jpg",
+				content: "<p>This is a sample blog content</p>",
+				status: "published",
+				tags: ["sample", "test"],
+				views: 10,
+				createdAt: "2025-07-22T00:00:00.000Z",
+				updatedAt: "2025-07-22T00:00:00.000Z",
 			},
 		];
 	};
@@ -216,26 +278,15 @@ export default function useDashboardData() {
 		const fetchData = async () => {
 			setLoading(true);
 			try {
-				const [statusData, todos, finances, journals] = await Promise.all([
-					fetchStatuses(),
-					fetchTodos(),
-					fetchFinances(),
-					fetchJournals(),
-				]);
-
-				// Static data for events and blogs (no APIs provided)
-				const events: EventType[] = [
-					{ id: "1", title: "Team meeting", date: "2025-07-22" },
-					{ id: "2", title: "Project deadline", date: "2025-07-25" },
-				];
-				const blogs: BlogType[] = [
-					{
-						id: "1",
-						title: "How to manage tasks effectively",
-						date: "2025-07-18",
-					},
-					{ id: "2", title: "Finance tips for coders", date: "2025-07-17" },
-				];
+				const [statusData, todos, finances, journals, events, blogs] =
+					await Promise.all([
+						fetchStatuses(),
+						fetchTodos(),
+						fetchFinances(),
+						fetchJournals(),
+						fetchEvents(),
+						fetchBlogs(),
+					]);
 
 				setStatuses(statusData);
 				setData({
