@@ -13,6 +13,7 @@ import {
 	TrendingDown,
 	CheckSquare,
 	Clock,
+	FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,48 +48,24 @@ export default function FooterNavigation() {
 
 	const navLinks: NavLink[] = [
 		{
-			url: "/admin/dashboard",
-			icon: <LayoutDashboard size={20} />,
-			label: "Dashboard",
-		},
-		{
 			url: "/admin/todolist",
 			icon: <CheckSquare size={20} />,
 			label: "To-Do",
-			submenu: [
-				{
-					url: "/admin/todolist/today",
-					label: "Today",
-					icon: <Clock size={16} />,
-				},
-				{
-					url: "/admin/todolist/tomorrow",
-					label: "Tomorrow",
-					icon: <Calendar size={16} />,
-				},
-			],
 		},
 		{
 			url: "/admin/finance",
 			icon: <DollarSign size={20} />,
 			label: "Finance",
-			submenu: [
-				{
-					url: "/admin/finance/categories",
-					label: "Categories",
-					icon: <Shapes size={16} />,
-				},
-				{
-					url: "/admin/finance/income",
-					label: "Income",
-					icon: <TrendingUp size={16} />,
-				},
-				{
-					url: "/admin/finance/expense",
-					label: "Expense",
-					icon: <TrendingDown size={16} />,
-				},
-			],
+		},
+		{
+			url: "/admin/dashboard",
+			icon: <Calendar size={20} />,
+			label: "Calendar",
+		},
+		{
+			url: "/admin/calendar",
+			icon: <LayoutDashboard size={20} />,
+			label: "Dashboard",
 		},
 		{
 			url: "/admin/journal",
@@ -96,9 +73,9 @@ export default function FooterNavigation() {
 			label: "Journal",
 		},
 		{
-			url: "/admin/settings",
-			icon: <Settings size={20} />,
-			label: "Settings",
+			url: "/admin/manageblogs",
+			icon: <FileText size={20} />,
+			label: "Blogs",
 		},
 	];
 
@@ -113,7 +90,7 @@ export default function FooterNavigation() {
 	const animationDuration = 0.3;
 
 	return (
-		<footer className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-100 border-t border-gray-700 z-30">
+		<footer className="md:hidden fixed bottom-0 left-0 right-0 bg-theme text-gray-900 z-30">
 			<div className="flex justify-around items-center py-3">
 				{navLinks.map((item) => {
 					const isItemActive = isActive(item.url);
@@ -125,7 +102,7 @@ export default function FooterNavigation() {
 								className={`flex flex-col items-center px-2 py-1 cursor-pointer transition-colors ${
 									isItemActive
 										? "text-blue-400 font-semibold"
-										: "text-gray-300 hover:text-blue-400"
+										: "text-gray-900 hover:text-blue-400"
 								}`}
 							>
 								<Link href={item.url} className="flex flex-col items-center">

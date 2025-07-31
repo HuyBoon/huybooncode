@@ -1,6 +1,4 @@
 import mongoose, { Schema, model, models } from 'mongoose';
-import { FaBullseye } from 'react-icons/fa';
-
 const UserSchema = new Schema({
     name: {
         type: String,

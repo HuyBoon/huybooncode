@@ -1,0 +1,164 @@
+import React from "react";
+import { Box, Grid, Card, CardContent, Snackbar, Alert } from "@mui/material";
+import AddTransactionForm from "./AddTransactionForm";
+import FinanceSummary from "./FinanceSummary";
+import TransactionHistory from "./TransactionHistory";
+import {
+	FinanceType,
+	FinanceCategoryType,
+	PaginationType,
+	TransactionFilters,
+	SummaryFilters,
+	FinanceEntryType,
+} from "@/types/interface";
+import { useSnackbar } from "@/hooks/useSnackbar";
+
+interface FinanceLayoutProps {
+	categories: FinanceCategoryType[];
+	transactionFinances: FinanceType[];
+	summaryFinances: FinanceType[];
+	isLoading: boolean;
+	pagination: PaginationType;
+	transactionFilters: TransactionFilters;
+	summaryFilters: SummaryFilters;
+	setTransactionFilters: React.Dispatch<
+		React.SetStateAction<TransactionFilters>
+	>;
+	setSummaryFilters: React.Dispatch<React.SetStateAction<SummaryFilters>>;
+	setPagination: React.Dispatch<React.SetStateAction<PaginationType>>;
+	handleSubmit: (data: {
+		id: string | null;
+		type: FinanceEntryType;
+		amount: number;
+		category: string;
+		description?: string;
+		date: string;
+	}) => Promise<void>;
+	handleEdit: (finance: FinanceType) => void;
+	handleDelete: (id: string) => Promise<void>;
+	handleCancel: () => void;
+	initialFormData?: FinanceType;
+}
+
+const FinanceLayout: React.FC<FinanceLayoutProps> = ({
+	categories,
+	transactionFinances,
+	summaryFinances,
+	isLoading,
+	pagination,
+	transactionFilters,
+	summaryFilters,
+	setTransactionFilters,
+	setSummaryFilters,
+	setPagination,
+	handleSubmit,
+	handleEdit,
+	handleDelete,
+	handleCancel,
+	initialFormData,
+}) => {
+	const { snackbar, closeSnackbar } = useSnackbar();
+	console.log("initialFormData trong FinanceLayout:", initialFormData);
+
+	return (
+		<Box sx={{ maxWidth: "lg", mx: "auto", mt: 2, minHeight: "100vh" }}>
+			<Grid container spacing={2}>
+				<Grid container spacing={2}>
+					<Grid size={{ xs: 12, md: 6 }}>
+						<Card
+							sx={{
+								borderRadius: 2,
+								boxShadow: 3,
+								mb: { xs: 1, md: 2 },
+								"&:hover": { boxShadow: 6 },
+							}}
+						>
+							<CardContent>
+								<AddTransactionForm
+									categories={categories}
+									loading={isLoading}
+									onSubmit={handleSubmit}
+									onCancel={handleCancel}
+									initialData={
+										initialFormData
+											? {
+													id: initialFormData.id,
+													type: initialFormData.type,
+													amount: initialFormData.amount.toString(),
+													category: initialFormData.category,
+													description: initialFormData.description || "",
+													date: new Date(initialFormData.date)
+														.toISOString()
+														.split("T")[0],
+											  }
+											: undefined
+									}
+								/>
+							</CardContent>
+						</Card>
+					</Grid>
+					<Grid size={{ xs: 12, md: 6 }}>
+						<Card
+							sx={{
+								borderRadius: 2,
+								boxShadow: 3,
+								mb: { xs: 1, md: 0 },
+								"&:hover": { boxShadow: 6 },
+							}}
+						>
+							<CardContent>
+								<FinanceSummary
+									finances={summaryFinances}
+									filters={summaryFilters}
+									setFilters={setSummaryFilters}
+								/>
+							</CardContent>
+						</Card>
+					</Grid>
+				</Grid>
+				<Grid size={{ xs: 12, md: 12 }}>
+					<Card
+						sx={{
+							borderRadius: 2,
+							boxShadow: 3,
+							height: "100%",
+							"&:hover": { boxShadow: 6 },
+						}}
+					>
+						<CardContent>
+							<TransactionHistory
+								finances={transactionFinances}
+								categories={categories}
+								loading={isLoading}
+								handleEdit={handleEdit}
+								handleDelete={handleDelete}
+								onFilteredFinancesChange={() => {}}
+								pagination={pagination}
+								setPagination={setPagination}
+								setFilters={setTransactionFilters}
+								filters={transactionFilters}
+							/>
+						</CardContent>
+					</Card>
+				</Grid>
+			</Grid>
+			<Snackbar
+				open={snackbar.open}
+				autoHideDuration={6000}
+				onClose={closeSnackbar}
+				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+			>
+				<Alert
+					onClose={closeSnackbar}
+					severity={snackbar.severity}
+					variant="filled"
+					sx={{ width: "100%" }}
+				>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
+		</Box>
+	);
+};
+
+export default FinanceLayout;

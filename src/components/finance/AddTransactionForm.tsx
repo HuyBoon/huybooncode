@@ -1,304 +1,242 @@
-import React, { useState, useMemo } from "react";
+"use client";
+import React from "react";
 import {
-	Card,
-	CardContent,
-	Typography,
-	Grid,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
-	TextField,
-	Button,
-	Stack,
-	Autocomplete,
-	CircularProgress,
+    Card,
+    CardContent,
+    Grid,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    TextField,
+    Button,
+    Stack,
+    Autocomplete,
+    CircularProgress,
+    Typography,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import { Bitcoin } from "lucide-react";
-import { FinanceType, FinanceCategoryType } from "@/types/interface";
+import { FinanceCategoryType, FinanceEntryType } from "@/types/interface";
+import { useTransactionForm } from "@/hooks/useTransactionForm";
 
 interface AddTransactionFormProps {
-	categories: FinanceCategoryType[];
-	loading: boolean;
-	onSubmit: (data: {
-		id: string | null;
-		type:
-			| "income"
-			| "expense"
-			| "saving"
-			| "investment"
-			| "debt"
-			| "loan"
-			| "other";
-		amount: number;
-		category: string;
-		description?: string;
-		date: string;
-	}) => Promise<void>;
-	onCancel?: () => void;
-	initialData?: {
-		id: string | null;
-		type:
-			| "income"
-			| "expense"
-			| "saving"
-			| "investment"
-			| "debt"
-			| "loan"
-			| "other";
-		amount: string;
-		category: string;
-		description: string;
-		date: string;
-	};
+    categories: FinanceCategoryType[];
+    loading: boolean;
+    onSubmit: (data: {
+        id: string | null;
+        type: FinanceEntryType;
+        amount: number;
+        category: string;
+        description?: string;
+        date: string;
+    }) => Promise<void>;
+    onCancel?: () => void;
+    initialData?: {
+        id: string | null;
+        type: FinanceEntryType;
+        amount: string;
+        category: string;
+        description: string;
+        date: string;
+    };
 }
 
-const financeTypes = [
-	{ value: "income", label: "Income" },
-	{ value: "expense", label: "Expense" },
-	{ value: "saving", label: "Saving" },
-	{ value: "investment", label: "Investment" },
-	{ value: "debt", label: "Debt" },
-	{ value: "loan", label: "Loan" },
-	{ value: "other", label: "Other" },
-] as const;
-
-type FinanceEntryType = (typeof financeTypes)[number]["value"];
-
 const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
-	categories,
-	loading,
-	onSubmit,
-	onCancel,
-	initialData,
+    categories,
+    loading,
+    onSubmit,
+    onCancel,
+    initialData,
 }) => {
-	const [formData, setFormData] = useState({
-		id: initialData?.id || null,
-		type: initialData?.type || "expense",
-		amount: initialData?.amount || "",
-		category: initialData?.category || "",
-		description: initialData?.description || "",
-		date: initialData?.date || new Date().toISOString().split("T")[0],
-	});
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const {
+        formData,
+        errors,
+        handleChange,
+        handleCategoryChange,
+        handleTypeChange,
+        handleSubmit,
+    } = useTransactionForm({ categories, initialData, onSubmit });
 
-	// Load amount history from localStorage
-	const [amountHistory, setAmountHistory] = useState<number[]>(() => {
-		if (typeof window !== "undefined") {
-			const saved = localStorage.getItem("financeAmountHistory");
-			return saved ? JSON.parse(saved) : [30000, 100000];
-		}
-		return [30000, 100000];
-	});
+    console.log("initialData trong AddTransactionForm:", initialData);
+    console.log("formData trong AddTransactionForm:", formData);
 
-	// Save amount to localStorage
-	const saveAmountToHistory = (amount: number) => {
-		const updatedHistory = Array.from(
-			new Set([amount, ...amountHistory])
-		).slice(0, 10);
-		setAmountHistory(updatedHistory);
-		if (typeof window !== "undefined") {
-			localStorage.setItem(
-				"financeAmountHistory",
-				JSON.stringify(updatedHistory)
-			);
-		}
-	};
-
-	// Filter categories based on finance type
-	const filteredCategories = useMemo(() => {
-		return categories.filter((cat) => cat.type.toLowerCase() === formData.type);
-	}, [categories, formData.type]);
-
-	// Handle form submission
-	const handleSubmit = async () => {
-		if (!formData.amount || !formData.category) {
-			return;
-		}
-
-		const amount = parseFloat(formData.amount);
-		if (isNaN(amount) || amount <= 0) {
-			return;
-		}
-
-		const selectedCategory = categories.find(
-			(cat) => cat.id === formData.category
-		);
-		if (
-			!selectedCategory ||
-			selectedCategory.type.toLowerCase() !== formData.type
-		) {
-			return;
-		}
-
-		await onSubmit({
-			id: formData.id,
-			type: formData.type as FinanceEntryType,
-			amount,
-			category: formData.category,
-			description: formData.description || undefined,
-			date: formData.date,
-		});
-
-		saveAmountToHistory(amount);
-	};
-
-	return (
-		<Card sx={{ borderRadius: 2, boxShadow: 3, height: "100%" }}>
-			<CardContent>
-				<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-					{formData.id ? "Edit Transaction" : "Add Transaction"}
-				</Typography>
-				<Grid container spacing={2}>
-					<Grid size={{ xs: 12, sm: 6 }}>
-						<FormControl fullWidth>
-							<InputLabel>Type</InputLabel>
-							<Select
-								value={formData.type}
-								onChange={(e) => {
-									const newType = e.target.value as FinanceEntryType;
-									setFormData({
-										...formData,
-										type: newType,
-										category: "",
-									});
-								}}
-								label="Type"
-								disabled={loading}
-								aria-label="Select transaction type"
-							>
-								{financeTypes.map(({ value, label }) => (
-									<MenuItem key={value} value={value}>
-										{label}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-					</Grid>
-					<Grid size={{ xs: 12, sm: 6 }}>
-						<Autocomplete
-							freeSolo
-							options={amountHistory.map((amount) =>
-								amount.toLocaleString("vi-VN")
-							)}
-							value={formData.amount}
-							onChange={(e, newValue) =>
-								setFormData({
-									...formData,
-									amount: newValue ? newValue.replace(/[^0-9]/g, "") : "",
-								})
-							}
-							onInputChange={(e, newInputValue) =>
-								setFormData({
-									...formData,
-									amount: newInputValue.replace(/[^0-9]/g, ""),
-								})
-							}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									fullWidth
-									label="Amount (VND)"
-									type="text"
-									disabled={loading}
-									InputProps={{
-										...params.InputProps,
-										startAdornment: <Bitcoin size={20} />,
-									}}
-									aria-label="Enter amount"
-								/>
-							)}
-						/>
-					</Grid>
-					<Grid size={{ xs: 12, sm: 6 }}>
-						<FormControl fullWidth>
-							<InputLabel>Category</InputLabel>
-							<Select
-								value={formData.category}
-								onChange={(e) =>
-									setFormData({ ...formData, category: e.target.value })
-								}
-								label="Category"
-								disabled={loading || filteredCategories.length === 0}
-								aria-label="Select category"
-							>
-								{filteredCategories.length === 0 ? (
-									<MenuItem value="" disabled>
-										No matching categories
-									</MenuItem>
-								) : (
-									filteredCategories.map((cat) => (
-										<MenuItem key={cat.id} value={cat.id}>
-											{cat.name} ({cat.type})
-										</MenuItem>
-									))
-								)}
-							</Select>
-						</FormControl>
-					</Grid>
-					<Grid size={{ xs: 12, sm: 6 }}>
-						<TextField
-							fullWidth
-							label="Date"
-							type="date"
-							value={formData.date}
-							onChange={(e) =>
-								setFormData({ ...formData, date: e.target.value })
-							}
-							disabled={loading}
-							InputLabelProps={{ shrink: true }}
-							aria-label="Select date"
-						/>
-					</Grid>
-					<Grid size={{ xs: 12 }}>
-						<TextField
-							fullWidth
-							label="Description"
-							value={formData.description}
-							onChange={(e) =>
-								setFormData({ ...formData, description: e.target.value })
-							}
-							disabled={loading}
-							multiline
-							rows={2}
-							aria-label="Enter description"
-						/>
-					</Grid>
-					<Grid size={{ xs: 12 }}>
-						<Stack direction="row" spacing={2} justifyContent="flex-end">
-							{formData.id && onCancel && (
-								<Button
-									variant="outlined"
-									onClick={onCancel}
-									disabled={loading}
-									sx={{ textTransform: "none", fontWeight: 500 }}
-									aria-label="Cancel editing"
-								>
-									Cancel
-								</Button>
-							)}
-							<Button
-								variant="contained"
-								onClick={handleSubmit}
-								disabled={loading}
-								startIcon={
-									loading ? (
-										<CircularProgress size={20} color="inherit" />
-									) : null
-								}
-								sx={{ textTransform: "none", fontWeight: 500 }}
-								aria-label={
-									formData.id ? "Update transaction" : "Add transaction"
-								}
-							>
-								{loading ? "Saving..." : formData.id ? "Update" : "Add"}
-							</Button>
-						</Stack>
-					</Grid>
-				</Grid>
-			</CardContent>
-		</Card>
-	);
+    return (
+        <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 700,
+                        mb: 2,
+                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    }}
+                >
+                    {formData.id ? "Edit Transaction" : "Add Transaction"}
+                </Typography>
+                <form onSubmit={handleSubmit}>
+                    <Grid container spacing={isMobile ? 1.5 : 2}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <FormControl
+                                fullWidth
+                                error={!!errors.type}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", sm: "1rem" } } }}
+                            >
+                                <InputLabel id="type-label">Type</InputLabel>
+                                <Select
+                                    labelId="type-label"
+                                    name="type"
+                                    value={formData.type}
+                                    onChange={(e) =>
+                                        handleTypeChange(e.target.value as FinanceEntryType)
+                                    }
+                                    label="Type"
+                                    disabled={loading}
+                                    aria-label="Select transaction type"
+                                >
+                                    <MenuItem value="income">Income</MenuItem>
+                                    <MenuItem value="expense">Expense</MenuItem>
+                                    <MenuItem value="saving">Saving</MenuItem>
+                                    <MenuItem value="investment">Investment</MenuItem>
+                                    <MenuItem value="debt">Debt</MenuItem>
+                                    <MenuItem value="loan">Loan</MenuItem>
+                                    <MenuItem value="other">Other</MenuItem>
+                                </Select>
+                                {errors.type && (
+                                    <Typography
+                                        color="error"
+                                        variant="caption"
+                                        sx={{ mt: 0.5, fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+                                    >
+                                        {errors.type}
+                                    </Typography>
+                                )}
+                            </FormControl>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <Autocomplete
+                                options={categories.filter(
+                                    (cat) =>
+                                        cat.type &&
+                                        typeof cat.type === "string" &&
+                                        cat.type.toLowerCase() === formData.type.toLowerCase()
+                                )}
+                                getOptionLabel={(option) => option.name}
+                                value={categories.find((cat) => cat.id === formData.category) || null}
+                                onChange={(e, newValue) => handleCategoryChange(newValue?.id || "")}
+                                disabled={loading}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Category"
+                                        error={!!errors.category}
+                                        helperText={errors.category}
+                                        size={isMobile ? "small" : "medium"}
+                                        sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", sm: "1rem" } } }}
+                                        aria-label="Select transaction category"
+                                    />
+                                )}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <TextField
+                                name="amount"
+                                label="Amount (VND)"
+                                type="number"
+                                value={formData.amount}
+                                onChange={handleChange}
+                                fullWidth
+                                disabled={loading}
+                                error={!!errors.amount}
+                                helperText={errors.amount}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", sm: "1rem" } } }}
+                                aria-label="Enter transaction amount"
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <TextField
+                                name="date"
+                                label="Date"
+                                type="date"
+                                value={formData.date}
+                                onChange={handleChange}
+                                fullWidth
+                                disabled={loading}
+                                InputLabelProps={{ shrink: true }}
+                                error={!!errors.date}
+                                helperText={errors.date}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", sm: "1rem" } } }}
+                                aria-label="Select transaction date"
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                            <TextField
+                                name="description"
+                                label="Description (Optional)"
+                                value={formData.description}
+                                onChange={handleChange}
+                                fullWidth
+                                multiline
+                                rows={isMobile ? 2 : 3}
+                                disabled={loading}
+                                error={!!errors.description}
+                                helperText={errors.description}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", sm: "1rem" } } }}
+                                aria-label="Enter transaction description"
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                            <Stack direction="row" spacing={isMobile ? 1 : 2} justifyContent="flex-end">
+                                {onCancel && (
+                                    <Button
+                                        variant="outlined"
+                                        onClick={onCancel}
+                                        disabled={loading}
+                                        sx={{
+                                            minWidth: { xs: 80, sm: 100 },
+                                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                            py: isMobile ? 1 : 1.5,
+                                        }}
+                                        aria-label="Cancel form"
+                                    >
+                                        Cancel
+                                    </Button>
+                                )}
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    disabled={loading}
+                                    startIcon={
+                                        loading ? (
+                                            <CircularProgress size={isMobile ? 16 : 20} />
+                                        ) : (
+                                            <Bitcoin size={isMobile ? 16 : 20} />
+                                        )
+                                    }
+                                    sx={{
+                                        minWidth: { xs: 80, sm: 100 },
+                                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                        py: isMobile ? 1 : 1.5,
+                                    }}
+                                    aria-label={formData.id ? "Update transaction" : "Add transaction"}
+                                >
+                                    {formData.id ? "Update" : "Add"}
+                                </Button>
+                            </Stack>
+                        </Grid>
+                    </Grid>
+                </form>
+            </CardContent>
+        </Card>
+    );
 };
 
 export default AddTransactionForm;
-import { NextResponse } from "next/server";

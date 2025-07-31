@@ -5,29 +5,27 @@ export interface UserType {
     avatar?: string;
     phone?: string;
     active: boolean;
-    createdAt: Date;
+    createdAt: string; // Changed to string for consistency with API responses
+}
+
+export interface PaginationType {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
 }
 
 export interface FinanceType {
     id: string;
-    type:
-    | "income"
-    | "expense"
-    | "saving"
-    | "investment"
-    | "debt"
-    | "loan"
-    | "other";
+    type: "income" | "expense" | "saving" | "investment" | "debt" | "loan" | "other";
     amount: number;
     category: string;
-    categoryName?: string;
     description?: string;
     date: string;
     createdAt: string;
     updatedAt: string;
 }
-
-
+export type FinanceEntryType = "income" | "expense" | "saving" | "investment" | "debt" | "loan" | "other";
 
 export interface FinanceCategoryType {
     id: string;
@@ -37,32 +35,45 @@ export interface FinanceCategoryType {
     updatedAt: string;
 }
 
+export interface TransactionFilters {
+    month: number;
+    year: number;
+    type: "all" | "income" | "expense" | "saving" | "investment" | "debt" | "loan" | "other";
+    category: string;
+    dayOfWeek: "all" | number;
+    period: "today" | "yesterday" | "week" | "month" | "year";
+}
+
+export interface SummaryFilters {
+    period: "today" | "yesterday" | "week" | "month" | "year";
+}
+
 export interface JournalType {
     id: string;
     title: string;
     content: string;
     mood: string;
-    date: string; // ISO date string (e.g., "2025-07-20")
+    date: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export interface MoodType {
     id: string;
-    name: string; // e.g., "Happy", "Sad", "Neutral"
-    emoji: string; // e.g., "😊", "😢", "😐"
+    name: string;
+    emoji: string;
 }
 
 export interface TodoType {
     id: string;
     title: string;
     description: string;
-    status: string; // References StatusType.id (MongoDB ObjectId)
+    status: string; // References StatusType.id
     priority: "low" | "medium" | "high";
     category: string; // References CategoryType.id
     dueDate: string;
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface StatusType {
@@ -80,9 +91,9 @@ export interface EventType {
     id: string;
     title: string;
     description: string;
-    start: string; // ISO date string (e.g., "2025-07-21T10:00:00.000Z")
-    end: string; // ISO date string (e.g., "2025-07-21T11:00:00.000Z")
-    todo?: string; // References TodoType.id (MongoDB ObjectId)
+    start: string;
+    end: string;
+    todo?: string; // References TodoType.id
     createdAt: string;
     updatedAt: string;
 }
@@ -91,13 +102,14 @@ export interface CategoryBlogType {
     id: string;
     name: string;
 }
+
 export interface BlogType {
     id: string;
     title: string;
     slug: string;
     description: string;
     introductions: string;
-    blogcategory: string; // References CategoryType.id
+    blogcategory: string; // References CategoryBlogType.id
     thumbnail: string;
     content: string;
     status: "draft" | "published" | "archived";
