@@ -1,104 +1,29 @@
-"use client";
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import { fetchCategories, fetchFinances } from "@/utils/financeApi";
 
-import React, { useState } from "react";
-import { Box, Grid, Card, CardContent, Typography, Link } from "@mui/material";
-import AddTransactionFormNew from "@/components/finance/AddTransactionFormNew";
-import { FinanceType, FinanceCategoryType } from "@/types/interface";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
-interface DashboardProps {
-	initialFinances: FinanceType[];
-	initialCategories: FinanceCategoryType[];
-}
+export const dynamic = "force-dynamic";
 
-const Dashboard: React.FC<DashboardProps> = ({
-	initialFinances,
-	initialCategories,
-}) => {
-	const [loading, setLoading] = useState(false);
+export default async function DashboardPage() {
+	const session = await getServerSession();
+	if (!session) {
+		redirect("/login");
+	}
 
-	console.log("initialCategories in Dashboard:", initialCategories);
+	const [categories, transactionData] = await Promise.all([
+		fetchCategories(),
+		fetchFinances({ period: "today" }),
+	]);
 
-	const handleAddTransaction = async (data: {
-		id: string | null;
-		type:
-			| "income"
-			| "expense"
-			| "saving"
-			| "investment"
-			| "debt"
-			| "loan"
-			| "other";
-		amount: number;
-		category: string;
-		description?: string;
-		date: string;
-	}) => {
-		setLoading(true);
-		try {
-			console.log("Adding transaction:", data);
-			// Example: await api.addTransaction(data);
-		} catch (error) {
-			console.error("Error adding transaction:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
+	console.log("initialCategories in DashboardPage:", categories);
+	console.log("initialFinances in DashboardPage:", transactionData.data);
 
 	return (
-		<Box sx={{ maxWidth: "lg", mx: "auto", py: 4, px: { xs: 2, sm: 3 } }}>
-			<Typography
-				variant="h4"
-				sx={{ fontWeight: 700, mb: 4, textAlign: "center" }}
-			>
-				Dashboard
-			</Typography>
-
-			<Grid container spacing={3}>
-				{/* Finance Section */}
-				<Grid size={{ xs: 12 }}>
-					<Card sx={{ height: "100%", boxShadow: 3, borderRadius: 2 }}>
-						<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-							<Typography
-								variant="h6"
-								sx={{
-									fontWeight: 700,
-									mb: 2,
-									fontSize: { xs: "1.1rem", sm: "1.25rem" },
-								}}
-							>
-								Add New Transaction
-							</Typography>
-							<AddTransactionFormNew
-								categories={initialCategories}
-								loading={loading}
-								onSubmit={handleAddTransaction}
-							/>
-						</CardContent>
-					</Card>
-				</Grid>
-
-				{/* Placeholder for future sections */}
-				<Grid size={{ xs: 12 }}>
-					<Card
-						sx={{
-							height: "100%",
-							textAlign: "center",
-							py: 2,
-							boxShadow: 3,
-							borderRadius: 2,
-						}}
-					>
-						<CardContent>
-							<Typography variant="body1" color="text.secondary">
-								More sections (ToDoList, Events, Journal, Blog) will be added
-								here soon.
-							</Typography>
-						</CardContent>
-					</Card>
-				</Grid>
-			</Grid>
-		</Box>
+		<DashboardLayout
+			initialFinances={transactionData.data}
+			initialCategories={categories}
+		/>
 	);
-};
-
-export default Dashboard;
+}
