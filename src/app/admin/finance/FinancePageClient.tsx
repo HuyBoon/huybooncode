@@ -29,7 +29,6 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 	initialFinances,
 	initialCategories,
 	initialPagination,
-	initialSummaryFinances,
 }) => {
 	const { snackbar, showSnackbar } = useSnackbar();
 	const [transactionFilters, setTransactionFilters] =
@@ -46,6 +45,7 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 	});
 	const [pagination, setPagination] =
 		useState<PaginationType>(initialPagination);
+
 	const [editFinance, setEditFinance] = useState<FinanceType | undefined>(
 		undefined
 	);
@@ -112,8 +112,6 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 		);
 	}
 
-	console.log("editFinance trong FinancePageClient:", editFinance);
-
 	return (
 		<FinanceLayout
 			categories={categories}
@@ -132,7 +130,7 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 			handleEdit={handleEdit}
 			handleDelete={handleDelete}
 			handleCancel={handleCancel}
-			initialFormData={editFinance} // Pass finance object directly
+			initialFormData={editFinance}
 		/>
 	);
 };

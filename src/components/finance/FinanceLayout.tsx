@@ -58,7 +58,6 @@ const FinanceLayout: React.FC<FinanceLayoutProps> = ({
 	initialFormData,
 }) => {
 	const { snackbar, closeSnackbar } = useSnackbar();
-	console.log("initialFormData trong FinanceLayout:", initialFormData);
 
 	return (
 		<Box sx={{ maxWidth: "lg", mx: "auto", mt: 2, minHeight: "100vh" }}>

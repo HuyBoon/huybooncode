@@ -61,8 +61,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
         handleSubmit,
     } = useTransactionForm({ categories, initialData, onSubmit });
 
-    console.log("initialData trong AddTransactionForm:", initialData);
-    console.log("formData trong AddTransactionForm:", formData);
+    
 
     return (
         <Card sx={{ borderRadius: 2, boxShadow: 3 }}>

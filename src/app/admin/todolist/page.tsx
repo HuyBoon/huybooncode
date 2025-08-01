@@ -582,7 +582,6 @@ const TodoPage = () => {
 				</CardContent>
 			</Card>
 
-			{/* Todo History */}
 			<TodoHistory
 				todos={todos}
 				statuses={statuses}

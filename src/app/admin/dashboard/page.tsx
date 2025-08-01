@@ -17,9 +17,6 @@ export default async function DashboardPage() {
 		fetchFinances({ period: "today" }),
 	]);
 
-	console.log("initialCategories in DashboardPage:", categories);
-	console.log("initialFinances in DashboardPage:", transactionData.data);
-
 	return (
 		<DashboardLayout
 			initialFinances={transactionData.data}
