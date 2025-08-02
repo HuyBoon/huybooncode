@@ -1,3 +1,4 @@
+// src/app/finance/FinancePageClient.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -16,13 +17,12 @@ import {
 	handleDeleteFinance,
 } from "@/hooks/useFinanceMutations";
 import FinanceLayout from "@/components/finance/FinanceLayout";
-import { useSnackbar } from "@/hooks/useSnackbar";
+import { useSnackbar } from "@/context/SnackbarContext"; // Cập nhật import
 
 interface FinancePageClientProps {
 	initialFinances: FinanceType[];
 	initialCategories: FinanceCategoryType[];
 	initialPagination: PaginationType;
-	initialSummaryFinances: FinanceType[];
 }
 
 const FinancePageClient: React.FC<FinancePageClientProps> = ({
@@ -30,7 +30,7 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 	initialCategories,
 	initialPagination,
 }) => {
-	const { snackbar, showSnackbar } = useSnackbar();
+	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 	const [transactionFilters, setTransactionFilters] =
 		useState<TransactionFilters>({
 			month: new Date().getMonth() + 1,
@@ -45,7 +45,6 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 	});
 	const [pagination, setPagination] =
 		useState<PaginationType>(initialPagination);
-
 	const [editFinance, setEditFinance] = useState<FinanceType | undefined>(
 		undefined
 	);
@@ -69,13 +68,12 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 
 	const handleSubmit = handleAddOrUpdateFinance(
 		addOrUpdateMutation,
-		categories,
-		showSnackbar
+		showSnackbar,
+		() => setEditFinance(undefined) // Đã thêm resetEdit từ trước
 	);
 	const handleDelete = handleDeleteFinance(deleteMutation, showSnackbar);
 
 	const handleEdit = (finance: FinanceType) => {
-		console.log("handleEdit nhận được:", finance);
 		if (!finance || !finance.id) {
 			showSnackbar({
 				open: true,

@@ -1,3 +1,4 @@
+// src/components/admin/ClientLayoutWrapper.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,9 +7,9 @@ import AdminHeader from "./AdminHeader";
 import FooterNavigation from "./FooterNavigation";
 import CustomBreadcrumbs from "./CustomBreadcrumbs";
 import { usePathname } from "next/navigation";
-import { useSnackbar } from "@/hooks/useSnackbar";
+import { useSnackbar } from "@/context/SnackbarContext"; // Cập nhật import
 import { Snackbar, Alert } from "@mui/material";
-import { navLinks, NavLink } from "@/constants/navLinks";
+import { navLinks } from "@/constants/navLinks";
 
 export default function ClientLayoutWrapper({
 	children,
@@ -16,13 +17,8 @@ export default function ClientLayoutWrapper({
 	children: React.ReactNode;
 }) {
 	const [collapsed, setCollapsed] = useState(false);
-
 	const pathname = usePathname();
-	const { snackbar, showSnackbar } = useSnackbar();
-
-	const handleCloseSnackbar = () => {
-		showSnackbar({ ...snackbar, open: false });
-	};
+	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar(); // Sử dụng context
 
 	const getBreadcrumbItems = () => {
 		const dashboardLink = navLinks.find(
@@ -39,14 +35,10 @@ export default function ClientLayoutWrapper({
 			: [];
 
 		const currentPath = pathname || "";
-
-		// Find the main nav link
 		const mainLink = navLinks.find((link) => currentPath.startsWith(link.url));
 		if (!mainLink) return baseItems;
 
 		const breadcrumbItems = [...baseItems];
-
-		// Add the current main link
 		if (mainLink.url !== "/admin/dashboard") {
 			breadcrumbItems.push({
 				label: mainLink.label,
@@ -55,7 +47,6 @@ export default function ClientLayoutWrapper({
 			});
 		}
 
-		// Handle submenu items
 		if (mainLink.submenu) {
 			const subLink = mainLink.submenu.find((sub) => currentPath === sub.url);
 			if (subLink) {
@@ -88,11 +79,11 @@ export default function ClientLayoutWrapper({
 			<Snackbar
 				open={snackbar.open}
 				autoHideDuration={6000}
-				onClose={handleCloseSnackbar}
+				onClose={closeSnackbar}
 				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
 			>
 				<Alert
-					onClose={handleCloseSnackbar}
+					onClose={closeSnackbar}
 					severity={snackbar.severity}
 					variant="filled"
 					sx={{ width: "100%", fontSize: { xs: "0.75rem", sm: "0.875rem" } }}

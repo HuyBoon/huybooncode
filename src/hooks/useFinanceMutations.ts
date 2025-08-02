@@ -4,8 +4,8 @@ import { addOrUpdateFinance, deleteFinance } from "@/utils/financeApi";
 
 export const handleAddOrUpdateFinance = (
     mutation: UseMutationResult<FinanceType, Error, any>,
-    categories: FinanceCategoryType[],
-    showSnackbar: (args: { open: boolean; message: string; severity: "success" | "error" }) => void
+    showSnackbar: (args: { open: boolean; message: string; severity: "success" | "error" }) => void,
+    resetEdit?: () => void
 ) => {
     return async (data: {
         id: string | null;
@@ -22,6 +22,7 @@ export const handleAddOrUpdateFinance = (
                 message: data.id ? "Finance updated successfully!" : "Finance added successfully!",
                 severity: "success",
             });
+            resetEdit?.();
         } catch (error) {
             showSnackbar({
                 open: true,
@@ -31,7 +32,6 @@ export const handleAddOrUpdateFinance = (
         }
     };
 };
-
 export const handleDeleteFinance = (
     mutation: UseMutationResult<void, Error, string>,
     showSnackbar: (args: { open: boolean; message: string; severity: "success" | "error" }) => void

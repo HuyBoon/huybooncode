@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { FinanceCategoryType, FinanceType, FinanceEntryType } from "@/types/interface";
+import { FinanceCategoryType, FinanceEntryType } from "@/types/interface";
 
 interface UseTransactionFormProps {
     categories: FinanceCategoryType[];
@@ -49,26 +49,29 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         return [30000, 100000];
     });
 
-    // Đồng bộ formData với initialData khi initialData thay đổi
     useEffect(() => {
         console.log("initialData trong useTransactionForm:", initialData);
-        if (initialData && (
-            initialData.id !== formData.id ||
-            initialData.type !== formData.type ||
-            initialData.amount !== formData.amount ||
-            initialData.category !== formData.category ||
-            initialData.description !== formData.description ||
-            initialData.date !== formData.date
-        )) {
-            setFormData({
-                id: initialData.id || null,
-                type: initialData.type || ("expense" as FinanceEntryType),
-                amount: initialData.amount || "",
-                category: initialData.category || "",
-                description: initialData.description || "",
-                date: initialData.date || new Date().toISOString().split("T")[0],
-            });
-            setErrors({});
+        if (initialData) {
+            if (
+                initialData.id !== formData.id ||
+                initialData.type !== formData.type ||
+                initialData.amount !== formData.amount ||
+                initialData.category !== formData.category ||
+                initialData.description !== formData.description ||
+                initialData.date !== formData.date
+            ) {
+                setFormData({
+                    id: initialData.id || null,
+                    type: initialData.type || ("expense" as FinanceEntryType),
+                    amount: initialData.amount || "",
+                    category: initialData.category || "",
+                    description: initialData.description || "",
+                    date: initialData.date || new Date().toISOString().split("T")[0],
+                });
+                setErrors({});
+            }
+        } else {
+            resetForm();
         }
     }, [initialData]);
 
@@ -146,23 +149,6 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         setErrors({});
     };
 
-    const setEditData = (finance: FinanceType) => {
-        console.log("setEditData nhận được:", finance);
-        if (!finance || !finance.id) {
-            console.error("Dữ liệu finance không hợp lệ:", finance);
-            return;
-        }
-        setFormData({
-            id: finance.id,
-            type: finance.type,
-            amount: finance.amount.toString(),
-            category: finance.category,
-            description: finance.description || "",
-            date: new Date(finance.date).toISOString().split("T")[0],
-        });
-        setErrors({});
-    };
-
     return {
         formData,
         errors,
@@ -174,6 +160,5 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         handleCategoryChange,
         handleTypeChange,
         resetForm,
-        setEditData,
     };
 };

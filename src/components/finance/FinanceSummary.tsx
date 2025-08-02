@@ -42,9 +42,6 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 	return (
 		<Card sx={{ borderRadius: 2, boxShadow: 3, height: "100%" }}>
 			<CardContent>
-				<Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-					Finance Summary
-				</Typography>
 				{finances.length === 0 || chartData.datasets[0].data.length === 0 ? (
 					<Box sx={{ textAlign: "center", py: 4 }}>
 						<Typography color="text.secondary">
@@ -76,7 +73,7 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 								</FormControl>
 							</Grid>
 						</Grid>
-						<Box sx={{ maxWidth: 400, mx: "auto", mb: 3, height: 300 }}>
+						<Box sx={{ maxWidth: 400, mx: "auto", mb: 3, height: 250 }}>
 							<Pie
 								data={chartData}
 								options={{

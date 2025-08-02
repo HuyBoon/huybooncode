@@ -681,15 +681,6 @@ const TransactionHistory = forwardRef<
 							>
 								{">"}
 							</Button>
-							<Typography
-								sx={{
-									ml: isMobile ? 1 : 2,
-									fontWeight: 500,
-									fontSize: { xs: "0.7rem", sm: "0.875rem" },
-								}}
-							>
-								Page {pagination.page} of {pagination.totalPages}
-							</Typography>
 						</Stack>
 					)}
 					{pagination.total === 0 && (

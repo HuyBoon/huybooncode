@@ -61,8 +61,6 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
         handleSubmit,
     } = useTransactionForm({ categories, initialData, onSubmit });
 
-    
-
     return (
         <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>

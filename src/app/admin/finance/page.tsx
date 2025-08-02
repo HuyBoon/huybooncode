@@ -15,10 +15,9 @@ export default async function FinancePage() {
 		redirect("/login");
 	}
 
-	const [categories, transactionData, summaryData] = await Promise.all([
+	const [categories, transactionData] = await Promise.all([
 		fetchCategories(),
 		fetchFinances({ period: "today" }),
-		fetchSummaryFinances({ period: "today" }),
 	]);
 
 	return (
@@ -26,7 +25,6 @@ export default async function FinancePage() {
 			initialFinances={transactionData.data}
 			initialCategories={categories}
 			initialPagination={transactionData.pagination}
-			initialSummaryFinances={summaryData}
 		/>
 	);
 }

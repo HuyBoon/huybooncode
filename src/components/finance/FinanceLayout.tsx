@@ -1,3 +1,4 @@
+// src/components/finance/FinanceLayout.tsx
 import React from "react";
 import { Box, Grid, Card, CardContent, Snackbar, Alert } from "@mui/material";
 import AddTransactionForm from "./AddTransactionForm";
@@ -11,7 +12,7 @@ import {
 	SummaryFilters,
 	FinanceEntryType,
 } from "@/types/interface";
-import { useSnackbar } from "@/hooks/useSnackbar";
+import { useSnackbar } from "@/context/SnackbarContext"; // Cập nhật import
 
 interface FinanceLayoutProps {
 	categories: FinanceCategoryType[];
@@ -64,81 +65,48 @@ const FinanceLayout: React.FC<FinanceLayoutProps> = ({
 			<Grid container spacing={2}>
 				<Grid container spacing={2}>
 					<Grid size={{ xs: 12, md: 6 }}>
-						<Card
-							sx={{
-								borderRadius: 2,
-								boxShadow: 3,
-								mb: { xs: 1, md: 2 },
-								"&:hover": { boxShadow: 6 },
-							}}
-						>
-							<CardContent>
-								<AddTransactionForm
-									categories={categories}
-									loading={isLoading}
-									onSubmit={handleSubmit}
-									onCancel={handleCancel}
-									initialData={
-										initialFormData
-											? {
-													id: initialFormData.id,
-													type: initialFormData.type,
-													amount: initialFormData.amount.toString(),
-													category: initialFormData.category,
-													description: initialFormData.description || "",
-													date: new Date(initialFormData.date)
-														.toISOString()
-														.split("T")[0],
-											  }
-											: undefined
-									}
-								/>
-							</CardContent>
-						</Card>
+						<AddTransactionForm
+							categories={categories}
+							loading={isLoading}
+							onSubmit={handleSubmit}
+							onCancel={handleCancel}
+							initialData={
+								initialFormData
+									? {
+											id: initialFormData.id,
+											type: initialFormData.type,
+											amount: initialFormData.amount.toString(),
+											category: initialFormData.category,
+											description: initialFormData.description || "",
+											date: new Date(initialFormData.date)
+												.toISOString()
+												.split("T")[0],
+									  }
+									: undefined
+							}
+						/>
 					</Grid>
 					<Grid size={{ xs: 12, md: 6 }}>
-						<Card
-							sx={{
-								borderRadius: 2,
-								boxShadow: 3,
-								mb: { xs: 1, md: 0 },
-								"&:hover": { boxShadow: 6 },
-							}}
-						>
-							<CardContent>
-								<FinanceSummary
-									finances={summaryFinances}
-									filters={summaryFilters}
-									setFilters={setSummaryFilters}
-								/>
-							</CardContent>
-						</Card>
+						<FinanceSummary
+							finances={summaryFinances}
+							filters={summaryFilters}
+							setFilters={setSummaryFilters}
+						/>
 					</Grid>
 				</Grid>
 				<Grid size={{ xs: 12, md: 12 }}>
-					<Card
-						sx={{
-							borderRadius: 2,
-							boxShadow: 3,
-							height: "100%",
-							"&:hover": { boxShadow: 6 },
-						}}
-					>
-						<CardContent>
-							<TransactionHistory
-								finances={transactionFinances}
-								categories={categories}
-								loading={isLoading}
-								handleEdit={handleEdit}
-								handleDelete={handleDelete}
-								onFilteredFinancesChange={() => {}}
-								pagination={pagination}
-								setPagination={setPagination}
-								setFilters={setTransactionFilters}
-								filters={transactionFilters}
-							/>
-						</CardContent>
-					</Card>
+					<TransactionHistory
+						finances={transactionFinances}
+						categories={categories}
+						loading={isLoading}
+						handleEdit={handleEdit}
+						handleDelete={handleDelete}
+						onFilteredFinancesChange={() => {}}
+						pagination={pagination}
+						setPagination={setPagination}
+						setFilters={setTransactionFilters}
+						filters={transactionFilters}
+					/>
 				</Grid>
 			</Grid>
 			<Snackbar
