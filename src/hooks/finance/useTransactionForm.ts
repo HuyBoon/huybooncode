@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { FinanceCategoryType, FinanceEntryType } from "@/types/interface";
+import { formatNumber, unformatNumber } from "@/utils/helper";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface UseTransactionFormProps {
     categories: FinanceCategoryType[];
@@ -30,10 +32,11 @@ interface FormErrors {
 }
 
 export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTransactionFormProps) => {
+    const { showSnackbar } = useSnackbar();
     const [formData, setFormData] = useState({
         id: initialData?.id || null,
         type: initialData?.type || ("expense" as FinanceEntryType),
-        amount: initialData?.amount || "",
+        amount: initialData?.amount ? formatNumber(unformatNumber(initialData.amount)) : "",
         category: initialData?.category || "",
         description: initialData?.description || "",
         date: initialData?.date || new Date().toISOString().split("T")[0],
@@ -50,12 +53,14 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
     });
 
     useEffect(() => {
-        console.log("initialData trong useTransactionForm:", initialData);
         if (initialData) {
+            const formattedAmount = initialData.amount
+                ? formatNumber(unformatNumber(initialData.amount))
+                : "";
             if (
                 initialData.id !== formData.id ||
                 initialData.type !== formData.type ||
-                initialData.amount !== formData.amount ||
+                formattedAmount !== formData.amount ||
                 initialData.category !== formData.category ||
                 initialData.description !== formData.description ||
                 initialData.date !== formData.date
@@ -63,7 +68,7 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
                 setFormData({
                     id: initialData.id || null,
                     type: initialData.type || ("expense" as FinanceEntryType),
-                    amount: initialData.amount || "",
+                    amount: formattedAmount,
                     category: initialData.category || "",
                     description: initialData.description || "",
                     date: initialData.date || new Date().toISOString().split("T")[0],
@@ -73,6 +78,7 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         } else {
             resetForm();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData]);
 
     const saveAmountToHistory = (amount: number) => {
@@ -88,9 +94,15 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         return categories.filter((cat) => cat.type.toLowerCase() === formData.type.toLowerCase());
     }, [categories, formData.type]);
 
+    const parseAmount = (formatted: string) => {
+        const digits = unformatNumber(formatted);
+        if (!digits) return NaN;
+        return parseInt(digits, 10);
+    };
+
     const validateForm = () => {
         const newErrors: FormErrors = {};
-        const amount = parseFloat(formData.amount);
+        const amount = parseAmount(formData.amount);
 
         if (!formData.type) {
             newErrors.type = "Type is required";
@@ -112,17 +124,42 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) {
+            showSnackbar({
+                open: true,
+                message: "Please fix the errors in the form",
+                severity: "error",
+            });
             return;
         }
-        const amount = parseFloat(formData.amount);
-        const data = { ...formData, amount, description: formData.description || undefined };
-        await onSubmit(data);
-        saveAmountToHistory(amount);
-        resetForm();
+        const amount = parseAmount(formData.amount);
+        try {
+            await onSubmit({
+                id: formData.id,
+                type: formData.type,
+                amount,
+                category: formData.category,
+                description: formData.description || undefined,
+                date: formData.date,
+            });
+            saveAmountToHistory(amount);
+            showSnackbar({
+                open: true,
+                message: formData.id ? "Transaction updated successfully" : "Transaction added successfully",
+                severity: "success",
+            });
+            resetForm();
+        } catch (error: any) {
+            setErrors({ amount: "Failed to submit transaction" });
+            showSnackbar({
+                open: true,
+                message: "Failed to submit transaction",
+                severity: "error",
+            });
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => {
-        const { name, value } = e.target;
+        const { name, value } = e.target as any;
         setFormData((prev) => ({ ...prev, [name as string]: value }));
         setErrors((prev) => ({ ...prev, [name as string]: undefined }));
     };

@@ -19,7 +19,7 @@ import {
 	TooltipItem,
 } from "chart.js";
 import { FinanceType, SummaryFilters } from "@/types/interface";
-import { useFinanceSummary } from "@/hooks/useFinanceSummary";
+import { useFinanceSummary } from "@/hooks/finance/useFinanceSummary";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 

@@ -30,6 +30,8 @@ const FinanceSchema: Schema = new Schema(
     { timestamps: true }
 );
 
+FinanceSchema.index({ type: 1, date: -1 });
+
 export default mongoose.models.Finance || mongoose.model<IFinance>("Finance", FinanceSchema);
 
 

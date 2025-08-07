@@ -23,6 +23,7 @@ import {
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { navLinks } from "@/constants/navLinks";
 
 interface NavLink {
 	url: string;
@@ -50,78 +51,77 @@ export default function AsideCustomer({
 		}));
 	};
 
-	// Cấu trúc menu được tối ưu hóa với icon cho submenu
-	const navLinks: NavLink[] = [
-		{
-			url: "/admin/dashboard",
-			icon: <LayoutDashboard size={20} />,
-			label: "Dashboard",
-		},
-		{
-			url: "/admin/todolist",
-			icon: <CheckSquare size={20} />,
-			label: "To-Do List",
-			submenu: [
-				{
-					url: "/admin/todolist/today",
-					label: "Today",
-					icon: <Clock size={16} />,
-				},
-				{
-					url: "/admin/todolist/tomorrow",
-					label: "Tomorrow",
-					icon: <Calendar size={16} />,
-				},
-			],
-		},
-		{
-			url: "/admin/finance",
-			icon: <DollarSign size={20} />,
-			label: "HB's Finance",
-			submenu: [
-				{
-					url: "/admin/finance/categories",
-					label: "Categories",
-					icon: <Shapes size={16} />,
-				},
-				{
-					url: "/admin/finance/income",
-					label: "Income",
-					icon: <TrendingUp size={16} />,
-				},
-				{
-					url: "/admin/finance/expense",
-					label: "Expense",
-					icon: <TrendingDown size={16} />,
-				},
-			],
-		},
-		{
-			url: "/admin/journal",
-			icon: <NotebookPen size={20} />,
-			label: "Journal",
-		},
-		{
-			url: "/admin/manageblogs",
-			icon: <FileText size={20} />,
-			label: "Blogs",
-		},
-		{
-			url: "/admin/calendar",
-			icon: <Calendar size={20} />,
-			label: "Calendar",
-		},
-		{
-			url: "/admin/media",
-			icon: <Video size={20} />,
-			label: "Media",
-		},
-		{
-			url: "/admin/settings",
-			icon: <Settings size={20} />,
-			label: "Settings",
-		},
-	];
+	// const navLinks: NavLink[] = [
+	// 	{
+	// 		url: "/admin/dashboard",
+	// 		icon: <LayoutDashboard size={20} />,
+	// 		label: "Dashboard",
+	// 	},
+	// 	{
+	// 		url: "/admin/todolist",
+	// 		icon: <CheckSquare size={20} />,
+	// 		label: "To-Do List",
+	// 		submenu: [
+	// 			{
+	// 				url: "/admin/todolist/today",
+	// 				label: "Today",
+	// 				icon: <Clock size={16} />,
+	// 			},
+	// 			{
+	// 				url: "/admin/todolist/tomorrow",
+	// 				label: "Tomorrow",
+	// 				icon: <Calendar size={16} />,
+	// 			},
+	// 		],
+	// 	},
+	// 	{
+	// 		url: "/admin/finance",
+	// 		icon: <DollarSign size={20} />,
+	// 		label: "HB's Finance",
+	// 		submenu: [
+	// 			{
+	// 				url: "/admin/finance/categories",
+	// 				label: "Categories",
+	// 				icon: <Shapes size={16} />,
+	// 			},
+	// 			{
+	// 				url: "/admin/finance/income",
+	// 				label: "Income",
+	// 				icon: <TrendingUp size={16} />,
+	// 			},
+	// 			{
+	// 				url: "/admin/finance/expense",
+	// 				label: "Expense",
+	// 				icon: <TrendingDown size={16} />,
+	// 			},
+	// 		],
+	// 	},
+	// 	{
+	// 		url: "/admin/journal",
+	// 		icon: <NotebookPen size={20} />,
+	// 		label: "Journal",
+	// 	},
+	// 	{
+	// 		url: "/admin/manageblogs",
+	// 		icon: <FileText size={20} />,
+	// 		label: "Blogs",
+	// 	},
+	// 	{
+	// 		url: "/admin/calendar",
+	// 		icon: <Calendar size={20} />,
+	// 		label: "Calendar",
+	// 	},
+	// 	{
+	// 		url: "/admin/media",
+	// 		icon: <Video size={20} />,
+	// 		label: "Media",
+	// 	},
+	// 	{
+	// 		url: "/admin/settings",
+	// 		icon: <Settings size={20} />,
+	// 		label: "Settings",
+	// 	},
+	// ];
 
 	const isActive = (url: string) =>
 		pathname === url || pathname.startsWith(url + "/");

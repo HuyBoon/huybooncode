@@ -7,15 +7,28 @@ import {
 	TableCell,
 	TableHead,
 	TableRow,
-	Button,
 	Checkbox,
 	Typography,
 	Box,
 	TablePagination,
 	IconButton,
+	FormControl,
+	InputLabel,
+	Select,
+	MenuItem,
+	Grid,
+	TextField,
+	SelectChangeEvent,
 } from "@mui/material";
 import { Edit, Delete } from "lucide-react";
-import { TodoType, StatusType, CategoryType } from "@/types/interface";
+import {
+	TodoType,
+	StatusType,
+	CategoryType,
+	PaginationType,
+	TodoFilters,
+	SummaryToDoFilters,
+} from "@/types/interface";
 
 interface TodoHistoryProps {
 	todos: TodoType[];
@@ -24,29 +37,13 @@ interface TodoHistoryProps {
 	loading: boolean;
 	handleEdit: (todo: TodoType) => void;
 	handleDelete: (id: string) => void;
-	handleComplete: (id: string, isCompleted: boolean) => void;
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-	};
-	setPagination: React.Dispatch<
-		React.SetStateAction<{
-			page: number;
-			limit: number;
-			total: number;
-			totalPages: number;
-		}>
-	>;
-	setFilters: React.Dispatch<
-		React.SetStateAction<{
-			dueDate: string;
-			status: string;
-			priority: string;
-			category: string;
-		}>
-	>;
+	handleComplete: (id: string) => void;
+	pagination: PaginationType;
+	setPagination: React.Dispatch<React.SetStateAction<PaginationType>>;
+	todoFilters: TodoFilters;
+	setTodoFilters: React.Dispatch<React.SetStateAction<TodoFilters>>;
+	summaryFilters: SummaryToDoFilters;
+	setSummaryFilters: React.Dispatch<React.SetStateAction<SummaryToDoFilters>>;
 }
 
 const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
@@ -61,8 +58,10 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			handleComplete,
 			pagination,
 			setPagination,
-			// setFilters is not used in this component, but passed in props.
-			// Consider removing it if it's not needed, or use it if it is.
+			todoFilters,
+			setTodoFilters,
+			summaryFilters,
+			setSummaryFilters,
 		},
 		ref
 	) => {
@@ -77,29 +76,121 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			setPagination((prev) => ({ ...prev, page: newPage + 1 }));
 		};
 
+		const handleSelectChange = (e: SelectChangeEvent<string>) => {
+			const { name, value } = e.target;
+			if (name) {
+				setTodoFilters((prev) => ({
+					...prev,
+					[name as keyof TodoFilters]: value,
+				}));
+				setPagination((prev) => ({ ...prev, page: 1 }));
+			}
+		};
+
 		const handleChangeRowsPerPage = (
 			event: React.ChangeEvent<HTMLInputElement>
 		) => {
 			setPagination((prev) => ({
 				...prev,
 				limit: parseInt(event.target.value, 10),
-				page: 1, // Reset to first page when rows per page changes
+				page: 1,
 			}));
 		};
 
-		const getStatusName = (statusId: string) =>
-			statuses.find((s) => s.id === statusId)?.name || "Unknown";
+		const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+			const { name, value } = e.target;
+			if (name) {
+				setTodoFilters((prev) => ({
+					...prev,
+					[name as keyof TodoFilters]: value,
+				}));
+				setPagination((prev) => ({ ...prev, page: 1 }));
+			}
+		};
+
+		const getStatusName = (statusName: string) =>
+			statuses.find((s) => s.name === statusName)?.name || "Unknown";
+		const getStatusIcon = (statusName: string) =>
+			statuses.find((s) => s.name === statusName)?.icon || "";
 		const getCategoryName = (categoryId: string) =>
 			categories.find((c) => c.id === categoryId)?.name || "Unknown";
-		const isCompleted = (statusId: string) =>
-			statuses.find((s) => s.id === statusId)?.name.toLowerCase() ===
-			"completed";
+		const isCompleted = (statusName: string) => statusName === "Completed";
 
 		return (
 			<Box sx={{ mt: 4 }}>
 				<Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
 					Todo History
 				</Typography>
+				<Grid container spacing={2} sx={{ mb: 2 }}>
+					<Grid size={{ xs: 12, sm: 3 }}>
+						<FormControl fullWidth>
+							<InputLabel>Status</InputLabel>
+							<Select
+								name="status"
+								value={todoFilters.status}
+								onChange={handleSelectChange}
+								label="Status"
+								disabled={loading}
+							>
+								<MenuItem value="all">All</MenuItem>
+								{statuses.map((status) => (
+									<MenuItem key={status.id} value={status.name}>
+										{status.icon} {status.name}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 3 }}>
+						<FormControl fullWidth>
+							<InputLabel>Priority</InputLabel>
+							<Select
+								name="priority"
+								value={todoFilters.priority}
+								onChange={handleSelectChange}
+								label="Priority"
+								disabled={loading}
+							>
+								<MenuItem value="all">All</MenuItem>
+								<MenuItem value="low">Low</MenuItem>
+								<MenuItem value="medium">Medium</MenuItem>
+								<MenuItem value="high">High</MenuItem>
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 3 }}>
+						<FormControl fullWidth>
+							<InputLabel>Category</InputLabel>
+							<Select
+								name="category"
+								value={todoFilters.category}
+								onChange={handleSelectChange}
+								label="Category"
+								disabled={loading}
+							>
+								<MenuItem value="all">All</MenuItem>
+								{categories.map((category) => (
+									<MenuItem key={category.id} value={category.id}>
+										{category.name}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 3 }}>
+						<FormControl fullWidth>
+							<TextField
+								label="Due Date (YYYY-MM)"
+								name="dueDate"
+								value={todoFilters.dueDate}
+								onChange={handleInputChange}
+								disabled={loading}
+								type="month"
+								InputLabelProps={{ shrink: true }}
+							/>
+						</FormControl>
+					</Grid>
+				</Grid>
 				<Table>
 					<TableHead>
 						<TableRow>
@@ -109,13 +200,14 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 							<TableCell>Priority</TableCell>
 							<TableCell>Category</TableCell>
 							<TableCell>Due Date</TableCell>
+							<TableCell>Notify</TableCell>
 							<TableCell>Actions</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{todos.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={7} align="center">
+								<TableCell colSpan={8} align="center">
 									No todos found
 								</TableCell>
 							</TableRow>
@@ -125,21 +217,31 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 									<TableCell>
 										<Checkbox
 											checked={isCompleted(todo.status)}
-											onChange={(e) =>
-												handleComplete(todo.id, e.target.checked)
-											}
+											onChange={() => handleComplete(todo.id)}
 											disabled={loading || isCompleted(todo.status)}
 											aria-label={`Mark ${todo.title} as completed`}
 										/>
 									</TableCell>
 									<TableCell>{todo.title}</TableCell>
-									<TableCell>{getStatusName(todo.status)}</TableCell>
+									<TableCell>
+										{getStatusIcon(todo.status)} {getStatusName(todo.status)}
+									</TableCell>
 									<TableCell>{todo.priority}</TableCell>
 									<TableCell>{getCategoryName(todo.category)}</TableCell>
 									<TableCell>
-										{new Date(todo.dueDate).toLocaleDateString()}
+										{new Date(todo.dueDate).toLocaleString("en-US", {
+											year: "numeric",
+											month: "2-digit",
+											day: "2-digit",
+											hour: "2-digit",
+											minute: "2-digit",
+										})}
 									</TableCell>
-									{/* Adjusted className here */}
+									<TableCell>
+										{todo.notifyEnabled
+											? `${todo.notifyMinutesBefore} min`
+											: "Off"}
+									</TableCell>
 									<TableCell align="left">
 										<IconButton
 											onClick={() => handleEdit(todo)}
@@ -166,7 +268,7 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 					component="div"
 					count={pagination.total}
 					rowsPerPage={pagination.limit}
-					page={pagination.page - 1} // MUI TablePagination is 0-indexed
+					page={pagination.page - 1}
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>

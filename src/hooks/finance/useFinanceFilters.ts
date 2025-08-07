@@ -26,8 +26,8 @@ export const useFinanceFilters = ({ initialPagination }: UseFinanceFiltersProps)
         dayOfWeek: "all" | number;
         period: "today" | "yesterday" | "week" | "month" | "year";
     }>({
-        month: new Date("2025-07-29T10:41:00+07:00").getMonth() + 1,
-        year: new Date("2025-07-29T10:41:00+07:00").getFullYear(),
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
         type: "all",
         category: "all",
         dayOfWeek: "all",
@@ -43,8 +43,8 @@ export const useFinanceFilters = ({ initialPagination }: UseFinanceFiltersProps)
 
     const resetFilters = useCallback(() => {
         setFilters({
-            month: new Date("2025-07-29T10:41:00+07:00").getMonth() + 1,
-            year: new Date("2025-07-29T10:41:00+07:00").getFullYear(),
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
             type: "all",
             category: "all",
             dayOfWeek: "all",

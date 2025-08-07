@@ -11,11 +11,11 @@ import {
 	SummaryFilters,
 	FinanceEntryType,
 } from "@/types/interface";
-import { useFinanceData } from "@/hooks/useFinanceData";
+import { useFinanceData } from "@/hooks/finance/useFinanceData";
 import {
 	handleAddOrUpdateFinance,
 	handleDeleteFinance,
-} from "@/hooks/useFinanceMutations";
+} from "@/hooks/finance/useFinanceMutations";
 import FinanceLayout from "@/components/finance/FinanceLayout";
 import { useSnackbar } from "@/context/SnackbarContext"; // Cập nhật import
 
@@ -30,7 +30,8 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 	initialCategories,
 	initialPagination,
 }) => {
-	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
+	const { showSnackbar } = useSnackbar();
+
 	const [transactionFilters, setTransactionFilters] =
 		useState<TransactionFilters>({
 			month: new Date().getMonth() + 1,
@@ -40,11 +41,14 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 			dayOfWeek: "all",
 			period: "today",
 		});
+
 	const [summaryFilters, setSummaryFilters] = useState<SummaryFilters>({
 		period: "today",
 	});
+
 	const [pagination, setPagination] =
 		useState<PaginationType>(initialPagination);
+		
 	const [editFinance, setEditFinance] = useState<FinanceType | undefined>(
 		undefined
 	);

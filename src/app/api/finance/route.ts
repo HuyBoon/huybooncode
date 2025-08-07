@@ -28,6 +28,7 @@ export async function GET(request: Request) {
             endOfDay.setHours(23, 59, 59, 999);
             query.date = { $gte: startOfDay, $lte: endOfDay };
         } else if (period === "yesterday") {
+
             const yesterday = new Date(today);
             yesterday.setDate(today.getDate() - 1);
             yesterday.setHours(0, 0, 0, 0);
@@ -35,8 +36,10 @@ export async function GET(request: Request) {
             endOfYesterday.setHours(23, 59, 59, 999);
             query.date = { $gte: yesterday, $lte: endOfYesterday };
         } else if (period === "week") {
+            const today = new Date();
+            const day = today.getDay() === 0 ? 7 : today.getDay();
             const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay());
+            startOfWeek.setDate(today.getDate() - day + 1);
             startOfWeek.setHours(0, 0, 0, 0);
             const endOfWeek = new Date(startOfWeek);
             endOfWeek.setDate(startOfWeek.getDate() + 6);

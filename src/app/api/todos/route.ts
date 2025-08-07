@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnect";
 import Todo from "@/models/Todo";
-import Status from "@/models/Status";
 import "@/models/Category";
 import { TodoType } from "@/types/interface";
 import mongoose from "mongoose";
+import { defaultStatuses } from "@/utils/constant";
 
 export async function GET(request: NextRequest) {
     await dbConnect();
@@ -13,9 +13,12 @@ export async function GET(request: NextRequest) {
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
         const dueDate = searchParams.get("dueDate") || null;
+        const dateTimeRange = searchParams.get("dateTimeRange") ? JSON.parse(searchParams.get("dateTimeRange") || "{}") : null;
         const status = searchParams.get("status") || null;
         const priority = searchParams.get("priority") || null;
         const category = searchParams.get("category") || null;
+        const notifyEnabled = searchParams.get("notifyEnabled") || null;
+        const notificationSent = searchParams.get("notificationSent") || null;
 
         // Build query
         const query: any = {};
@@ -26,7 +29,13 @@ export async function GET(request: NextRequest) {
                 $lt: new Date(year, month, 1),
             };
         }
-        if (status && status !== "all" && mongoose.Types.ObjectId.isValid(status)) {
+        if (dateTimeRange && dateTimeRange.start && dateTimeRange.end) {
+            query.dueDate = {
+                $gte: new Date(dateTimeRange.start),
+                $lte: new Date(dateTimeRange.end),
+            };
+        }
+        if (status && status !== "all" && defaultStatuses.some((s) => s.name === status)) {
             query.status = status;
         }
         if (priority && ["low", "medium", "high"].includes(priority)) {
@@ -35,15 +44,20 @@ export async function GET(request: NextRequest) {
         if (category && mongoose.Types.ObjectId.isValid(category)) {
             query.category = category;
         }
+        if (notifyEnabled !== null) {
+            query.notifyEnabled = notifyEnabled === "true";
+        }
+        if (notificationSent !== null) {
+            query.notificationSent = notificationSent === "true";
+        }
 
         // Calculate pagination
         const skip = (page - 1) * limit;
         const total = await Todo.countDocuments(query);
         const totalPages = Math.ceil(total / limit);
 
-        // Fetch todos with populated status and category
+        // Fetch todos with populated category
         const todos = await Todo.find(query)
-            .populate("status", "name icon")
             .populate("category", "name")
             .sort({ dueDate: -1 })
             .skip(skip)
@@ -53,12 +67,15 @@ export async function GET(request: NextRequest) {
             id: todo._id.toString(),
             title: todo.title,
             description: todo.description || "",
-            status: todo.status._id.toString(),
+            status: todo.status,
             priority: todo.priority,
             category: todo.category._id.toString(),
             dueDate: todo.dueDate.toISOString(),
             createdAt: todo.createdAt.toISOString(),
             updatedAt: todo.updatedAt.toISOString(),
+            notifyEnabled: todo.notifyEnabled,
+            notifyMinutesBefore: todo.notifyMinutesBefore,
+            notificationSent: todo.notificationSent,
         }));
 
         return NextResponse.json(
@@ -73,23 +90,23 @@ export async function GET(request: NextRequest) {
             },
             { status: 200 }
         );
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error fetching todos:", error);
-        return NextResponse.json({ error: "Failed to fetch todos" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to fetch todos", details: error.message }, { status: 500 });
     }
 }
 
 export async function POST(request: NextRequest) {
     await dbConnect();
     try {
-        const { title, description, status, priority, category, dueDate } = await request.json();
+        const { title, description, status, priority, category, dueDate, notifyEnabled, notifyMinutesBefore } = await request.json();
 
         // Validate inputs
         if (!title || typeof title !== "string" || !title.trim()) {
             return NextResponse.json({ error: "Valid title is required" }, { status: 400 });
         }
-        if (!status || !mongoose.Types.ObjectId.isValid(status)) {
-            return NextResponse.json({ error: "Valid status ID is required" }, { status: 400 });
+        if (!status || !defaultStatuses.some((s) => s.name === status)) {
+            return NextResponse.json({ error: "Valid status (Pending, In Progress, Completed) is required" }, { status: 400 });
         }
         if (!priority || !["low", "medium", "high"].includes(priority)) {
             return NextResponse.json({ error: "Valid priority (low, medium, high) is required" }, { status: 400 });
@@ -100,11 +117,11 @@ export async function POST(request: NextRequest) {
         if (!dueDate || isNaN(new Date(dueDate).getTime())) {
             return NextResponse.json({ error: "Valid due date is required" }, { status: 400 });
         }
-
-        // Verify status exists
-        const statusExists = await Status.findById(status);
-        if (!statusExists) {
-            return NextResponse.json({ error: "Status not found" }, { status: 404 });
+        if (typeof notifyEnabled !== "boolean") {
+            return NextResponse.json({ error: "notifyEnabled must be a boolean" }, { status: 400 });
+        }
+        if (notifyEnabled && (typeof notifyMinutesBefore !== "number" || notifyMinutesBefore < 0)) {
+            return NextResponse.json({ error: "notifyMinutesBefore must be a non-negative number" }, { status: 400 });
         }
 
         const todo = await Todo.create({
@@ -114,11 +131,12 @@ export async function POST(request: NextRequest) {
             priority,
             category,
             dueDate: new Date(dueDate),
+            notifyEnabled,
+            notifyMinutesBefore: notifyEnabled ? notifyMinutesBefore : 15,
+            notificationSent: false,
         });
 
-        const populatedTodo = await Todo.findById(todo._id)
-            .populate("status", "name icon")
-            .populate("category", "name");
+        const populatedTodo = await Todo.findById(todo._id).populate("category", "name");
 
         if (!populatedTodo) {
             return NextResponse.json({ error: "Failed to populate created todo" }, { status: 500 });
@@ -128,12 +146,15 @@ export async function POST(request: NextRequest) {
             id: populatedTodo._id.toString(),
             title: populatedTodo.title,
             description: populatedTodo.description || "",
-            status: populatedTodo.status._id.toString(),
+            status: populatedTodo.status,
             priority: populatedTodo.priority,
             category: populatedTodo.category._id.toString(),
             dueDate: populatedTodo.dueDate.toISOString(),
             createdAt: populatedTodo.createdAt.toISOString(),
             updatedAt: populatedTodo.updatedAt.toISOString(),
+            notifyEnabled: populatedTodo.notifyEnabled,
+            notifyMinutesBefore: populatedTodo.notifyMinutesBefore,
+            notificationSent: populatedTodo.notificationSent,
         };
 
         return NextResponse.json(formattedTodo, { status: 201 });
@@ -141,103 +162,6 @@ export async function POST(request: NextRequest) {
         console.error("Error creating todo:", error);
         return NextResponse.json(
             { error: "Failed to create todo", details: error.message },
-            { status: 500 }
-        );
-    }
-}
-
-export async function PUT(request: NextRequest) {
-    await dbConnect();
-    try {
-        const { id, title, description, status, priority, category, dueDate } = await request.json();
-
-        // Validate inputs
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: "Valid todo ID is required" }, { status: 400 });
-        }
-        if (!title || typeof title !== "string" || !title.trim()) {
-            return NextResponse.json({ error: "Valid title is required" }, { status: 400 });
-        }
-        if (!status || !mongoose.Types.ObjectId.isValid(status)) {
-            return NextResponse.json({ error: "Valid status ID is required" }, { status: 400 });
-        }
-        if (!priority || !["low", "medium", "high"].includes(priority)) {
-            return NextResponse.json({ error: "Valid priority (low, medium, high) is required" }, { status: 400 });
-        }
-        if (!category || !mongoose.Types.ObjectId.isValid(category)) {
-            return NextResponse.json({ error: "Valid category ID is required" }, { status: 400 });
-        }
-        if (!dueDate || isNaN(new Date(dueDate).getTime())) {
-            return NextResponse.json({ error: "Valid due date is required" }, { status: 400 });
-        }
-
-        // Verify status exists
-        const statusExists = await Status.findById(status);
-        if (!statusExists) {
-            return NextResponse.json({ error: "Status not found" }, { status: 404 });
-        }
-
-        const todo = await Todo.findByIdAndUpdate(
-            id,
-            {
-                title: title.trim(),
-                description: description?.trim(),
-                status,
-                priority,
-                category,
-                dueDate: new Date(dueDate),
-            },
-            { new: true, runValidators: true }
-        )
-            .populate("status", "name icon")
-            .populate("category", "name");
-
-        if (!todo) {
-            return NextResponse.json({ error: "Todo not found" }, { status: 404 });
-        }
-
-        const formattedTodo: TodoType = {
-            id: todo._id.toString(),
-            title: todo.title,
-            description: todo.description || "",
-            status: todo.status._id.toString(),
-            priority: todo.priority,
-            category: todo.category._id.toString(),
-            dueDate: todo.dueDate.toISOString(),
-            createdAt: todo.createdAt.toISOString(),
-            updatedAt: todo.updatedAt.toISOString(),
-        };
-
-        return NextResponse.json(formattedTodo, { status: 200 });
-    } catch (error: any) {
-        console.error("Error updating todo:", error);
-        return NextResponse.json(
-            { error: "Failed to update todo", details: error.message },
-            { status: 500 }
-        );
-    }
-}
-
-export async function DELETE(request: NextRequest) {
-    await dbConnect();
-    try {
-        const { searchParams } = new URL(request.url);
-        const id = searchParams.get("id");
-
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: "Valid todo ID is required" }, { status: 400 });
-        }
-
-        const todo = await Todo.findByIdAndDelete(id);
-        if (!todo) {
-            return NextResponse.json({ error: "Todo not found" }, { status: 404 });
-        }
-
-        return NextResponse.json({ message: "Todo deleted successfully" }, { status: 200 });
-    } catch (error: any) {
-        console.error("Error deleting todo:", error);
-        return NextResponse.json(
-            { error: "Failed to delete todo", details: error.message },
             { status: 500 }
         );
     }

@@ -3,7 +3,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 interface SnackbarState {
 	open: boolean;
 	message: string;
-	severity: "success" | "error";
+	severity: "success" | "error" | "warning";
 }
 
 interface SnackbarContextType {
@@ -11,7 +11,7 @@ interface SnackbarContextType {
 	showSnackbar: (args: {
 		open: boolean;
 		message: string;
-		severity: "success" | "error";
+		severity: "success" | "error" | "warning";
 	}) => void;
 	closeSnackbar: () => void;
 }
@@ -34,7 +34,7 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
 	}: {
 		open: boolean;
 		message: string;
-		severity: "success" | "error";
+		severity: "success" | "error" | "warning";
 	}) => {
 		setSnackbar({ open, message, severity });
 	};

@@ -35,7 +35,7 @@ import {
 	FinanceCategoryType,
 	TransactionFilters,
 } from "@/types/interface";
-import { useTransactionFilters } from "@/hooks/useTransactionFilters";
+import { useTransactionFilters } from "@/hooks/finance/useTransactionFilters";
 
 interface TransactionHistoryProps {
 	finances: FinanceType[];
@@ -221,7 +221,7 @@ const TransactionHistory = forwardRef<
 								>
 									{Array.from({ length: 12 }, (_, i) => (
 										<MenuItem key={i + 1} value={i + 1}>
-											{new Date(0, i).toLocaleString("default", {
+											{new Date(0, i).toLocaleString("en-US", {
 												month: "long",
 											})}
 										</MenuItem>

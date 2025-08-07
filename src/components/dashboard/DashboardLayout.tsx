@@ -14,7 +14,7 @@ import {
 	SummaryFilters,
 } from "@/types/interface";
 
-import { useFinanceData } from "@/hooks/useFinanceData";
+import { useFinanceData } from "@/hooks/finance/useFinanceData";
 import { useSnackbar } from "@/hooks/useSnackbar";
 
 interface DashboardProps {
@@ -120,41 +120,33 @@ const DashboardLayout: React.FC<DashboardProps> = ({
 		<Box sx={{ maxWidth: "lg", mx: "auto", mt: 2 }}>
 			<Grid container spacing={3} boxShadow={3} sx={{ p: 2 }}>
 				<Grid size={{ xs: 12, md: 6 }}>
-					<Card sx={{ height: "100%", boxShadow: 3, borderRadius: 2 }}>
-						<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-							<AddTransactionForm
-								categories={categories}
-								loading={isLoading || addOrUpdateMutation.isPending}
-								onSubmit={handleAddOrUpdateFinance}
-								onCancel={editFinance ? handleCancel : undefined}
-								initialData={
-									editFinance
-										? {
-												id: editFinance.id,
-												type: editFinance.type,
-												amount: editFinance.amount.toString(),
-												category: editFinance.category,
-												description: editFinance.description || "",
-												date: new Date(editFinance.date)
-													.toISOString()
-													.split("T")[0],
-										  }
-										: undefined
-								}
-							/>
-						</CardContent>
-					</Card>
+					<AddTransactionForm
+						categories={categories}
+						loading={isLoading || addOrUpdateMutation.isPending}
+						onSubmit={handleAddOrUpdateFinance}
+						onCancel={editFinance ? handleCancel : undefined}
+						initialData={
+							editFinance
+								? {
+										id: editFinance.id,
+										type: editFinance.type,
+										amount: editFinance.amount.toString(),
+										category: editFinance.category,
+										description: editFinance.description || "",
+										date: new Date(editFinance.date)
+											.toISOString()
+											.split("T")[0],
+								  }
+								: undefined
+						}
+					/>
 				</Grid>
 				<Grid size={{ xs: 12, md: 6 }}>
-					<Card sx={{ height: "100%", boxShadow: 3, borderRadius: 2 }}>
-						<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-							<FinanceSummary
-								finances={summaryFinances}
-								filters={summaryFilters}
-								setFilters={setSummaryFilters}
-							/>
-						</CardContent>
-					</Card>
+					<FinanceSummary
+						finances={summaryFinances}
+						filters={summaryFilters}
+						setFilters={setSummaryFilters}
+					/>
 				</Grid>
 			</Grid>
 		</Box>

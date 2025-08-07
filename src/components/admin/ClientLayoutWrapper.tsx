@@ -76,21 +76,6 @@ export default function ClientLayoutWrapper({
 				{children}
 			</main>
 			<FooterNavigation />
-			<Snackbar
-				open={snackbar.open}
-				autoHideDuration={6000}
-				onClose={closeSnackbar}
-				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-			>
-				<Alert
-					onClose={closeSnackbar}
-					severity={snackbar.severity}
-					variant="filled"
-					sx={{ width: "100%", fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
-				>
-					{snackbar.message}
-				</Alert>
-			</Snackbar>
 		</div>
 	);
 }

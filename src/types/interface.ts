@@ -5,7 +5,7 @@ export interface UserType {
     avatar?: string;
     phone?: string;
     active: boolean;
-    createdAt: string; // Changed to string for consistency with API responses
+    createdAt: string;
 }
 
 export interface PaginationType {
@@ -64,16 +64,21 @@ export interface MoodType {
     emoji: string;
 }
 
+// TODO Types
+
 export interface TodoType {
     id: string;
     title: string;
     description: string;
-    status: string; // References StatusType.id
+    status: string;
     priority: "low" | "medium" | "high";
-    category: string; // References CategoryType.id
+    category: string;
     dueDate: string;
     createdAt: string;
     updatedAt: string;
+    notifyEnabled: boolean;
+    notifyMinutesBefore: number;
+    notificationSent: boolean;
 }
 
 export interface StatusType {
@@ -86,6 +91,21 @@ export interface CategoryType {
     id: string;
     name: string;
 }
+
+
+
+export interface TodoFilters {
+    dueDate: string;
+    status: string;
+    priority: string;
+    category: string;
+}
+
+export interface SummaryToDoFilters {
+    period: string;
+}
+
+// Event Types
 
 export interface EventType {
     id: string;
