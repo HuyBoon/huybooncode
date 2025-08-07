@@ -15,7 +15,7 @@ import {
 } from "@/types/interface";
 
 import { useFinanceData } from "@/hooks/finance/useFinanceData";
-import { useSnackbar } from "@/hooks/useSnackbar";
+import { useSnackbar } from "@/context/SnackbarContext";
 
 interface DashboardProps {
 	initialFinances: FinanceType[];

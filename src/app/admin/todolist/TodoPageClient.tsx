@@ -32,7 +32,7 @@ const TodoPageClient: React.FC<{
 	const { showSnackbar } = useSnackbar();
 
 	const [todoFilters, setTodoFilters] = useState<TodoFilters>({
-		dueDate: new Date().toISOString().split("T")[0].slice(0, 7),
+		dueDate: new Date().toISOString().slice(0, 7), // Current YYYY-MM
 		status: "all",
 		priority: "all",
 		category: "all",
@@ -69,11 +69,12 @@ const TodoPageClient: React.FC<{
 			(snackbar) => showSnackbar(snackbar),
 			() => {
 				setEditTodo(undefined);
-
-				setTodoFilters((prev) => ({
-					...prev,
+				setTodoFilters({
 					dueDate: new Date().toISOString().slice(0, 7),
-				}));
+					status: "all",
+					priority: "all",
+					category: "all",
+				});
 			},
 			statuses
 		);
@@ -89,7 +90,7 @@ const TodoPageClient: React.FC<{
 					status: editTodo.status,
 					priority: editTodo.priority,
 					category: editTodo.category,
-					dueDate: new Date(editTodo.dueDate).toISOString().split("T")[0],
+					dueDate: editTodo.dueDate.slice(0, 16),
 					notifyEnabled: editTodo.notifyEnabled,
 					notifyMinutesBefore: editTodo.notifyMinutesBefore,
 			  }
@@ -126,12 +127,32 @@ const TodoPageClient: React.FC<{
 						showSnackbar({
 							open: true,
 							message: `Reminder: Todo "${todo.title}" is due soon!`,
-							severity: "error",
+							severity: "warning",
 						});
+						// Fetch the full todo to ensure all required fields
+						const response = await fetch(`/api/todos/${todo.id}`, {
+							method: "GET",
+							headers: { "Content-Type": "application/json" },
+						});
+						if (!response.ok) {
+							console.error("Failed to fetch todo for notification update");
+							continue;
+						}
+						const fullTodo: TodoType = await response.json();
 						await fetch(`/api/todos/${todo.id}`, {
 							method: "PUT",
 							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({ ...todo, notificationSent: true }),
+							body: JSON.stringify({
+								title: fullTodo.title,
+								description: fullTodo.description || "",
+								status: fullTodo.status,
+								priority: fullTodo.priority,
+								category: fullTodo.category,
+								dueDate: fullTodo.dueDate,
+								notifyEnabled: fullTodo.notifyEnabled,
+								notifyMinutesBefore: fullTodo.notifyMinutesBefore,
+								notificationSent: true,
+							}),
 						});
 					}
 				}
@@ -188,7 +209,7 @@ const TodoPageClient: React.FC<{
 			showSnackbar({
 				open: true,
 				message: error.message || "Failed to mark todo as completed",
-				severity: "error",
+				severity: "warning",
 			});
 		}
 	};
@@ -222,8 +243,8 @@ const TodoPageClient: React.FC<{
 			isLoading={isLoading || isMutating}
 			pagination={fetchedPagination}
 			todoFilters={todoFilters}
-			summaryFilters={summaryFilters}
 			setTodoFilters={setTodoFilters}
+			summaryFilters={summaryFilters}
 			setSummaryFilters={setSummaryFilters}
 			setPagination={setPagination}
 			handleSubmit={handleSubmit}

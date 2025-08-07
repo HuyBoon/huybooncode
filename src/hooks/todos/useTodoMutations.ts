@@ -32,10 +32,11 @@ export const useTodoMutations = (
     statuses: { id: string; name: string }[]
 ): UseTodoMutationsResult => {
     const queryClient = useQueryClient();
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || ""; // Trim to remove potential spaces
 
     const addTodoMutation = useMutation({
         mutationFn: async (formData: FormData) => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos`, {
+            const response = await fetch(`${baseUrl}/api/todos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -67,7 +68,7 @@ export const useTodoMutations = (
 
     const updateTodoMutation = useMutation({
         mutationFn: async (formData: FormData) => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos/${formData.id}`, {
+            const response = await fetch(`${baseUrl}/api/todos/${formData.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -99,7 +100,7 @@ export const useTodoMutations = (
 
     const deleteTodoMutation = useMutation({
         mutationFn: async (id: string) => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos/${id}`, {
+            const response = await fetch(`${baseUrl}/api/todos/${id}`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
             });
@@ -128,16 +129,40 @@ export const useTodoMutations = (
 
     const completeTodoMutation = useMutation({
         mutationFn: async ({ id, statusName }: { id: string; statusName: string }) => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos/${id}`, {
-                method: "PUT",
+            // Fetch the current todo to get all required fields
+            const response = await fetch(`${baseUrl}/api/todos/${id}`, {
+                method: "GET",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: statusName, notificationSent: true }),
             });
             if (!response.ok) {
                 const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to fetch todo");
+            }
+            const todo: TodoType = await response.json();
+
+            // Send updated todo with all required fields
+            const updatedData = {
+                title: todo.title,
+                description: todo.description || "",
+                status: statusName,
+                priority: todo.priority,
+                category: todo.category,
+                dueDate: todo.dueDate,
+                notifyEnabled: todo.notifyEnabled,
+                notifyMinutesBefore: todo.notifyMinutesBefore,
+                notificationSent: true,
+            };
+
+            const updateResponse = await fetch(`${baseUrl}/api/todos/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedData),
+            });
+            if (!updateResponse.ok) {
+                const errorData = await updateResponse.json();
                 throw new Error(errorData.error || "Failed to mark todo as completed");
             }
-            return response.json();
+            return updateResponse.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["todos"] });
