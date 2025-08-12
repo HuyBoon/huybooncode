@@ -80,11 +80,19 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 	};
 
 	return (
-		<Card sx={{ borderRadius: 2, boxShadow: 3 }}>
+		<Card
+			sx={{
+				borderRadius: "24px",
+				overflow: "hidden",
+				background: "transparent",
+				color: "#fff",
+			}}
+		>
 			<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
 				<Typography
 					variant="h6"
 					sx={{
+						display: isMobile ? "none" : "block",
 						fontWeight: 700,
 						mb: 2,
 						fontSize: { xs: "1.1rem", sm: "1.25rem" },
@@ -93,8 +101,8 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 					{formData.id ? "Edit Transaction" : "Add Transaction"}
 				</Typography>
 				<form onSubmit={handleSubmit}>
-					<Grid container spacing={isMobile ? 1.5 : 2}>
-						<Grid size={{ xs: 12, sm: 6 }}>
+					<Grid container spacing={isMobile ? 2.5 : 2}>
+						<Grid size={{ xs: 6, sm: 6 }}>
 							<FormControl
 								fullWidth
 								error={!!errors.type}
@@ -116,6 +124,16 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									label="Type"
 									disabled={loading}
 									aria-label="Select transaction type"
+									sx={{
+										color: "#fff",
+										"& .MuiOutlinedInput-notchedOutline": {
+											borderColor: "#fff",
+										},
+										"&:hover .MuiOutlinedInput-notchedOutline": {
+											borderColor: "#fff",
+										},
+										"& .MuiSvgIcon-root": { color: "#fff" },
+									}}
 								>
 									<MenuItem value="income">Income</MenuItem>
 									<MenuItem value="expense">Expense</MenuItem>
@@ -139,7 +157,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								)}
 							</FormControl>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6 }}>
+						<Grid size={{ xs: 6, sm: 6 }}>
 							<Autocomplete
 								options={categories.filter(
 									(cat) =>
@@ -155,6 +173,14 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									handleCategoryChange(newValue?.id || "")
 								}
 								disabled={loading}
+								sx={{
+									"& .MuiInputBase-input": { color: "#fff" }, // input text
+									"& .MuiSvgIcon-root": { color: "#fff" }, // dropdown icon
+									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: "#fff",
+									},
+								}}
 								renderInput={(params) => (
 									<TextField
 										{...params}
@@ -162,17 +188,38 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										error={!!errors.category}
 										helperText={errors.category}
 										size={isMobile ? "small" : "medium"}
+										InputLabelProps={{
+											sx: { color: "#fff" }, // label màu trắng
+										}}
 										sx={{
 											"& .MuiInputBase-root": {
 												fontSize: { xs: "0.875rem", sm: "1rem" },
 											},
+											"& .MuiInputBase-input": { color: "#fff" },
+											"& .MuiOutlinedInput-notchedOutline": {
+												borderColor: "#fff",
+											},
+											"&:hover .MuiOutlinedInput-notchedOutline": {
+												borderColor: "#fff",
+											},
+											"& .MuiSvgIcon-root": { color: "#fff" },
 										}}
-										aria-label="Select transaction category"
 									/>
 								)}
+								slotProps={{
+									paper: {
+										sx: {
+											backgroundColor: "rgba(0,0,0,0.8)", // nền dropdown
+											color: "#fff", // chữ trắng
+											"& .MuiAutocomplete-option": {
+												fontSize: { xs: "0.875rem", sm: "1rem" }, // chỉnh font size item
+											},
+										},
+									},
+								}}
 							/>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6 }}>
+						<Grid size={{ xs: 6, sm: 6 }}>
 							<TextField
 								name="amount"
 								label="Amount (VND)"
@@ -183,17 +230,26 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								error={!!errors.amount}
 								helperText={errors.amount}
 								size={isMobile ? "small" : "medium"}
+								InputLabelProps={{
+									sx: { color: "#fff" },
+								}}
 								sx={{
 									"& .MuiInputBase-root": {
 										fontSize: { xs: "0.875rem", sm: "1rem" },
 									},
+									"& .MuiInputBase-input": { color: "#fff" },
+									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: "#fff",
+									},
+									"& .MuiSvgIcon-root": { color: "#fff" },
 								}}
 								aria-label="Enter transaction amount"
 								inputProps={{ inputMode: "numeric" }} // Loại bỏ pattern
 								placeholder="1.234.567"
 							/>
 						</Grid>
-						<Grid size={{ xs: 12, sm: 6 }}>
+						<Grid size={{ xs: 6, sm: 6 }}>
 							<TextField
 								name="date"
 								label="Date"
@@ -202,7 +258,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								onChange={handleChange}
 								fullWidth
 								disabled={loading}
-								InputLabelProps={{ shrink: true }}
+								InputLabelProps={{ shrink: true, sx: { color: "#fff" } }}
 								error={!!errors.date}
 								helperText={errors.date}
 								size={isMobile ? "small" : "medium"}
@@ -210,6 +266,12 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									"& .MuiInputBase-root": {
 										fontSize: { xs: "0.875rem", sm: "1rem" },
 									},
+									"& .MuiInputBase-input": { color: "#fff" }, // nội dung input
+									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" }, // viền
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: "#fff",
+									}, // viền khi hover
+									"& .MuiSvgIcon-root": { color: "#fff" }, // icon dropdown
 								}}
 								aria-label="Select transaction date"
 							/>
@@ -231,6 +293,12 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									"& .MuiInputBase-root": {
 										fontSize: { xs: "0.875rem", sm: "1rem" },
 									},
+									"& .MuiInputBase-input": { color: "#fff" }, // nội dung input
+									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" }, // viền
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: "#fff",
+									}, // viền khi hover
+									"& .MuiSvgIcon-root": { color: "#fff" }, // icon dropdown
 								}}
 								aria-label="Enter transaction description"
 							/>

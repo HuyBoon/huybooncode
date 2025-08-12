@@ -10,60 +10,22 @@ import { motion, AnimatePresence } from "framer-motion";
 const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 	const { data: session, status } = useSession();
 	const router = useRouter();
-	const [greeting, setGreeting] = useState("");
+
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
 	const [showHeader, setShowHeader] = useState(true);
 	const [lastScrollY, setLastScrollY] = useState(0);
 
-	useEffect(() => {
-		setGreeting(getFrenchGreeting());
-	}, []);
-
 	// Apply sidebar offset only on md screens and up
 	const asideWidth = collapsed
 		? "md:left-16 md:w-[calc(100%-4rem)]"
 		: "md:left-64 md:w-[calc(100%-16rem)]";
 
-	const getFrenchGreeting = () => {
-		const hour = new Date().getHours();
-		if (hour >= 5 && hour < 11) return "Bonjour, HuyBoon"; // Good morning
-		if (hour >= 11 && hour < 14) return "Bon appétit, HuyBoon"; // Around lunch
-		if (hour >= 14 && hour < 18) return "Bon après-midi, HuyBoon"; // Good afternoon
-		if (hour >= 18 && hour < 22) return "Bonsoir, HuyBoon"; // Good evening
-		return "Bonne nuit, HuyBoon"; // Good night
-	};
-
-	useEffect(() => {
-		const handleScroll = () => {
-			const currentScrollY = window.scrollY;
-			if (currentScrollY > lastScrollY && currentScrollY > 50) {
-				setShowHeader(false); // Scroll down => hide
-			} else {
-				setShowHeader(true); // Scroll up => show
-			}
-			setLastScrollY(currentScrollY);
-		};
-		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [lastScrollY]);
-
 	const handleLogout = async () => {
 		await signOut({ callbackUrl: "/login" });
 		router.push("/login");
 	};
-
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (!(event.target as HTMLElement).closest(".dropdown")) {
-				setIsProfileOpen(false);
-				setIsNotificationsOpen(false);
-			}
-		};
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, []);
 
 	const dropdownVariants = {
 		open: { opacity: 1, y: 0, height: "auto" },
@@ -73,12 +35,9 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 	return (
 		<motion.header
 			initial={{ y: 0 }}
-			animate={{ y: showHeader ? 0 : -100 }}
-			transition={{ duration: 0.9 }}
-			className={`fixed w-full mx-auto ${asideWidth} top-[10px] md:top-0 z-[50] h-16 px-2 md:px-4 bg-theme text-title transition-all duration-300 rounded-4xl md:rounded-none shadow-md`}
+			className={`absolute w-full mx-auto ${asideWidth}  z-[50] h-16 px-2 md:px-4  text-title transition-all duration-300  `}
 		>
 			<div className="w-full h-full flex items-center justify-between md:justify-between mx-auto max-w-[90%] md:max-w-full">
-				{/* Left Section (Search or Greeting) */}
 				<div className="flex items-center gap-2">
 					<div className="hidden md:flex relative w-32 md:w-64">
 						<Search
@@ -91,8 +50,8 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 							className="pl-8 pr-2 py-1 w-full text-[16px] bg-theme text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
 						/>
 					</div>
-					<div className="md:hidden text-xl font-dancing text-pink-600 italic">
-						{greeting}
+					<div className="md:hidden text-xl font-bold font-dancing text-title">
+						HBoonCode.
 					</div>
 				</div>
 

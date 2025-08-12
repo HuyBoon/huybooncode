@@ -17,6 +17,8 @@ import {
 import { useFinanceData } from "@/hooks/finance/useFinanceData";
 import { useSnackbar } from "@/context/SnackbarContext";
 
+import HeroAdmin from "./HeroAdmin";
+
 interface DashboardProps {
 	initialFinances: FinanceType[];
 	initialCategories: FinanceCategoryType[];
@@ -117,37 +119,49 @@ const DashboardLayout: React.FC<DashboardProps> = ({
 	};
 
 	return (
-		<Box sx={{ maxWidth: "lg", mx: "auto", mt: 2 }}>
-			<Grid container spacing={3} boxShadow={3} sx={{ p: 2 }}>
-				<Grid size={{ xs: 12, md: 6 }}>
-					<AddTransactionForm
-						categories={categories}
-						loading={isLoading || addOrUpdateMutation.isPending}
-						onSubmit={handleAddOrUpdateFinance}
-						onCancel={editFinance ? handleCancel : undefined}
-						initialData={
-							editFinance
-								? {
-										id: editFinance.id,
-										type: editFinance.type,
-										amount: editFinance.amount.toString(),
-										category: editFinance.category,
-										description: editFinance.description || "",
-										date: new Date(editFinance.date)
-											.toISOString()
-											.split("T")[0],
-								  }
-								: undefined
-						}
-					/>
+		<Box sx={{ maxWidth: "lg", mx: "auto" }}>
+			<Card sx={{ mb: 2, borderRadius: "24px", overflow: "hidden" }}>
+				<HeroAdmin />
+			</Card>
+			<Grid container spacing={2}>
+				<Grid
+					size={{ xs: 12, md: 6 }}
+					sx={{
+						borderRadius: "24px",
+						overflow: "hidden",
+						background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+					}}
+				>
+					<Card
+						sx={{
+							borderRadius: "24px",
+							overflow: "hidden",
+							background: "transparent",
+						}}
+					>
+						<AddTransactionForm
+							categories={categories}
+							loading={isLoading || addOrUpdateMutation.isPending}
+							onSubmit={handleAddOrUpdateFinance}
+							onCancel={editFinance ? handleCancel : undefined}
+							initialData={
+								editFinance
+									? {
+											id: editFinance.id,
+											type: editFinance.type,
+											amount: editFinance.amount.toString(),
+											category: editFinance.category,
+											description: editFinance.description || "",
+											date: new Date(editFinance.date)
+												.toISOString()
+												.split("T")[0],
+									  }
+									: undefined
+							}
+						/>
+					</Card>
 				</Grid>
-				<Grid size={{ xs: 12, md: 6 }}>
-					<FinanceSummary
-						finances={summaryFinances}
-						filters={summaryFilters}
-						setFilters={setSummaryFilters}
-					/>
-				</Grid>
+				<Grid size={{ xs: 12, md: 6 }}></Grid>
 			</Grid>
 		</Box>
 	);

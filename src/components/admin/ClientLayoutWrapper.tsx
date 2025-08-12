@@ -7,8 +7,8 @@ import AdminHeader from "./AdminHeader";
 import FooterNavigation from "./FooterNavigation";
 import CustomBreadcrumbs from "./CustomBreadcrumbs";
 import { usePathname } from "next/navigation";
-import { useSnackbar } from "@/context/SnackbarContext"; // Cập nhật import
-import { Snackbar, Alert } from "@mui/material";
+import { useSnackbar } from "@/context/SnackbarContext";
+
 import { navLinks } from "@/constants/navLinks";
 
 export default function ClientLayoutWrapper({
@@ -18,7 +18,7 @@ export default function ClientLayoutWrapper({
 }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const pathname = usePathname();
-	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar(); // Sử dụng context
+	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
 	const getBreadcrumbItems = () => {
 		const dashboardLink = navLinks.find(
@@ -62,7 +62,7 @@ export default function ClientLayoutWrapper({
 	};
 
 	return (
-		<div className="relative bg-light flex flex-col min-h-screen">
+		<div className="relative bg-gradient-to-b from-teal-400 via-blue-200 to-theme flex flex-col min-h-screen">
 			<div className="hidden md:block">
 				<AsideCustomer collapsed={collapsed} setCollapsed={setCollapsed} />
 			</div>
@@ -72,7 +72,9 @@ export default function ClientLayoutWrapper({
 					collapsed ? "md:ml-16" : "md:ml-64"
 				}`}
 			>
-				<CustomBreadcrumbs items={getBreadcrumbItems()} navLinks={navLinks} />
+				{/* <div className="hidden md:flex ">
+					<CustomBreadcrumbs items={getBreadcrumbItems()} navLinks={navLinks} />
+				</div> */}
 				{children}
 			</main>
 			<FooterNavigation />

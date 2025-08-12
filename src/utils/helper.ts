@@ -1,4 +1,13 @@
 
+export const getFrenchGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return "Bonjour, HuyBoon"; // Good morning
+    if (hour >= 11 && hour < 14) return "Bon appétit, HuyBoon"; // Around lunch
+    if (hour >= 14 && hour < 18) return "Bon après-midi, HuyBoon"; // Good afternoon
+    if (hour >= 18 && hour < 22) return "Bonsoir, HuyBoon"; // Good evening
+    return "Bonne nuit, HuyBoon"; // Good night
+};
+
 // Xoá hết ký tự không phải số và trả về chuỗi chỉ chứa chữ số
 export const unformatNumber = (raw: string) => raw.replace(/\D/g, "");
 
@@ -17,3 +26,4 @@ export const parseNumber = (value: string): number => {
     if (!value) return 0;
     return parseFloat(value.replace(/\./g, ""));
 };
+
