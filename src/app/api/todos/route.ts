@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
         const category = searchParams.get("category") || null;
         const notifyEnabled = searchParams.get("notifyEnabled") || null;
         const notificationSent = searchParams.get("notificationSent") || null;
+        const period = searchParams.get("period") || null;
 
-        // Build query
         const query: any = {};
         if (dueDate) {
             const [year, month] = dueDate.split("-").map(Number);
@@ -34,6 +34,26 @@ export async function GET(request: NextRequest) {
                 $gte: new Date(dateTimeRange.start),
                 $lte: new Date(dateTimeRange.end),
             };
+        }
+        if (period) {
+            const now = new Date();
+            if (period === "today") {
+                query.dueDate = {
+                    $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+                    $lt: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1),
+                };
+            } else if (period === "week") {
+                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+                query.dueDate = {
+                    $gte: startOfWeek,
+                    $lt: new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000),
+                };
+            } else if (period === "month") {
+                query.dueDate = {
+                    $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                    $lt: new Date(now.getFullYear(), now.getMonth() + 1, 1),
+                };
+            }
         }
         if (status && status !== "all" && defaultStatuses.some((s) => s.name === status)) {
             query.status = status;
@@ -95,7 +115,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Failed to fetch todos", details: error.message }, { status: 500 });
     }
 }
-
 export async function POST(request: NextRequest) {
     await dbConnect();
     try {

@@ -6,15 +6,16 @@ interface TodoFilters {
     status: string;
     priority: string;
     category: string;
+    period: string; // Add period to filters
 }
 
 export const useTodoFilter = (initialCategories: CategoryType[], initialPagination: PaginationType) => {
-
     const [filters, setFilters] = useState<TodoFilters>({
         dueDate: new Date().toISOString().split("T")[0].slice(0, 7), // YYYY-MM
         status: "all",
         priority: "all",
         category: "all",
+        period: "today", // Default to "today"
     });
     const [pagination, setPagination] = useState<PaginationType>(initialPagination);
 
@@ -24,6 +25,7 @@ export const useTodoFilter = (initialCategories: CategoryType[], initialPaginati
             status: "all",
             priority: "all",
             category: "all",
+            period: "today", // Reset period to "today"
         });
         setPagination({ ...initialPagination, page: 1 });
     };

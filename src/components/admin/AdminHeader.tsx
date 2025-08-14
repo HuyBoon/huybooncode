@@ -35,11 +35,11 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 	return (
 		<motion.header
 			initial={{ y: 0 }}
-			className={`absolute w-full mx-auto ${asideWidth}  z-[50] h-16 px-2 md:px-4  text-title transition-all duration-300  `}
+			className={`absolute w-full mx-auto ${asideWidth}  z-[50] h-16 px-2 md:px-4  text-title transition-all duration-300 md:shadow  `}
 		>
 			<div className="w-full h-full flex items-center justify-between md:justify-between mx-auto max-w-[90%] md:max-w-full">
 				<div className="flex items-center gap-2">
-					<div className="hidden md:flex relative w-32 md:w-64">
+					<div className="hidden md:flex relative w-32 md:w-64 border border-gray-300 rounded-md bg-white">
 						<Search
 							className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
 							size={16}
@@ -47,7 +47,7 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 						<input
 							type="text"
 							placeholder="Search..."
-							className="pl-8 pr-2 py-1 w-full text-[16px] bg-theme text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+							className="pl-8 pr-2 py-1 w-full text-[16px]  text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
 						/>
 					</div>
 					<div className="md:hidden text-xl font-bold font-dancing text-title">
@@ -61,7 +61,7 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 					<div className="relative dropdown">
 						<button
 							onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-							className="relative p-2 rounded-full hover:bg-gray-800 transition-colors"
+							className="relative p-2 rounded-full  transition-colors"
 						>
 							<Bell className="text-title" size={18} />
 							<span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -103,7 +103,7 @@ const AdminHeader = ({ collapsed }: { collapsed: boolean }) => {
 						<div className="relative dropdown">
 							<button
 								onClick={() => setIsProfileOpen(!isProfileOpen)}
-								className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-800 transition-colors"
+								className="flex items-center gap-2 p-2 rounded-full transition-colors"
 							>
 								<Image
 									src={session.user.avatar || "/avatar.png"}

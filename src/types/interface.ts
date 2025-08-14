@@ -99,6 +99,7 @@ export interface TodoFilters {
     status: string;
     priority: string;
     category: string;
+    period: string;
 }
 
 export interface SummaryToDoFilters {

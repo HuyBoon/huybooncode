@@ -9,7 +9,6 @@ import {
 	CategoryType,
 	PaginationType,
 	TodoFilters,
-	SummaryToDoFilters,
 } from "@/types/interface";
 import TodoLayout from "@/components/todos/TodoLayout";
 
@@ -36,22 +35,17 @@ const TodoPageClient: React.FC<{
 		status: "all",
 		priority: "all",
 		category: "all",
-	});
-
-	const [summaryFilters, setSummaryFilters] = useState<SummaryToDoFilters>({
-		period: "today",
+		period: "today", // Default to "today"
 	});
 
 	const [pagination, setPagination] =
 		useState<PaginationType>(initialPagination);
-
 	const [editTodo, setEditTodo] = useState<TodoType | undefined>(undefined);
 
 	const {
 		statuses,
 		categories,
 		todos,
-		summaryTodos,
 		isLoading,
 		pagination: fetchedPagination,
 	} = useTodoData({
@@ -60,7 +54,6 @@ const TodoPageClient: React.FC<{
 		initialCategories,
 		initialPagination,
 		todoFilters,
-		summaryFilters,
 		pagination,
 	});
 
@@ -74,6 +67,7 @@ const TodoPageClient: React.FC<{
 					status: "all",
 					priority: "all",
 					category: "all",
+					period: "today", // Reset to "today"
 				});
 			},
 			statuses
@@ -129,7 +123,6 @@ const TodoPageClient: React.FC<{
 							message: `Reminder: Todo "${todo.title}" is due soon!`,
 							severity: "warning",
 						});
-						// Fetch the full todo to ensure all required fields
 						const response = await fetch(`/api/todos/${todo.id}`, {
 							method: "GET",
 							headers: { "Content-Type": "application/json" },
@@ -239,13 +232,10 @@ const TodoPageClient: React.FC<{
 			categories={categories}
 			statuses={statuses}
 			todos={todos}
-			summaryTodos={summaryTodos}
 			isLoading={isLoading || isMutating}
 			pagination={fetchedPagination}
 			todoFilters={todoFilters}
 			setTodoFilters={setTodoFilters}
-			summaryFilters={summaryFilters}
-			setSummaryFilters={setSummaryFilters}
 			setPagination={setPagination}
 			handleSubmit={handleSubmit}
 			handleEdit={handleEdit}

@@ -64,7 +64,14 @@ const FinanceLayout: React.FC<FinanceLayoutProps> = ({
 		<Box sx={{ maxWidth: "lg", mx: "auto", mt: 2, minHeight: "100vh" }}>
 			<Grid container spacing={2}>
 				<Grid container spacing={2}>
-					<Grid size={{ xs: 12, md: 6 }}>
+					<Grid
+						size={{ xs: 12, md: 6 }}
+						sx={{
+							borderRadius: "24px",
+							overflow: "hidden",
+							background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+						}}
+					>
 						<AddTransactionForm
 							categories={categories}
 							loading={isLoading}
@@ -86,7 +93,14 @@ const FinanceLayout: React.FC<FinanceLayoutProps> = ({
 							}
 						/>
 					</Grid>
-					<Grid size={{ xs: 12, md: 6 }}>
+					<Grid
+						size={{ xs: 12, md: 6 }}
+						sx={{
+							borderRadius: "24px",
+							overflow: "hidden",
+							background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+						}}
+					>
 						<FinanceSummary
 							finances={summaryFinances}
 							filters={summaryFilters}
@@ -94,7 +108,13 @@ const FinanceLayout: React.FC<FinanceLayoutProps> = ({
 						/>
 					</Grid>
 				</Grid>
-				<Grid size={{ xs: 12, md: 12 }}>
+				<Grid
+					size={{ xs: 12, md: 12 }}
+					sx={{
+						borderRadius: "24px",
+						overflow: "hidden",
+					}}
+				>
 					<TransactionHistory
 						finances={transactionFinances}
 						categories={categories}

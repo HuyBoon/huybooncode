@@ -143,7 +143,13 @@ const TransactionHistory = forwardRef<
 		}, [pagination.page, pagination.totalPages, isMobile]);
 
 		return (
-			<Card sx={{ borderRadius: 2, boxShadow: 3, overflowX: "auto" }}>
+			<Card
+				sx={{
+					borderRadius: 2,
+					boxShadow: 3,
+					overflowX: "auto",
+				}}
+			>
 				<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
 					<Typography
 						variant="h6"

@@ -62,7 +62,7 @@ export default function ClientLayoutWrapper({
 	};
 
 	return (
-		<div className="relative bg-gradient-to-b from-teal-400 via-blue-200 to-theme flex flex-col min-h-screen">
+		<div className="relative bg-gradient-to-b from-teal-400 via-blue-200 to-[#135e3d] flex flex-col min-h-screen">
 			<div className="hidden md:block">
 				<AsideCustomer collapsed={collapsed} setCollapsed={setCollapsed} />
 			</div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -15,6 +16,8 @@ import {
     Typography,
     CircularProgress,
     Switch,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import { CheckCircle } from "lucide-react";
 import { TodoType, StatusType, CategoryType } from "@/types/interface";
@@ -72,14 +75,31 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
     formErrors,
     handleChange,
 }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     return (
-        <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
-            <CardContent>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    {formData.id ? "Edit Todo" : "Add Todo"}
+        <Card
+            sx={{
+                background: "transparent",
+                color: "#fff",
+                boxShadow: "none",
+            }}
+        >
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        display: isMobile ? "none" : "block",
+                        fontWeight: 700,
+                        mb: 2,
+                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    }}
+                >
+                    {formData.id ? "Edit Task" : "Add Task"}
                 </Typography>
                 <form onSubmit={onSubmit}>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={isMobile ? 2.5 : 2}>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <TextField
                                 fullWidth
@@ -90,19 +110,38 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                 disabled={loading}
                                 error={!!formErrors.title}
                                 helperText={formErrors.title}
-                                aria-label="Enter title"
+                                size={isMobile ? "small" : "medium"}
+                                InputLabelProps={{ sx: { color: "#fff" } }}
+                                sx={{
+                                    "& .MuiInputBase-root": { fontSize: "1rem" },
+                                    "& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
+                                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                }}
+                                aria-label="Enter task title"
                             />
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <FormControl fullWidth error={!!formErrors.status}>
-                                <InputLabel>Status</InputLabel>
+                            <FormControl
+                                fullWidth
+                                error={!!formErrors.status}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: "1rem" } }}
+                            >
+                                <InputLabel sx={{ color: "#fff" }}>Status</InputLabel>
                                 <Select
                                     name="status"
                                     value={formData.status}
                                     onChange={(e) => handleChange({ target: { name: "status", value: e.target.value } })}
                                     label="Status"
                                     disabled={loading || statuses.length === 0}
-                                    aria-label="Select status"
+                                    sx={{
+                                        color: "#fff",
+                                        "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                        "& .MuiSvgIcon-root": { color: "#fff" },
+                                    }}
+                                    aria-label="Select task status"
                                 >
                                     {statuses.length === 0 ? (
                                         <MenuItem value="" disabled>
@@ -117,40 +156,74 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                     )}
                                 </Select>
                                 {formErrors.status && (
-                                    <Typography color="error">{formErrors.status}</Typography>
+                                    <Typography
+                                        color="error"
+                                        variant="caption"
+                                        sx={{ mt: 0.5, fontSize: "0.875rem" }}
+                                    >
+                                        {formErrors.status}
+                                    </Typography>
                                 )}
                             </FormControl>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <FormControl fullWidth error={!!formErrors.priority}>
-                                <InputLabel>Priority</InputLabel>
+                            <FormControl
+                                fullWidth
+                                error={!!formErrors.priority}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: "1rem" } }}
+                            >
+                                <InputLabel sx={{ color: "#fff" }}>Priority</InputLabel>
                                 <Select
                                     name="priority"
                                     value={formData.priority}
                                     onChange={(e) => handleChange({ target: { name: "priority", value: e.target.value } })}
                                     label="Priority"
                                     disabled={loading}
-                                    aria-label="Select priority"
+                                    sx={{
+                                        color: "#fff",
+                                        "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                        "& .MuiSvgIcon-root": { color: "#fff" },
+                                    }}
+                                    aria-label="Select task priority"
                                 >
                                     <MenuItem value="low">Low</MenuItem>
                                     <MenuItem value="medium">Medium</MenuItem>
                                     <MenuItem value="high">High</MenuItem>
                                 </Select>
                                 {formErrors.priority && (
-                                    <Typography color="error">{formErrors.priority}</Typography>
+                                    <Typography
+                                        color="error"
+                                        variant="caption"
+                                        sx={{ mt: 0.5, fontSize: "0.875rem" }}
+                                    >
+                                        {formErrors.priority}
+                                    </Typography>
                                 )}
                             </FormControl>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <FormControl fullWidth error={!!formErrors.category}>
-                                <InputLabel>Category</InputLabel>
+                            <FormControl
+                                fullWidth
+                                error={!!formErrors.category}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{ "& .MuiInputBase-root": { fontSize: "1rem" } }}
+                            >
+                                <InputLabel sx={{ color: "#fff" }}>Category</InputLabel>
                                 <Select
                                     name="category"
                                     value={formData.category}
                                     onChange={(e) => handleChange({ target: { name: "category", value: e.target.value } })}
                                     label="Category"
                                     disabled={loading || categories.length === 0}
-                                    aria-label="Select category"
+                                    sx={{
+                                        color: "#fff",
+                                        "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                        "& .MuiSvgIcon-root": { color: "#fff" },
+                                    }}
+                                    aria-label="Select task category"
                                 >
                                     {categories.length === 0 ? (
                                         <MenuItem value="" disabled>
@@ -165,7 +238,13 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                     )}
                                 </Select>
                                 {formErrors.category && (
-                                    <Typography color="error">{formErrors.category}</Typography>
+                                    <Typography
+                                        color="error"
+                                        variant="caption"
+                                        sx={{ mt: 0.5, fontSize: "0.875rem" }}
+                                    >
+                                        {formErrors.category}
+                                    </Typography>
                                 )}
                             </FormControl>
                         </Grid>
@@ -178,16 +257,23 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                 value={formData.dueDate}
                                 onChange={handleChange}
                                 disabled={loading}
-                                InputLabelProps={{ shrink: true }}
+                                InputLabelProps={{ shrink: true, sx: { color: "#fff" } }}
                                 error={!!formErrors.dueDate}
                                 helperText={formErrors.dueDate}
-                                aria-label="Select due date and time"
+                                size={isMobile ? "small" : "medium"}
+                                sx={{
+                                    "& .MuiInputBase-root": { fontSize: "1rem" },
+                                    "& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
+                                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                }}
+                                aria-label="Select task due date and time"
                             />
                         </Grid>
                         <Grid size={{ xs: 12, sm: 6 }}>
                             <FormControl fullWidth>
                                 <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Typography>Enable Notifications</Typography>
+                                    <Typography sx={{ color: "#fff" }}>Enable Notifications</Typography>
                                     <Switch
                                         name="notifyEnabled"
                                         checked={formData.notifyEnabled}
@@ -197,6 +283,7 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                             })
                                         }
                                         disabled={loading}
+                                        sx={{ "& .MuiSwitch-switchBase": { color: "#fff" } }}
                                         aria-label="Toggle notifications"
                                     />
                                 </Stack>
@@ -213,6 +300,14 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                 disabled={loading || !formData.notifyEnabled}
                                 error={!!formErrors.notifyMinutesBefore}
                                 helperText={formErrors.notifyMinutesBefore}
+                                size={isMobile ? "small" : "medium"}
+                                InputLabelProps={{ sx: { color: "#fff" } }}
+                                sx={{
+                                    "& .MuiInputBase-root": { fontSize: "1rem" },
+                                    "& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
+                                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                }}
                                 aria-label="Set notification time"
                                 inputProps={{ min: 0 }}
                             />
@@ -226,20 +321,42 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                 onChange={handleChange}
                                 disabled={loading}
                                 multiline
-                                rows={4}
+                                rows={isMobile ? 2 : 3}
                                 error={!!formErrors.description}
                                 helperText={formErrors.description}
-                                aria-label="Enter description"
+                                size={isMobile ? "small" : "medium"}
+                                InputLabelProps={{ sx: { color: "#fff" } }}
+                                sx={{
+                                    "& .MuiInputBase-root": { fontSize: "1rem" },
+                                    "& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
+                                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                                }}
+                                aria-label="Enter task description"
                             />
                         </Grid>
                         <Grid size={{ xs: 12 }}>
-                            <Stack direction="row" spacing={2} justifyContent="flex-end">
+                            <Stack
+                                direction="row"
+                                spacing={isMobile ? 1 : 2}
+                                justifyContent="flex-end"
+                            >
                                 {formData.id && (
                                     <Button
                                         variant="outlined"
                                         onClick={onCancel}
                                         disabled={loading}
-                                        sx={{ textTransform: "none", fontWeight: 500 }}
+                                        sx={{
+                                            minWidth: { xs: 80, sm: 100 },
+                                            fontSize: "0.875rem",
+                                            py: isMobile ? 1 : 1.5,
+                                            color: "#fff",
+                                            borderColor: "#fff",
+                                            "&:hover": {
+                                                borderColor: "#fff",
+                                                backgroundColor: "rgba(255,255,255,0.1)",
+                                            },
+                                        }}
                                         aria-label="Cancel editing"
                                     >
                                         Cancel
@@ -251,13 +368,19 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
                                     disabled={loading}
                                     startIcon={
                                         loading ? (
-                                            <CircularProgress size={20} color="inherit" />
+                                            <CircularProgress size={isMobile ? 16 : 20} />
                                         ) : (
-                                            <CheckCircle size={20} />
+                                            <CheckCircle size={isMobile ? 16 : 20} />
                                         )
                                     }
-                                    sx={{ textTransform: "none", fontWeight: 500 }}
-                                    aria-label={formData.id ? "Update todo" : "Add todo"}
+                                    sx={{
+                                        minWidth: { xs: 80, sm: 100 },
+                                        fontSize: "0.875rem",
+                                        py: isMobile ? 1 : 1.5,
+                                        backgroundColor: "#1976d2",
+                                        "&:hover": { backgroundColor: "#115293" },
+                                    }}
+                                    aria-label={formData.id ? "Update task" : "Add task"}
                                 >
                                     {loading ? "Saving..." : formData.id ? "Update" : "Add"}
                                 </Button>
@@ -271,3 +394,4 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({
 };
 
 export default AddTodoForm;
+

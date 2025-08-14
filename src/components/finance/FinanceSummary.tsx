@@ -40,7 +40,15 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 	});
 
 	return (
-		<Card sx={{ borderRadius: 2, boxShadow: 3, height: "100%" }}>
+		<Card
+			sx={{
+				borderRadius: 2,
+				boxShadow: 3,
+				height: "100%",
+				background: "transparent",
+				color: "#fff",
+			}}
+		>
 			<CardContent>
 				{finances.length === 0 || chartData.datasets[0].data.length === 0 ? (
 					<Box sx={{ textAlign: "center", py: 4 }}>

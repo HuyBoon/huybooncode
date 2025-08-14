@@ -27,7 +27,6 @@ import {
 	CategoryType,
 	PaginationType,
 	TodoFilters,
-	SummaryToDoFilters,
 } from "@/types/interface";
 
 interface TodoHistoryProps {
@@ -42,8 +41,6 @@ interface TodoHistoryProps {
 	setPagination: React.Dispatch<React.SetStateAction<PaginationType>>;
 	todoFilters: TodoFilters;
 	setTodoFilters: React.Dispatch<React.SetStateAction<TodoFilters>>;
-	summaryFilters: SummaryToDoFilters;
-	setSummaryFilters: React.Dispatch<React.SetStateAction<SummaryToDoFilters>>;
 }
 
 const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
@@ -60,8 +57,6 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			setPagination,
 			todoFilters,
 			setTodoFilters,
-			summaryFilters,
-			setSummaryFilters,
 		},
 		ref
 	) => {
@@ -76,6 +71,16 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			setPagination((prev) => ({ ...prev, page: newPage + 1 }));
 		};
 
+		const handleChangeRowsPerPage = (
+			event: React.ChangeEvent<HTMLInputElement>
+		) => {
+			setPagination((prev) => ({
+				...prev,
+				limit: parseInt(event.target.value, 10),
+				page: 1,
+			}));
+		};
+
 		const handleSelectChange = (e: SelectChangeEvent<string>) => {
 			const { name, value } = e.target;
 			if (name) {
@@ -85,16 +90,6 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 				}));
 				setPagination((prev) => ({ ...prev, page: 1 }));
 			}
-		};
-
-		const handleChangeRowsPerPage = (
-			event: React.ChangeEvent<HTMLInputElement>
-		) => {
-			setPagination((prev) => ({
-				...prev,
-				limit: parseInt(event.target.value, 10),
-				page: 1,
-			}));
 		};
 
 		const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,6 +169,22 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 										{category.name}
 									</MenuItem>
 								))}
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 3 }}>
+						<FormControl fullWidth>
+							<InputLabel>Period</InputLabel>
+							<Select
+								name="period"
+								value={todoFilters.period || "today"}
+								onChange={handleSelectChange}
+								label="Period"
+								disabled={loading}
+							>
+								<MenuItem value="today">Today</MenuItem>
+								<MenuItem value="week">This Week</MenuItem>
+								<MenuItem value="month">This Month</MenuItem>
 							</Select>
 						</FormControl>
 					</Grid>

@@ -11,30 +11,30 @@ import {
 	Select,
 	MenuItem,
 } from "@mui/material";
-import { TodoType, StatusType, SummaryToDoFilters } from "@/types/interface";
+import { TodoType, StatusType, TodoFilters } from "@/types/interface";
 import { SelectChangeEvent } from "@mui/material";
 
 interface TodoSummaryProps {
 	todos: TodoType[];
 	statuses: StatusType[];
-	summaryFilters: SummaryToDoFilters;
-	setSummaryFilters: React.Dispatch<React.SetStateAction<SummaryToDoFilters>>;
+	todoFilters: TodoFilters;
+	setTodoFilters: React.Dispatch<React.SetStateAction<TodoFilters>>;
 }
 
 const TodoSummary: React.FC<TodoSummaryProps> = ({
 	todos,
 	statuses,
-	summaryFilters,
-	setSummaryFilters,
+	todoFilters,
+	setTodoFilters,
 }) => {
 	const getStatusCount = (statusName: string) =>
 		todos.filter((todo) => todo.status === statusName).length;
 
 	const handleFilterChange = (e: SelectChangeEvent) => {
 		const { name, value } = e.target;
-		setSummaryFilters((prev) => ({
+		setTodoFilters((prev) => ({
 			...prev,
-			[name as keyof SummaryToDoFilters]: value,
+			[name as keyof TodoFilters]: value,
 		}));
 	};
 
@@ -48,7 +48,7 @@ const TodoSummary: React.FC<TodoSummaryProps> = ({
 					<InputLabel>Period</InputLabel>
 					<Select
 						name="period"
-						value={summaryFilters.period}
+						value={todoFilters.period || "today"}
 						onChange={handleFilterChange}
 						label="Period"
 					>

@@ -69,8 +69,8 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 
 	const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const raw = e.target.value;
-		const digits = unformatNumber(raw); // Loại bỏ dấu chấm và ký tự không phải số
-		const formatted = formatNumber(digits); // Định dạng với dấu chấm
+		const digits = unformatNumber(raw);
+		const formatted = formatNumber(digits);
 		handleChange({
 			target: {
 				name: "amount",
@@ -82,10 +82,9 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 	return (
 		<Card
 			sx={{
-				borderRadius: "24px",
-				overflow: "hidden",
 				background: "transparent",
 				color: "#fff",
+				boxShadow: "none",
 			}}
 		>
 			<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
@@ -109,11 +108,13 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								size={isMobile ? "small" : "medium"}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: { xs: "0.875rem", sm: "1rem" },
+										fontSize: "1rem",
 									},
 								}}
 							>
-								<InputLabel id="type-label">Type</InputLabel>
+								<InputLabel id="type-label" sx={{ color: "#fff" }}>
+									Type
+								</InputLabel>
 								<Select
 									labelId="type-label"
 									name="type"
@@ -149,7 +150,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										variant="caption"
 										sx={{
 											mt: 0.5,
-											fontSize: { xs: "0.75rem", sm: "0.875rem" },
+											fontSize: "0.875rem", // Consistent caption size
 										}}
 									>
 										{errors.type}
@@ -174,8 +175,8 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								}
 								disabled={loading}
 								sx={{
-									"& .MuiInputBase-input": { color: "#fff" }, // input text
-									"& .MuiSvgIcon-root": { color: "#fff" }, // dropdown icon
+									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" }, // Prevent zoom
+									"& .MuiSvgIcon-root": { color: "#fff" },
 									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
 									"&:hover .MuiOutlinedInput-notchedOutline": {
 										borderColor: "#fff",
@@ -189,13 +190,16 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										helperText={errors.category}
 										size={isMobile ? "small" : "medium"}
 										InputLabelProps={{
-											sx: { color: "#fff" }, // label màu trắng
+											sx: { color: "#fff" },
 										}}
 										sx={{
 											"& .MuiInputBase-root": {
-												fontSize: { xs: "0.875rem", sm: "1rem" },
+												fontSize: "1rem", // Prevent zoom
 											},
-											"& .MuiInputBase-input": { color: "#fff" },
+											"& .MuiInputBase-input": {
+												color: "#fff",
+												fontSize: "1rem",
+											},
 											"& .MuiOutlinedInput-notchedOutline": {
 												borderColor: "#fff",
 											},
@@ -204,15 +208,16 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 											},
 											"& .MuiSvgIcon-root": { color: "#fff" },
 										}}
+										aria-label="Select transaction category"
 									/>
 								)}
 								slotProps={{
 									paper: {
 										sx: {
-											backgroundColor: "rgba(0,0,0,0.8)", // nền dropdown
-											color: "#fff", // chữ trắng
+											backgroundColor: "rgba(0,0,0,0.8)",
+											color: "#fff",
 											"& .MuiAutocomplete-option": {
-												fontSize: { xs: "0.875rem", sm: "1rem" }, // chỉnh font size item
+												fontSize: "1rem", // Prevent zoom in options
 											},
 										},
 									},
@@ -235,9 +240,9 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								}}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: { xs: "0.875rem", sm: "1rem" },
+										fontSize: "1rem", // Prevent zoom
 									},
-									"& .MuiInputBase-input": { color: "#fff" },
+									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
 									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
 									"&:hover .MuiOutlinedInput-notchedOutline": {
 										borderColor: "#fff",
@@ -245,7 +250,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									"& .MuiSvgIcon-root": { color: "#fff" },
 								}}
 								aria-label="Enter transaction amount"
-								inputProps={{ inputMode: "numeric" }} // Loại bỏ pattern
+								inputProps={{ inputMode: "numeric" }}
 								placeholder="1.234.567"
 							/>
 						</Grid>
@@ -264,14 +269,14 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								size={isMobile ? "small" : "medium"}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: { xs: "0.875rem", sm: "1rem" },
+										fontSize: "1rem", // Prevent zoom
 									},
-									"& .MuiInputBase-input": { color: "#fff" }, // nội dung input
-									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" }, // viền
+									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
+									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
 									"&:hover .MuiOutlinedInput-notchedOutline": {
 										borderColor: "#fff",
-									}, // viền khi hover
-									"& .MuiSvgIcon-root": { color: "#fff" }, // icon dropdown
+									},
+									"& .MuiSvgIcon-root": { color: "#fff" },
 								}}
 								aria-label="Select transaction date"
 							/>
@@ -291,14 +296,14 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								size={isMobile ? "small" : "medium"}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: { xs: "0.875rem", sm: "1rem" },
+										fontSize: "1rem", // Prevent zoom
 									},
-									"& .MuiInputBase-input": { color: "#fff" }, // nội dung input
-									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" }, // viền
+									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
+									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
 									"&:hover .MuiOutlinedInput-notchedOutline": {
 										borderColor: "#fff",
-									}, // viền khi hover
-									"& .MuiSvgIcon-root": { color: "#fff" }, // icon dropdown
+									},
+									"& .MuiSvgIcon-root": { color: "#fff" },
 								}}
 								aria-label="Enter transaction description"
 							/>
@@ -316,8 +321,14 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										disabled={loading}
 										sx={{
 											minWidth: { xs: 80, sm: 100 },
-											fontSize: { xs: "0.75rem", sm: "0.875rem" },
+											fontSize: "0.875rem", // Consistent button size
 											py: isMobile ? 1 : 1.5,
+											color: "#fff",
+											borderColor: "#fff",
+											"&:hover": {
+												borderColor: "#fff",
+												backgroundColor: "rgba(255,255,255,0.1)",
+											},
 										}}
 										aria-label="Cancel form"
 									>
@@ -337,8 +348,10 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									}
 									sx={{
 										minWidth: { xs: 80, sm: 100 },
-										fontSize: { xs: "0.75rem", sm: "0.875rem" },
+										fontSize: "0.875rem", // Consistent button size
 										py: isMobile ? 1 : 1.5,
+										backgroundColor: "#1976d2",
+										"&:hover": { backgroundColor: "#115293" },
 									}}
 									aria-label={
 										formData.id ? "Update transaction" : "Add transaction"

@@ -44,11 +44,16 @@ export const fetchTodos = async ({
         };
     }
     if (period) {
+        // Use UTC for consistency; adjust for user time zone if needed (e.g., pass timeZone param)
         const now = new Date();
+        // Optional: Adjust 'now' based on user's time zone, e.g., using a library like date-fns-tz
+        // Example: const now = zonedTimeToUtc(new Date(), 'Asia/Ho_Chi_Minh');
         if (period === "today") {
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
             query.dueDate = {
-                $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
-                $lt: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString(),
+                $gte: startOfDay.toISOString(),
+                $lt: endOfDay.toISOString(),
             };
         } else if (period === "week") {
             const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
@@ -74,23 +79,34 @@ export const fetchTodos = async ({
         ...(priority ? { priority } : {}),
         ...(dueDate ? { dueDate } : {}),
         ...(dateTimeRange ? { dateTimeRange: JSON.stringify(dateTimeRange) } : {}),
+        ...(period ? { period } : {}), // Add period to query string
         ...(notifyEnabled !== undefined ? { notifyEnabled: notifyEnabled.toString() } : {}),
         ...(notificationSent !== undefined ? { notificationSent: notificationSent.toString() } : {}),
     }).toString();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos?${queryString}`);
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch todos");
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos?${queryString}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to fetch todos");
+        }
+        return response.json();
+    } catch (error: any) {
+        console.error("Error fetching todos:", error.message);
+        throw new Error(`Failed to fetch todos: ${error.message}`);
     }
-    return response.json();
 };
 
 export const fetchTodoCategories = async (): Promise<CategoryType[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`);
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch categories");
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to fetch categories");
+        }
+        return response.json();
+    } catch (error: any) {
+        console.error("Error fetching categories:", error.message);
+        throw new Error(`Failed to fetch categories: ${error.message}`);
     }
-    return response.json();
 };

@@ -14,7 +14,6 @@ import {
 	CategoryType,
 	PaginationType,
 	TodoFilters,
-	SummaryToDoFilters,
 } from "@/types/interface";
 
 interface FormErrors {
@@ -31,13 +30,10 @@ interface TodoLayoutProps {
 	categories: CategoryType[];
 	statuses: StatusType[];
 	todos: TodoType[];
-	summaryTodos: TodoType[];
 	isLoading: boolean;
 	pagination: PaginationType;
 	todoFilters: TodoFilters;
-	summaryFilters: SummaryToDoFilters;
 	setTodoFilters: React.Dispatch<React.SetStateAction<TodoFilters>>;
-	setSummaryFilters: React.Dispatch<React.SetStateAction<SummaryToDoFilters>>;
 	setPagination: React.Dispatch<React.SetStateAction<PaginationType>>;
 	handleSubmit: (e: React.FormEvent) => Promise<void>;
 	handleEdit: (todo: TodoType) => void;
@@ -68,13 +64,10 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 	categories,
 	statuses,
 	todos,
-	summaryTodos,
 	isLoading,
 	pagination,
 	todoFilters,
-	summaryFilters,
 	setTodoFilters,
-	setSummaryFilters,
 	setPagination,
 	handleSubmit,
 	handleEdit,
@@ -145,10 +138,10 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 					</Grid>
 					<Grid size={{ xs: 12, md: 6 }}>
 						<TodoSummary
-							todos={summaryTodos}
+							todos={todos}
 							statuses={statuses}
-							summaryFilters={summaryFilters}
-							setSummaryFilters={setSummaryFilters}
+							todoFilters={todoFilters}
+							setTodoFilters={setTodoFilters}
 						/>
 					</Grid>
 				</Grid>
@@ -165,8 +158,6 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 						setPagination={setPagination}
 						todoFilters={todoFilters}
 						setTodoFilters={setTodoFilters}
-						summaryFilters={summaryFilters}
-						setSummaryFilters={setSummaryFilters}
 					/>
 				</Grid>
 			</Grid>
