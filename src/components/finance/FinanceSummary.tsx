@@ -20,6 +20,7 @@ import {
 } from "chart.js";
 import { FinanceType, SummaryFilters } from "@/types/interface";
 import { useFinanceSummary } from "@/hooks/finance/useFinanceSummary";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -34,6 +35,8 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 	filters,
 	setFilters,
 }) => {
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 	const { totals, chartData, balance } = useFinanceSummary({
 		finances,
 		filters,
@@ -42,26 +45,54 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 	return (
 		<Card
 			sx={{
-				borderRadius: 2,
-				boxShadow: 3,
-				height: "100%",
+				borderRadius: "24px",
+				overflow: "hidden",
 				background: "transparent",
-				color: "#fff",
+				boxShadow: "none",
+				display: "flex",
+				flexDirection: "column",
+				height: "100%",
+				minHeight: { xs: "300px", sm: "350px", md: "400px" },
 			}}
 		>
-			<CardContent>
+			<CardContent
+				sx={{
+					p: { xs: 2, sm: 3 },
+					flexGrow: 1, // Allow content to grow
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				{finances.length === 0 || chartData.datasets[0].data.length === 0 ? (
-					<Box sx={{ textAlign: "center", py: 4 }}>
-						<Typography color="text.secondary">
+					<Box
+						sx={{
+							textAlign: "center",
+							py: 4,
+							flexGrow: 1,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+						}}
+					>
+						<Typography
+							sx={{
+								color: "#fff",
+								fontSize: { xs: "0.9rem", sm: "1rem" },
+							}}
+						>
 							No financial data available for the selected period.
 						</Typography>
 					</Box>
 				) : (
 					<>
-						<Grid container spacing={2} sx={{ mb: 3 }}>
+						<Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: 2 }}>
 							<Grid size={{ xs: 12, sm: 6, md: 4 }}>
-								<FormControl fullWidth>
-									<InputLabel>Time Range</InputLabel>
+								<FormControl
+									fullWidth
+									size={isMobile ? "small" : "medium"}
+									sx={{ "& .MuiInputBase-root": { fontSize: "1rem" } }}
+								>
+									<InputLabel sx={{ color: "#fff" }}>Time Range</InputLabel>
 									<Select
 										value={filters.period}
 										onChange={(e) =>
@@ -70,6 +101,16 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 											})
 										}
 										label="Time Range"
+										sx={{
+											color: "#fff",
+											"& .MuiOutlinedInput-notchedOutline": {
+												borderColor: "#fff",
+											},
+											"&:hover .MuiOutlinedInput-notchedOutline": {
+												borderColor: "#fff",
+											},
+											"& .MuiSvgIcon-root": { color: "#fff" },
+										}}
 										aria-label="Select time range"
 									>
 										<MenuItem value="today">Today</MenuItem>
@@ -81,7 +122,15 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 								</FormControl>
 							</Grid>
 						</Grid>
-						<Box sx={{ maxWidth: 400, mx: "auto", mb: 3, height: 250 }}>
+						<Box
+							sx={{
+								flexGrow: 1,
+								maxWidth: { xs: 250, sm: 300, md: 400 },
+								mx: "auto",
+								mb: 2,
+								height: { xs: "50%", sm: "60%", md: "60%" }, // Responsive chart height
+							}}
+						>
 							<Pie
 								data={chartData}
 								options={{
@@ -91,9 +140,9 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 										legend: {
 											position: "bottom",
 											labels: {
-												boxWidth: 20,
-												padding: 15,
-												font: { size: 12 },
+												boxWidth: isMobile ? 15 : 20,
+												padding: isMobile ? 10 : 15,
+												font: { size: isMobile ? 10 : 12 },
 											},
 										},
 										tooltip: {
@@ -107,8 +156,9 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 										title: {
 											display: true,
 											text: `Finance Summary (${filters.period})`,
-											font: { size: 16, weight: "bold" },
-											padding: { top: 10, bottom: 20 },
+											font: { size: isMobile ? 14 : 16, weight: "bold" },
+											padding: { top: 10, bottom: isMobile ? 10 : 20 },
+											color: "#fff",
 										},
 									},
 								}}
@@ -120,6 +170,8 @@ const FinanceSummary: React.FC<FinanceSummaryProps> = ({
 								fontWeight: 700,
 								textAlign: "center",
 								color: balance >= 0 ? "success.main" : "error.main",
+								fontSize: { xs: "1rem", sm: "1.25rem" },
+								mt: "auto", // Push to bottom
 							}}
 						>
 							Balance: {balance.toLocaleString("vi-VN")} VND

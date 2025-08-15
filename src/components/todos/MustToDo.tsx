@@ -11,6 +11,9 @@ import {
 	Typography,
 	IconButton,
 	Card,
+	useMediaQuery,
+	useTheme,
+	Box,
 } from "@mui/material";
 import { Edit, Delete } from "lucide-react";
 import { TodoType, StatusType, CategoryType } from "@/types/interface";
@@ -38,6 +41,8 @@ const MustToDo = forwardRef<{ todos: TodoType[] }, MustToDoProps>(
 		},
 		ref
 	) => {
+		const theme = useTheme();
+		const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 		const [localTodos, setLocalTodos] = useState<TodoType[]>(initialTodos);
 
 		React.useImperativeHandle(ref, () => ({
@@ -76,98 +81,198 @@ const MustToDo = forwardRef<{ todos: TodoType[] }, MustToDoProps>(
 				sx={{
 					borderRadius: "24px",
 					overflow: "hidden",
-					background: "transparent",
+					background: "transparent", // Cool purple gradient
 					boxShadow: "none",
-					p: 3,
+					p: { xs: 2, sm: 3 },
+					display: "flex",
+					flexDirection: "column",
+					height: "100%",
+					minHeight: { xs: "300px", sm: "350px", md: "400px" }, // Match DashboardLayout
 				}}
 			>
-				<Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: "#fff" }}>
+				<Typography
+					variant="h6"
+					sx={{
+						mb: 2,
+						fontWeight: 600,
+						color: "#fff",
+						fontSize: { xs: "1.1rem", sm: "1.25rem" },
+					}}
+				>
 					Today's Must-Do Tasks
 				</Typography>
-				<Table>
-					<TableHead>
-						<TableRow>
-							<TableCell sx={{ fontWeight: 600, color: "#fff" }}>
-								Completed
-							</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: "#fff" }}>
-								Title
-							</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: "#fff" }}>
-								Status
-							</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: "#fff" }}>
-								Category
-							</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: "#fff" }}>
-								Due Time
-							</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: "#fff" }}>
-								Actions
-							</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{localTodos.length === 0 ? (
+				<Box sx={{ flexGrow: 1, overflow: "auto" }}>
+					<Table>
+						<TableHead>
 							<TableRow>
-								<TableCell colSpan={6} align="center" sx={{ color: "#fff" }}>
-									No tasks for today
+								<TableCell
+									sx={{
+										fontWeight: 600,
+										color: "#fff",
+										p: { xs: 1, sm: 2 },
+										fontSize: { xs: "0.8rem", sm: "1rem" },
+									}}
+								>
+									Completed
 								</TableCell>
+								<TableCell
+									sx={{
+										fontWeight: 600,
+										color: "#fff",
+										p: { xs: 1, sm: 2 },
+										fontSize: { xs: "0.8rem", sm: "1rem" },
+									}}
+								>
+									Title
+								</TableCell>
+								<TableCell
+									sx={{
+										fontWeight: 600,
+										color: "#fff",
+										p: { xs: 1, sm: 2 },
+										fontSize: { xs: "0.8rem", sm: "1rem" },
+									}}
+								>
+									Status
+								</TableCell>
+								{!isMobile && (
+									<>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+												color: "#fff",
+												p: { xs: 1, sm: 2 },
+												fontSize: { xs: "0.8rem", sm: "1rem" },
+											}}
+										>
+											Category
+										</TableCell>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+												color: "#fff",
+												p: { xs: 1, sm: 2 },
+												fontSize: { xs: "0.8rem", sm: "1rem" },
+											}}
+										>
+											Due Time
+										</TableCell>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+												color: "#fff",
+												p: { xs: 1, sm: 2 },
+												fontSize: { xs: "0.8rem", sm: "1rem" },
+											}}
+										>
+											Actions
+										</TableCell>
+									</>
+								)}
 							</TableRow>
-						) : (
-							localTodos.map((todo) => (
-								<TableRow key={todo.id}>
-									<TableCell>
-										<Checkbox
-											checked={isCompleted(todo.status)}
-											onChange={() => handleOptimisticComplete(todo.id)}
-											disabled={loading || isCompleted(todo.status)}
-											sx={{ color: "#fff", "&.Mui-checked": { color: "#fff" } }}
-											aria-label={`Mark ${todo.title} as completed`}
-										/>
-									</TableCell>
-									<TableCell sx={{ color: "#fff" }}>{todo.title}</TableCell>
-									<TableCell sx={{ color: "#fff" }}>
-										{getStatusIcon(todo.status)} {getStatusName(todo.status)}
-									</TableCell>
-									<TableCell sx={{ color: "#fff" }}>
-										{getCategoryName(todo.category)}
-									</TableCell>
-									<TableCell sx={{ color: "#fff" }}>
-										{new Date(todo.dueDate).toLocaleString("en-US", {
-											hour: "2-digit",
-											minute: "2-digit",
-											hour12: true,
-										})}
-									</TableCell>
-									<TableCell align="left">
-										<IconButton
-											onClick={() => handleEdit(todo)}
-											disabled={loading}
-											aria-label={`Edit ${todo.title}`}
-											sx={{ color: "#fff" }}
-										>
-											<Edit size={16} />
-										</IconButton>
-										<IconButton
-											onClick={() => handleDelete(todo.id)}
-											disabled={loading}
-											aria-label={`Delete ${todo.title}`}
-											sx={{ color: "#f44336" }}
-										>
-											<Delete size={16} />
-										</IconButton>
+						</TableHead>
+						<TableBody>
+							{localTodos.length === 0 ? (
+								<TableRow>
+									<TableCell
+										colSpan={isMobile ? 3 : 6}
+										align="center"
+										sx={{
+											color: "#fff",
+											p: { xs: 1, sm: 2 },
+											fontSize: { xs: "0.8rem", sm: "1rem" },
+										}}
+									>
+										No tasks for today
 									</TableCell>
 								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
+							) : (
+								localTodos.map((todo) => (
+									<TableRow key={todo.id}>
+										<TableCell sx={{ p: { xs: 1, sm: 2 } }}>
+											<Checkbox
+												checked={isCompleted(todo.status)}
+												onChange={() => handleOptimisticComplete(todo.id)}
+												disabled={loading || isCompleted(todo.status)}
+												sx={{
+													color: "#fff",
+													"&.Mui-checked": { color: "#fff" },
+													transform: { xs: "scale(0.8)", sm: "scale(1)" },
+												}}
+												aria-label={`Mark ${todo.title} as completed`}
+											/>
+										</TableCell>
+										<TableCell
+											sx={{
+												color: "#fff",
+												p: { xs: 1, sm: 2 },
+												fontSize: { xs: "0.8rem", sm: "1rem" },
+											}}
+										>
+											{todo.title}
+										</TableCell>
+										<TableCell
+											sx={{
+												color: "#fff",
+												p: { xs: 1, sm: 2 },
+												fontSize: { xs: "0.8rem", sm: "1rem" },
+											}}
+										>
+											{getStatusIcon(todo.status)} {getStatusName(todo.status)}
+										</TableCell>
+										{!isMobile && (
+											<>
+												<TableCell
+													sx={{
+														color: "#fff",
+														p: { xs: 1, sm: 2 },
+														fontSize: { xs: "0.8rem", sm: "1rem" },
+													}}
+												>
+													{getCategoryName(todo.category)}
+												</TableCell>
+												<TableCell
+													sx={{
+														color: "#fff",
+														p: { xs: 1, sm: 2 },
+														fontSize: { xs: "0.8rem", sm: "1rem" },
+													}}
+												>
+													{new Date(todo.dueDate).toLocaleString("en-US", {
+														hour: "2-digit",
+														minute: "2-digit",
+														hour12: true,
+													})}
+												</TableCell>
+												<TableCell sx={{ p: { xs: 1, sm: 2 } }} align="left">
+													<IconButton
+														onClick={() => handleEdit(todo)}
+														disabled={loading}
+														aria-label={`Edit ${todo.title}`}
+														sx={{ color: "#fff" }}
+													>
+														<Edit size={isMobile ? 14 : 16} />
+													</IconButton>
+													<IconButton
+														onClick={() => handleDelete(todo.id)}
+														disabled={loading}
+														aria-label={`Delete ${todo.title}`}
+														sx={{ color: "#f44336" }}
+													>
+														<Delete size={isMobile ? 14 : 16} />
+													</IconButton>
+												</TableCell>
+											</>
+										)}
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				</Box>
 			</Card>
 		);
 	}
 );
-
-MustToDo.displayName = "MustToDo";
 
 export default MustToDo;

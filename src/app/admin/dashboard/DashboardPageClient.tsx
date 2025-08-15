@@ -4,56 +4,74 @@ import React, { useState, useEffect } from "react";
 import { CircularProgress, Box } from "@mui/material";
 import { useSnackbar } from "@/context/SnackbarContext";
 import {
+	FinanceType,
+	FinanceCategoryType,
+	TransactionFilters,
+	PaginationType,
+	FinanceEntryType,
+	SummaryFilters,
 	TodoType,
 	StatusType,
 	CategoryType,
-	PaginationType,
-	TodoFilters,
 } from "@/types/interface";
-import TodoLayout from "@/components/todos/TodoLayout";
-
-import { fetchTodos } from "@/utils/todoApi";
-import { useTodoData } from "@/hooks/todos/useTodoData";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { useFinanceData } from "@/hooks/finance/useFinanceData";
 import { useTodoMutations } from "@/hooks/todos/useTodoMutations";
 import { useTodoForm } from "@/hooks/todos/useTodoForm";
+import { fetchTodos } from "@/utils/todoApi";
 
-const TodoPageClient: React.FC<{
+interface DashboardPageClientProps {
+	initialFinances: FinanceType[];
+	initialCategories: FinanceCategoryType[];
 	initialTodos: TodoType[];
-	initialCategories: CategoryType[];
+	initialTodoCategories: CategoryType[];
 	initialStatuses: StatusType[];
 	initialPagination: PaginationType;
-}> = ({
-	initialTodos,
+}
+
+const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
+	initialFinances,
 	initialCategories,
+	initialTodos,
+	initialTodoCategories,
 	initialStatuses,
 	initialPagination,
 }) => {
 	const { showSnackbar } = useSnackbar();
 
-	const [todoFilters, setTodoFilters] = useState<TodoFilters>({
-		dueDate: new Date().toISOString().slice(0, 7), // Current YYYY-MM
-		status: "all",
-		priority: "all",
-		category: "all",
+	const [transactionFilters, setTransactionFilters] =
+		useState<TransactionFilters>({
+			month: new Date().getMonth() + 1,
+			year: new Date().getFullYear(),
+			type: "all" as FinanceEntryType,
+			category: "all",
+			dayOfWeek: "all",
+			period: "today",
+		});
+	const [summaryFilters, setSummaryFilters] = useState<SummaryFilters>({
 		period: "today",
 	});
-
 	const [pagination, setPagination] =
 		useState<PaginationType>(initialPagination);
+	const [editFinance, setEditFinance] = useState<FinanceType | undefined>(
+		undefined
+	);
 	const [editTodo, setEditTodo] = useState<TodoType | undefined>(undefined);
 
 	const {
-		statuses,
 		categories,
-		todos,
-		isLoading,
+		transactionFinances,
+		summaryFinances,
+		isLoading: isFinanceLoading,
+		addOrUpdateMutation,
+		deleteMutation,
 		pagination: fetchedPagination,
-	} = useTodoData({
-		initialTodos,
-		initialStatuses,
+	} = useFinanceData({
+		initialFinances,
 		initialCategories,
 		initialPagination,
-		todoFilters,
+		transactionFilters,
+		summaryFilters,
 		pagination,
 	});
 
@@ -62,20 +80,22 @@ const TodoPageClient: React.FC<{
 			(snackbar) => showSnackbar(snackbar),
 			() => {
 				setEditTodo(undefined);
-				setTodoFilters({
-					dueDate: new Date().toISOString().slice(0, 7),
-					status: "all",
-					priority: "all",
+				setTransactionFilters({
+					month: new Date().getMonth() + 1,
+					year: new Date().getFullYear(),
+					type: "all",
 					category: "all",
-					period: "today", // Reset to "today"
+					dayOfWeek: "all",
+					period: "today",
 				});
+				setSummaryFilters({ period: "today" });
 			},
-			statuses
+			initialStatuses
 		);
 
 	const { formData, errors, handleSubmit, handleChange } = useTodoForm({
-		statuses,
-		categories,
+		statuses: initialStatuses,
+		categories: initialTodoCategories,
 		initialData: editTodo
 			? {
 					id: editTodo.id,
@@ -157,7 +177,68 @@ const TodoPageClient: React.FC<{
 		return () => clearInterval(interval);
 	}, [showSnackbar]);
 
-	const handleEdit = (todo: TodoType) => {
+	const handleAddOrUpdateFinance = async (data: {
+		id: string | null;
+		type: FinanceEntryType;
+		amount: number;
+		category: string;
+		description?: string;
+		date: string;
+	}) => {
+		try {
+			await addOrUpdateMutation.mutateAsync(data);
+			setEditFinance(undefined);
+			showSnackbar({
+				open: true,
+				message: data.id
+					? "Transaction updated successfully!"
+					: "Transaction added successfully!",
+				severity: "success",
+			});
+		} catch (error) {
+			showSnackbar({
+				open: true,
+				message: (error as Error).message || "Error saving transaction",
+				severity: "error",
+			});
+		}
+	};
+
+	const handleEditFinance = (finance: FinanceType) => {
+		if (!finance || !finance.id) {
+			showSnackbar({
+				open: true,
+				message: "Invalid transaction data",
+				severity: "error",
+			});
+			return;
+		}
+		setEditFinance(finance);
+		showSnackbar({
+			open: true,
+			message: "Transaction loaded for editing",
+			severity: "success",
+		});
+	};
+
+	const handleDeleteFinance = async (id: string) => {
+		try {
+			await deleteMutation.mutateAsync(id);
+			showSnackbar({
+				open: true,
+				message: "Transaction deleted successfully!",
+				severity: "success",
+			});
+		} catch (error) {
+			showSnackbar({
+				open: true,
+				message: (error as Error).message || "Error deleting transaction",
+				severity: "error",
+			});
+		}
+	};
+
+	const handleEditTodo = (todo: TodoType) => {
 		if (!todo || !todo.id) {
 			showSnackbar({
 				open: true,
@@ -174,9 +255,14 @@ const TodoPageClient: React.FC<{
 		});
 	};
 
-	const handleDelete = async (id: string) => {
+	const handleDeleteTodo = async (id: string) => {
 		try {
 			await deleteTodo(id);
+			showSnackbar({
+				open: true,
+				message: "Todo deleted successfully!",
+				severity: "success",
+			});
 		} catch (error: any) {
 			showSnackbar({
 				open: true,
@@ -186,8 +272,8 @@ const TodoPageClient: React.FC<{
 		}
 	};
 
-	const handleComplete = async (id: string) => {
-		const completedStatus = statuses.find((s) => s.name === "Completed");
+	const handleCompleteTodo = async (id: string) => {
+		const completedStatus = initialStatuses.find((s) => s.name === "Completed");
 		if (!completedStatus) {
 			showSnackbar({
 				open: true,
@@ -208,10 +294,11 @@ const TodoPageClient: React.FC<{
 	};
 
 	const handleCancel = () => {
+		setEditFinance(undefined);
 		setEditTodo(undefined);
 	};
 
-	if (isLoading && !todos.length) {
+	if (isFinanceLoading && !transactionFinances.length) {
 		return (
 			<Box
 				sx={{
@@ -219,7 +306,7 @@ const TodoPageClient: React.FC<{
 					justifyContent: "center",
 					alignItems: "center",
 					height: "100vh",
-					backgroundColor: "#f5f5f5",
+					backgroundColor: "transparent",
 				}}
 			>
 				<CircularProgress />
@@ -228,26 +315,35 @@ const TodoPageClient: React.FC<{
 	}
 
 	return (
-		<TodoLayout
+		<DashboardLayout
 			categories={categories}
-			statuses={statuses}
-			todos={todos}
-			isLoading={isLoading || isMutating}
+			todoCategories={initialTodoCategories}
+			statuses={initialStatuses}
+			todos={initialTodos}
+			finances={transactionFinances}
+			summaryFinances={summaryFinances}
+			isLoading={isFinanceLoading || isMutating}
 			pagination={fetchedPagination}
-			todoFilters={todoFilters}
-			setTodoFilters={setTodoFilters}
+			transactionFilters={transactionFilters}
+			setTransactionFilters={setTransactionFilters}
+			summaryFilters={summaryFilters}
+			setSummaryFilters={setSummaryFilters}
 			setPagination={setPagination}
+			handleAddOrUpdateFinance={handleAddOrUpdateFinance}
+			handleEditFinance={handleEditFinance}
+			handleDeleteFinance={handleDeleteFinance}
 			handleSubmit={handleSubmit}
-			handleEdit={handleEdit}
-			handleDelete={handleDelete}
-			handleComplete={handleComplete}
+			handleEditTodo={handleEditTodo}
+			handleDeleteTodo={handleDeleteTodo}
+			handleCompleteTodo={handleCompleteTodo}
 			handleCancel={handleCancel}
+			initialFinanceData={editFinance}
 			initialFormData={editTodo}
-			formErrors={errors}
 			formData={formData}
+			formErrors={errors}
 			handleFormChange={handleChange}
 		/>
 	);
 };
 
-export default TodoPageClient;
+export default DashboardPageClient;

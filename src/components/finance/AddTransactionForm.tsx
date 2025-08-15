@@ -83,11 +83,21 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 		<Card
 			sx={{
 				background: "transparent",
-				color: "#fff",
 				boxShadow: "none",
+				display: "flex",
+				flexDirection: "column",
+				height: "100%",
+				minHeight: { xs: "300px", sm: "350px", md: "400px" },
 			}}
 		>
-			<CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+			<CardContent
+				sx={{
+					p: { xs: 2, sm: 3 },
+					flexGrow: 1, // Allow content to grow
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				<Typography
 					variant="h6"
 					sx={{
@@ -99,8 +109,11 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 				>
 					{formData.id ? "Edit Transaction" : "Add Transaction"}
 				</Typography>
-				<form onSubmit={handleSubmit}>
-					<Grid container spacing={isMobile ? 2.5 : 2}>
+				<form
+					onSubmit={handleSubmit}
+					style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+				>
+					<Grid container spacing={isMobile ? 1.5 : 2} sx={{ flexGrow: 1 }}>
 						<Grid size={{ xs: 6, sm: 6 }}>
 							<FormControl
 								fullWidth
@@ -150,7 +163,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										variant="caption"
 										sx={{
 											mt: 0.5,
-											fontSize: "0.875rem", // Consistent caption size
+											fontSize: "0.875rem",
 										}}
 									>
 										{errors.type}
@@ -175,7 +188,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								}
 								disabled={loading}
 								sx={{
-									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" }, // Prevent zoom
+									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
 									"& .MuiSvgIcon-root": { color: "#fff" },
 									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
 									"&:hover .MuiOutlinedInput-notchedOutline": {
@@ -194,7 +207,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										}}
 										sx={{
 											"& .MuiInputBase-root": {
-												fontSize: "1rem", // Prevent zoom
+												fontSize: "1rem",
 											},
 											"& .MuiInputBase-input": {
 												color: "#fff",
@@ -217,7 +230,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 											backgroundColor: "rgba(0,0,0,0.8)",
 											color: "#fff",
 											"& .MuiAutocomplete-option": {
-												fontSize: "1rem", // Prevent zoom in options
+												fontSize: "1rem",
 											},
 										},
 									},
@@ -240,7 +253,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								}}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: "1rem", // Prevent zoom
+										fontSize: "1rem",
 									},
 									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
 									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
@@ -269,7 +282,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								size={isMobile ? "small" : "medium"}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: "1rem", // Prevent zoom
+										fontSize: "1rem",
 									},
 									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
 									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
@@ -296,7 +309,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								size={isMobile ? "small" : "medium"}
 								sx={{
 									"& .MuiInputBase-root": {
-										fontSize: "1rem", // Prevent zoom
+										fontSize: "1rem",
 									},
 									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
 									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
@@ -313,6 +326,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								direction="row"
 								spacing={isMobile ? 1 : 2}
 								justifyContent="flex-end"
+								sx={{ mt: "auto" }} // Push buttons to bottom
 							>
 								{onCancel && (
 									<Button
@@ -321,7 +335,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										disabled={loading}
 										sx={{
 											minWidth: { xs: 80, sm: 100 },
-											fontSize: "0.875rem", // Consistent button size
+											fontSize: "0.875rem",
 											py: isMobile ? 1 : 1.5,
 											color: "#fff",
 											borderColor: "#fff",
@@ -348,7 +362,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									}
 									sx={{
 										minWidth: { xs: 80, sm: 100 },
-										fontSize: "0.875rem", // Consistent button size
+										fontSize: "0.875rem",
 										py: isMobile ? 1 : 1.5,
 										backgroundColor: "#1976d2",
 										"&:hover": { backgroundColor: "#115293" },
