@@ -104,6 +104,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 						display: isMobile ? "none" : "block",
 						fontWeight: 700,
 						mb: 2,
+						color: "#fff",
 						fontSize: { xs: "1.1rem", sm: "1.25rem" },
 					}}
 				>
@@ -307,6 +308,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								error={!!errors.description}
 								helperText={errors.description}
 								size={isMobile ? "small" : "medium"}
+								InputLabelProps={{ sx: { color: "#fff" } }}
 								sx={{
 									"& .MuiInputBase-root": {
 										fontSize: "1rem",

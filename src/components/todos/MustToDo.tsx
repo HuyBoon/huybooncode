@@ -80,14 +80,15 @@ const MustToDo = forwardRef<{ todos: TodoType[] }, MustToDoProps>(
 			<Card
 				sx={{
 					borderRadius: "24px",
-					overflow: "hidden",
-					background: "transparent", // Cool purple gradient
+					overflowX: "hidden",
+					background: "transparent",
 					boxShadow: "none",
 					p: { xs: 2, sm: 3 },
 					display: "flex",
 					flexDirection: "column",
 					height: "100%",
-					minHeight: { xs: "300px", sm: "350px", md: "400px" }, // Match DashboardLayout
+					minHeight: { xs: "300px", sm: "350px", md: "400px" },
+					maxHeight: "520px",
 				}}
 			>
 				<Typography
