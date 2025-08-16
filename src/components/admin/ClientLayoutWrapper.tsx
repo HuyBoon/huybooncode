@@ -1,4 +1,3 @@
-// src/components/admin/ClientLayoutWrapper.tsx
 "use client";
 
 import { useState } from "react";
@@ -20,47 +19,6 @@ export default function ClientLayoutWrapper({
 	const pathname = usePathname();
 	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
-	const getBreadcrumbItems = () => {
-		const dashboardLink = navLinks.find(
-			(link) => link.url === "/admin/dashboard"
-		);
-		const baseItems = dashboardLink
-			? [
-					{
-						label: dashboardLink.label,
-						href: dashboardLink.url,
-						icon: dashboardLink.icon,
-					},
-			  ]
-			: [];
-
-		const currentPath = pathname || "";
-		const mainLink = navLinks.find((link) => currentPath.startsWith(link.url));
-		if (!mainLink) return baseItems;
-
-		const breadcrumbItems = [...baseItems];
-		if (mainLink.url !== "/admin/dashboard") {
-			breadcrumbItems.push({
-				label: mainLink.label,
-				href: mainLink.url,
-				icon: mainLink.icon,
-			});
-		}
-
-		if (mainLink.submenu) {
-			const subLink = mainLink.submenu.find((sub) => currentPath === sub.url);
-			if (subLink) {
-				breadcrumbItems.push({
-					label: subLink.label,
-					icon: subLink.icon,
-					href: subLink.url,
-				});
-			}
-		}
-
-		return breadcrumbItems;
-	};
-
 	return (
 		<div className="relative bg-gradient-to-b from-teal-400 via-blue-200 to-[#135e3d] flex flex-col min-h-screen">
 			<div className="hidden md:block">
@@ -72,9 +30,6 @@ export default function ClientLayoutWrapper({
 					collapsed ? "md:ml-16" : "md:ml-64"
 				}`}
 			>
-				{/* <div className="hidden md:flex ">
-					<CustomBreadcrumbs items={getBreadcrumbItems()} navLinks={navLinks} />
-				</div> */}
 				{children}
 			</main>
 			<FooterNavigation />

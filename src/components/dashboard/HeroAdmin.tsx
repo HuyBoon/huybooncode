@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface HeroAdminProps {
 	className?: string;
+	initialQuote?: Quote; // Thêm prop để nhận quote từ server
 }
 
 interface BackgroundOption {
@@ -76,7 +77,10 @@ const fallbackQuotes: Quote[] = [
 	},
 ];
 
-const HeroAdmin: React.FC<HeroAdminProps> = ({ className = "" }) => {
+const HeroAdmin: React.FC<HeroAdminProps> = ({
+	className = "",
+	initialQuote,
+}) => {
 	const { showSnackbar } = useSnackbar();
 	const [greeting, setGreeting] = useState("");
 	const [currentBackgroundIndex, setCurrentBackgroundIndex] = useState(0);
@@ -101,8 +105,7 @@ const HeroAdmin: React.FC<HeroAdminProps> = ({ className = "" }) => {
 		},
 		staleTime: 1000 * 60 * 5, // Cache 5 phút
 		retry: 1,
-		initialData:
-			fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)],
+		initialData: initialQuote || fallbackQuotes[0], // Dùng initialQuote hoặc quote cố định
 	});
 
 	// Handle error with snackbar
