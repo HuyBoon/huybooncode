@@ -18,7 +18,7 @@ interface UseTodoFormProps {
         notifyMinutesBefore: number;
     };
     onSubmit: (data: {
-        id: string | null;
+        id: string; // Đổi từ string | null thành string
         title: string;
         description: string;
         status: string;
@@ -112,7 +112,12 @@ export const useTodoForm = ({ statuses, categories, initialData, onSubmit }: Use
             return;
         }
         try {
-            await onSubmit(formData);
+            // Đảm bảo id là string trước khi gọi onSubmit
+            const submitData = {
+                ...formData,
+                id: formData.id || `temp-${Date.now()}`, // Gán id tạm nếu null
+            };
+            await onSubmit(submitData);
             showSnackbar({
                 open: true,
                 message: formData.id ? "Todo updated successfully" : "Todo added successfully",

@@ -57,7 +57,7 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 		undefined
 	);
 	const [editTodo, setEditTodo] = useState<TodoType | undefined>(undefined);
-	const [todos, setTodos] = useState<TodoType[]>(initialTodos); // State động cho todos
+	const [todos, setTodos] = useState<TodoType[]>(initialTodos);
 
 	const {
 		categories,
@@ -76,6 +76,20 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 		pagination,
 	});
 
+	const refetchTodos = async () => {
+		try {
+			const res = await fetchTodos({ period: "today" });
+			setTodos(res.data);
+		} catch (error) {
+			console.error("Failed to refetch todos:", error);
+			showSnackbar({
+				open: true,
+				message: "Failed to refresh todo list",
+				severity: "error",
+			});
+		}
+	};
+
 	const {
 		addTodo,
 		updateTodo,
@@ -86,7 +100,7 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 		(snackbar) => showSnackbar(snackbar),
 		async () => {
 			setEditTodo(undefined);
-			await refetchTodos(); // Refetch todos sau add/update
+			await refetchTodos();
 		},
 		initialStatuses
 	);
@@ -108,23 +122,53 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 			  }
 			: undefined,
 		onSubmit: async (data) => {
-			data.id ? await updateTodo(data) : await addTodo(data);
+			if (!data.id) {
+				// Optimistic update cho add todo
+				const tempId = `temp-${Date.now()}`;
+				const now = new Date().toISOString();
+				const newTodo: TodoType = {
+					...data,
+					id: tempId,
+					notificationSent: false,
+					createdAt: now, // Thêm createdAt
+					updatedAt: now, // Thêm updatedAt
+				};
+				setTodos([...todos, newTodo]);
+				try {
+					await addTodo(data);
+					showSnackbar({
+						open: true,
+						message: "Todo added successfully!",
+						severity: "success",
+					});
+					await refetchTodos();
+				} catch (error) {
+					setTodos(todos); // Revert nếu lỗi
+					throw error;
+				}
+			} else {
+				// Optimistic update cho update todo
+				const now = new Date().toISOString();
+				setTodos(
+					todos.map((todo) =>
+						todo.id === data.id ? { ...todo, ...data, updatedAt: now } : todo
+					)
+				);
+				try {
+					await updateTodo(data);
+					showSnackbar({
+						open: true,
+						message: "Todo updated successfully!",
+						severity: "success",
+					});
+					await refetchTodos();
+				} catch (error) {
+					setTodos(todos);
+					throw error;
+				}
+			}
 		},
 	});
-
-	const refetchTodos = async () => {
-		try {
-			const res = await fetchTodos({ period: "today" }); 
-			setTodos(res.data);
-		} catch (error) {
-			console.error("Failed to refetch todos:", error);
-			showSnackbar({
-				open: true,
-				message: "Failed to refresh todo list",
-				severity: "error",
-			});
-		}
-	};
 
 	useEffect(() => {
 		const interval = setInterval(async () => {
@@ -168,18 +212,11 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 							method: "PUT",
 							headers: { "Content-Type": "application/json" },
 							body: JSON.stringify({
-								title: fullTodo.title,
-								description: fullTodo.description || "",
-								status: fullTodo.status,
-								priority: fullTodo.priority,
-								category: fullTodo.category,
-								dueDate: fullTodo.dueDate,
-								notifyEnabled: fullTodo.notifyEnabled,
-								notifyMinutesBefore: fullTodo.notifyMinutesBefore,
+								...fullTodo,
 								notificationSent: true,
 							}),
 						});
-						await refetchTodos(); // Refetch todos sau notification update
+						await refetchTodos();
 					}
 				}
 			} catch (error: any) {
@@ -270,14 +307,17 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 
 	const handleDeleteTodo = async (id: string) => {
 		try {
+			const prevTodos = todos;
+			setTodos(todos.filter((todo) => todo.id !== id)); // Optimistic delete
 			await deleteTodo(id);
 			showSnackbar({
 				open: true,
 				message: "Todo deleted successfully!",
 				severity: "success",
 			});
-			await refetchTodos(); // Refetch sau delete
+			await refetchTodos();
 		} catch (error: any) {
+			setTodos(todos); // Revert nếu lỗi
 			showSnackbar({
 				open: true,
 				message: error.message || "Failed to delete todo",
@@ -297,14 +337,24 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 			return;
 		}
 		try {
+			const prevTodos = todos;
+			const now = new Date().toISOString();
+			setTodos(
+				todos.map((todo) =>
+					todo.id === id
+						? { ...todo, status: completedStatus.name, updatedAt: now }
+						: todo
+				)
+			); // Optimistic complete
 			await completeTodo(id, completedStatus.name);
 			showSnackbar({
 				open: true,
 				message: "Todo marked as completed!",
 				severity: "success",
 			});
-			await refetchTodos(); // Refetch sau complete
+			await refetchTodos();
 		} catch (error: any) {
+			setTodos(todos); // Revert nếu lỗi
 			showSnackbar({
 				open: true,
 				message: error.message || "Failed to mark todo as completed",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnect";
 import Finance from "@/models/Finance";
+import "@/models/FinanceCategory";
 import { FinanceType } from "@/types/interface";
 import mongoose from "mongoose";
 

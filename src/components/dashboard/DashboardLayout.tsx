@@ -35,8 +35,8 @@ interface DashboardLayoutProps {
 	todos: TodoType[];
 	finances: FinanceType[];
 	summaryFinances: FinanceType[];
-	isFinanceLoading: boolean; // Thay isLoading bằng isFinanceLoading
-	isTodoLoading: boolean; // Thêm isTodoLoading
+	isFinanceLoading: boolean;
+	isTodoLoading: boolean;
 	pagination: PaginationType;
 	transactionFilters: TransactionFilters;
 	setTransactionFilters: React.Dispatch<
@@ -127,7 +127,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 					borderRadius: "24px",
 					overflow: "hidden",
 					mb: 3,
-					background: "linear-gradient(135deg, #4b5e7a 0%, #26384e 100%)", // Cool blue-gray gradient
+					background: "linear-gradient(135deg, #4b5e7a 0%, #26384e 100%)",
 					boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
 					minHeight: { xs: "150px", sm: "200px", md: "250px" },
 				}}
@@ -188,7 +188,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 						/>
 					</Card>
 				</Grid>
-				<Grid size={{ xs: 12, md: 4 }}>
+				<Grid size={{ xs: 12, md: 5 }}>
 					<Card
 						sx={{
 							borderRadius: "24px",
@@ -229,7 +229,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 						/>
 					</Card>
 				</Grid>
-				<Grid size={{ xs: 12, md: 8 }}>
+				<Grid size={{ xs: 12, md: 7 }}>
 					<Card
 						sx={{
 							borderRadius: "24px",
