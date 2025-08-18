@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import mongoose from "mongoose";
 import Todo from "@/models/Todo";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
 
 async function sendNotification(todo: any) {
     console.log(`Sending notification for todo: ${todo.title}, due at ${new Date(todo.dueDate).toLocaleString()}`);
