@@ -2,10 +2,15 @@ import { FinanceType, FinanceCategoryType, PaginationType } from "@/types/interf
 
 export async function fetchCategories(): Promise<FinanceCategoryType[]> {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/finance-categories`, {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/finance-categories`;
+        console.log('Fetching categories from:', url); // Debug log
+        const response = await fetch(url, {
             cache: "no-store",
         });
-        if (!response.ok) throw new Error("Failed to fetch categories");
+        if (!response.ok) {
+            console.error('Response status:', response.status, response.statusText); // Debug status
+            throw new Error("Failed to fetch categories");
+        }
         const data = await response.json();
         return Array.isArray(data) ? data : [];
     } catch (error) {
@@ -47,10 +52,15 @@ export async function fetchFinances({
             ...(category && category !== "all" && { category }),
             ...(dayOfWeek && dayOfWeek !== "all" && { dayOfWeek: dayOfWeek.toString() }),
         });
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/finance?${params}`, {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/finance?${params}`;
+        console.log('Fetching finances from:', url); // Debug log
+        const response = await fetch(url, {
             cache: "no-store",
         });
-        if (!response.ok) throw new Error("Failed to fetch finances");
+        if (!response.ok) {
+            console.error('Response status:', response.status, response.statusText); // Debug status
+            throw new Error("Failed to fetch finances");
+        }
         const { finances, ...pagination } = await response.json();
         return {
             data: Array.isArray(finances) ? finances : [],

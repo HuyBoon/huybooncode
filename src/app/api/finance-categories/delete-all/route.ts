@@ -2,7 +2,8 @@
 import { NextResponse } from "next/server";
 
 import FinanceCategory from "@/models/FinanceCategory";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 
 export async function DELETE() {
     try {

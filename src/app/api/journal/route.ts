@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import Journal from "@/models/Journal";
 import { JournalType } from "@/types/interface";
 

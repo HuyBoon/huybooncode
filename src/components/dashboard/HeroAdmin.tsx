@@ -55,28 +55,6 @@ const defaultBackgrounds: BackgroundOption[] = [
 	},
 ];
 
-const fallbackQuotes: Quote[] = [
-	{
-		content: "The only way to do great work is to love what you do.",
-		author: "Steve Jobs",
-	},
-	{
-		content:
-			"La vie est un mystère qu'il faut vivre, et non un problème à résoudre.",
-		author: "Gandhi",
-	},
-	{
-		content:
-			"Le succès n'est pas la clé du bonheur. Le bonheur est la clé du succès.",
-		author: "Albert Schweitzer",
-	},
-	{ content: "Stay hungry, stay foolish.", author: "Steve Jobs" },
-	{
-		content: "The best way to predict the future is to create it.",
-		author: "Peter Drucker",
-	},
-];
-
 const HeroAdmin: React.FC<HeroAdminProps> = ({
 	className = "",
 	initialQuote,
@@ -86,7 +64,6 @@ const HeroAdmin: React.FC<HeroAdminProps> = ({
 	const [currentBackgroundIndex, setCurrentBackgroundIndex] = useState(0);
 	const [isDay, setIsDay] = useState(true);
 
-	// Greeting + Day/Night
 	useEffect(() => {
 		setGreeting(getFrenchGreeting());
 		const hour = new Date().getHours();
@@ -105,10 +82,9 @@ const HeroAdmin: React.FC<HeroAdminProps> = ({
 		},
 		staleTime: 1000 * 60 * 5, // Cache 5 phút
 		retry: 1,
-		initialData: initialQuote || fallbackQuotes[0], // Dùng initialQuote hoặc quote cố định
+		initialData: initialQuote,
 	});
 
-	// Handle error with snackbar
 	useEffect(() => {
 		if (error) {
 			showSnackbar({
@@ -125,7 +101,7 @@ const HeroAdmin: React.FC<HeroAdminProps> = ({
 			setCurrentBackgroundIndex(
 				(prev) => (prev + 1) % defaultBackgrounds.length
 			);
-		}, 10000);
+		}, 20000);
 		return () => clearInterval(interval);
 	}, []);
 

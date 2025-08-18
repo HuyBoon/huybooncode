@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
 import { FinanceCategoryType } from "@/types/interface";
 import FinanceCategory from "@/models/FinanceCategory";
 

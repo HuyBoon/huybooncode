@@ -80,6 +80,7 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 		try {
 			const res = await fetchTodos({ period: "today" });
 			setTodos(res.data);
+			console.log("Refetched todos:", res.data); // Debug
 		} catch (error) {
 			console.error("Failed to refetch todos:", error);
 			showSnackbar({
@@ -96,14 +97,18 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 		deleteTodo,
 		completeTodo,
 		isMutating: isTodoLoading,
-	} = useTodoMutations(
-		(snackbar) => showSnackbar(snackbar),
-		async () => {
+	} = useTodoMutations({
+		setSnackbar: (snackbar: {
+			open: boolean;
+			message: string;
+			severity: "success" | "error" | "warning";
+		}) => showSnackbar(snackbar),
+		resetForm: async () => {
 			setEditTodo(undefined);
 			await refetchTodos();
 		},
-		initialStatuses
-	);
+		statuses: initialStatuses,
+	});
 
 	const { formData, errors, handleSubmit, handleChange } = useTodoForm({
 		statuses: initialStatuses,
@@ -123,19 +128,26 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 			: undefined,
 		onSubmit: async (data) => {
 			if (!data.id) {
-				// Optimistic update cho add todo
 				const tempId = `temp-${Date.now()}`;
 				const now = new Date().toISOString();
-				const newTodo: TodoType = {
+				const optimisticTodo: TodoType = {
 					...data,
 					id: tempId,
 					notificationSent: false,
-					createdAt: now, // Thêm createdAt
-					updatedAt: now, // Thêm updatedAt
+					createdAt: now,
+					updatedAt: now,
 				};
-				setTodos([...todos, newTodo]);
+				setTodos([...todos, optimisticTodo]);
 				try {
-					await addTodo(data);
+					const newTodo = await addTodo(data);
+					setTodos((prevTodos) =>
+						prevTodos.map((todo) =>
+							todo.id === tempId
+								? { ...todo, ...newTodo, id: newTodo.id }
+								: todo
+						)
+					);
+					console.log("Updated todos after add:", todos); // Debug
 					showSnackbar({
 						open: true,
 						message: "Todo added successfully!",
@@ -144,10 +156,14 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 					await refetchTodos();
 				} catch (error) {
 					setTodos(todos); // Revert nếu lỗi
+					showSnackbar({
+						open: true,
+						message: (error as Error).message || "Error adding todo",
+						severity: "error",
+					});
 					throw error;
 				}
 			} else {
-				// Optimistic update cho update todo
 				const now = new Date().toISOString();
 				setTodos(
 					todos.map((todo) =>
@@ -163,7 +179,12 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 					});
 					await refetchTodos();
 				} catch (error) {
-					setTodos(todos);
+					setTodos(todos); // Revert nếu lỗi
+					showSnackbar({
+						open: true,
+						message: (error as Error).message || "Error updating todo",
+						severity: "error",
+					});
 					throw error;
 				}
 			}

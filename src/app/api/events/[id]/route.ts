@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import Event from "@/models/Event";
 import Todo from "@/models/Todo";
 import mongoose from "mongoose";

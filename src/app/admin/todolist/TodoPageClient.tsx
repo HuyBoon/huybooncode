@@ -11,7 +11,6 @@ import {
 	TodoFilters,
 } from "@/types/interface";
 import TodoLayout from "@/components/todos/TodoLayout";
-
 import { fetchTodos } from "@/utils/todoApi";
 import { useTodoData } from "@/hooks/todos/useTodoData";
 import { useTodoMutations } from "@/hooks/todos/useTodoMutations";
@@ -31,11 +30,11 @@ const TodoPageClient: React.FC<{
 	const { showSnackbar } = useSnackbar();
 
 	const [todoFilters, setTodoFilters] = useState<TodoFilters>({
-		dueDate: new Date().toISOString().slice(0, 7), // Current YYYY-MM
+		dueDate: "",
 		status: "all",
 		priority: "all",
 		category: "all",
-		period: "today",
+		period: "all",
 	});
 
 	const [pagination, setPagination] =
@@ -58,20 +57,26 @@ const TodoPageClient: React.FC<{
 	});
 
 	const { addTodo, updateTodo, deleteTodo, completeTodo, isMutating } =
-		useTodoMutations(
-			(snackbar) => showSnackbar(snackbar),
-			() => {
+		useTodoMutations({
+			setSnackbar: (snackbar: {
+				open: boolean;
+				message: string;
+				severity: "success" | "error" | "warning";
+			}) => showSnackbar(snackbar),
+			resetForm: () => {
 				setEditTodo(undefined);
 				setTodoFilters({
 					dueDate: new Date().toISOString().slice(0, 7),
 					status: "all",
 					priority: "all",
 					category: "all",
-					period: "today", // Reset to "today"
+					period: "today",
 				});
 			},
-			statuses
-		);
+			statuses,
+			pagination,
+			todoFilters,
+		});
 
 	const { formData, errors, handleSubmit, handleChange } = useTodoForm({
 		statuses,
@@ -90,7 +95,21 @@ const TodoPageClient: React.FC<{
 			  }
 			: undefined,
 		onSubmit: async (data) => {
-			data.id ? await updateTodo(data) : await addTodo(data);
+			try {
+				if (data.id) {
+					await updateTodo(data);
+				} else {
+					await addTodo(data);
+				}
+			} catch (error: any) {
+				showSnackbar({
+					open: true,
+					message:
+						error.message ||
+						(data.id ? "Failed to update todo" : "Failed to add todo"),
+					severity: "error",
+				});
+			}
 		},
 	});
 
@@ -206,6 +225,16 @@ const TodoPageClient: React.FC<{
 			});
 		}
 	};
+	const resetFilters = () => {
+		setTodoFilters({
+			dueDate: "",
+			status: "all",
+			priority: "all",
+			category: "all",
+			period: "all",
+		});
+		setPagination({ ...initialPagination, page: 1 });
+	};
 
 	const handleCancel = () => {
 		setEditTodo(undefined);
@@ -246,6 +275,7 @@ const TodoPageClient: React.FC<{
 			formErrors={errors}
 			formData={formData}
 			handleFormChange={handleChange}
+			resetFilters={resetFilters}
 		/>
 	);
 };

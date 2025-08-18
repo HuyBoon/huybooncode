@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import Finance from "@/models/Finance";
 import * as XLSX from "xlsx";
 

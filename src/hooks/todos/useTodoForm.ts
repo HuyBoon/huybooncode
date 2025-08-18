@@ -18,7 +18,7 @@ interface UseTodoFormProps {
         notifyMinutesBefore: number;
     };
     onSubmit: (data: {
-        id: string; // Đổi từ string | null thành string
+        id?: string;
         title: string;
         description: string;
         status: string;
@@ -112,11 +112,8 @@ export const useTodoForm = ({ statuses, categories, initialData, onSubmit }: Use
             return;
         }
         try {
-            // Đảm bảo id là string trước khi gọi onSubmit
-            const submitData = {
-                ...formData,
-                id: formData.id || `temp-${Date.now()}`, // Gán id tạm nếu null
-            };
+
+            const { id, ...submitData } = formData;
             await onSubmit(submitData);
             showSnackbar({
                 open: true,

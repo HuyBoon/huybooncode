@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
 	const session = await getServerSession();
+	console.log("session", session);
 	if (!session) {
 		redirect("/login");
 	}
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
 				fetchTodoCategories(),
 				fetchTodos({ period: "today" }),
 			]);
-
+		console.log(categories, transactionData);
 		return (
 			<DashboardPageClient
 				initialFinances={transactionData.data}

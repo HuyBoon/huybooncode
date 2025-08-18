@@ -58,6 +58,7 @@ interface TodoLayoutProps {
 			| React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 			| { target: { name?: string; value: unknown } }
 	) => void;
+	resetFilters: () => void; // Add resetFilters to interface
 }
 
 const TodoLayout: React.FC<TodoLayoutProps> = ({
@@ -78,6 +79,7 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 	formData,
 	formErrors,
 	handleFormChange,
+	resetFilters, // Destructure resetFilters
 }) => {
 	const { snackbar, closeSnackbar } = useSnackbar();
 	const router = useRouter();
@@ -158,6 +160,7 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 						setPagination={setPagination}
 						todoFilters={todoFilters}
 						setTodoFilters={setTodoFilters}
+						resetFilters={resetFilters} // Pass resetFilters to TodoHistory
 					/>
 				</Grid>
 			</Grid>

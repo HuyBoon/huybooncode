@@ -17,7 +17,6 @@ export default async function TodoPage() {
 			fetchTodos({ page: 1, limit: 10, period: "today" }),
 		]);
 
-		console.log("fetchedTodos:", todosData.data);
 		return (
 			<TodoPageClient
 				initialTodos={todosData.data}

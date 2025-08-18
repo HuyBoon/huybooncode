@@ -19,8 +19,9 @@ import {
 	Grid,
 	TextField,
 	SelectChangeEvent,
+	Button,
 } from "@mui/material";
-import { Edit, Delete } from "lucide-react";
+import { Edit, Delete, RefreshCw } from "lucide-react"; 
 import {
 	TodoType,
 	StatusType,
@@ -41,6 +42,7 @@ interface TodoHistoryProps {
 	setPagination: React.Dispatch<React.SetStateAction<PaginationType>>;
 	todoFilters: TodoFilters;
 	setTodoFilters: React.Dispatch<React.SetStateAction<TodoFilters>>;
+	resetFilters: () => void;
 }
 
 const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
@@ -57,6 +59,7 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 			setPagination,
 			todoFilters,
 			setTodoFilters,
+			resetFilters,
 		},
 		ref
 	) => {
@@ -177,11 +180,12 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 							<InputLabel>Period</InputLabel>
 							<Select
 								name="period"
-								value={todoFilters.period || "today"}
+								value={todoFilters.period || "all"}
 								onChange={handleSelectChange}
 								label="Period"
 								disabled={loading}
 							>
+								<MenuItem value="all">All</MenuItem>
 								<MenuItem value="today">Today</MenuItem>
 								<MenuItem value="week">This Week</MenuItem>
 								<MenuItem value="month">This Month</MenuItem>
@@ -200,6 +204,17 @@ const TodoHistory = forwardRef<{ todos: TodoType[] }, TodoHistoryProps>(
 								InputLabelProps={{ shrink: true }}
 							/>
 						</FormControl>
+					</Grid>
+					<Grid size={{ xs: 12, sm: 3 }}>
+						<Button
+							variant="outlined"
+							onClick={resetFilters}
+							startIcon={<RefreshCw size={16} />}
+							sx={{ mt: 1 }}
+							disabled={loading}
+						>
+							Reset Filters
+						</Button>
 					</Grid>
 				</Grid>
 				<Table>

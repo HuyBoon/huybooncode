@@ -1,12 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import Journal from "@/models/Journal";
 import { JournalType } from "@/types/interface";
 import mongoose from "mongoose";
 
-export async function PUT(req: NextRequest,
-    context: { params: Promise<{ id: string }> }) {
+export async function GET(
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
+    await dbConnect();
+    const { id } = await context.params;
 
+    try {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return NextResponse.json({ error: "Invalid journal ID" }, { status: 400 });
+        }
+
+        const journal = await Journal.findById(id);
+        if (!journal) {
+            return NextResponse.json({ error: "Journal not found" }, { status: 404 });
+        }
+
+        const formattedJournal: JournalType = {
+            id: journal._id.toString(),
+            title: journal.title,
+            content: journal.content,
+            mood: journal.mood,
+            date: journal.date.toISOString(),
+            createdAt: journal.createdAt.toISOString(),
+            updatedAt: journal.updatedAt.toISOString(),
+        };
+
+        return NextResponse.json(formattedJournal, { status: 200 });
+    } catch (error: any) {
+        console.error("Error fetching journal:", error);
+        return NextResponse.json(
+            { error: "Failed to fetch journal", details: error.message },
+            { status: 500 }
+        );
+    }
+}
+
+export async function PUT(
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
     await dbConnect();
     const { id } = await context.params;
 
@@ -66,8 +105,10 @@ export async function PUT(req: NextRequest,
     }
 }
 
-export async function DELETE(req: NextRequest,
-    context: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+    req: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
     await dbConnect();
     const { id } = await context.params;
 
@@ -82,8 +123,11 @@ export async function DELETE(req: NextRequest,
         }
 
         return NextResponse.json({ message: "Journal deleted" }, { status: 200 });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting journal:", error);
-        return NextResponse.json({ error: "Failed to delete journal" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to delete journal", details: error.message },
+            { status: 500 }
+        );
     }
 }

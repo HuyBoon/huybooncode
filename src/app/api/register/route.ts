@@ -1,5 +1,6 @@
-// /api/register/route.ts
-import { dbConnect } from "@/libs/dbConnect";
+
+import { dbConnect } from "@/libs/dbConnection";
+
 import { User } from "@/models/User";
 import bcrypt from "bcrypt";
 import { getToken } from "next-auth/jwt";

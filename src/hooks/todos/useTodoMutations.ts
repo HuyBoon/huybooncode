@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TodoType, PaginationType } from "@/types/interface";
-
+import { TodoType, PaginationType, TodoFilters } from "@/types/interface";
+import { v4 as uuidv4 } from 'uuid';
 interface FormData {
-    id?: string | null;
+    id?: string;
     title: string;
     description: string;
     status: string;
@@ -19,27 +19,38 @@ interface QueryData {
 }
 
 interface UseTodoMutationsResult {
-    addTodo: (formData: FormData) => Promise<void>;
+    addTodo: (formData: FormData) => Promise<TodoType>;
     updateTodo: (formData: FormData) => Promise<void>;
     deleteTodo: (id: string) => Promise<void>;
     completeTodo: (id: string, statusName: string) => Promise<void>;
     isMutating: boolean;
 }
 
-export const useTodoMutations = (
-    setSnackbar: (snackbar: { open: boolean; message: string; severity: "success" | "error" | "warning" }) => void,
-    resetForm: () => void,
-    statuses: { id: string; name: string }[]
-): UseTodoMutationsResult => {
+interface UseTodoMutationsProps {
+    setSnackbar: (snackbar: { open: boolean; message: string; severity: "success" | "error" | "warning" }) => void;
+    resetForm: () => void | Promise<void>;
+    statuses: { id: string; name: string }[];
+    pagination?: PaginationType;
+    todoFilters?: TodoFilters;
+}
+
+export const useTodoMutations = ({
+    setSnackbar,
+    resetForm,
+    statuses,
+    pagination,
+    todoFilters,
+}: UseTodoMutationsProps): UseTodoMutationsResult => {
     const queryClient = useQueryClient();
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || ""; // Trim to remove potential spaces
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || "";
 
     const addTodoMutation = useMutation({
         mutationFn: async (formData: FormData) => {
+            const { id, ...data } = formData;
             const response = await fetch(`${baseUrl}/api/todos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(data),
             });
             if (!response.ok) {
                 const errorData = await response.json();
@@ -47,7 +58,83 @@ export const useTodoMutations = (
             }
             return response.json();
         },
-        onSuccess: (newTodo: TodoType) => {
+        onMutate: async (formData: FormData) => {
+            // Hủy queries đang chạy để tránh race condition
+            await queryClient.cancelQueries({ queryKey: ["todos", pagination?.page, pagination?.limit, todoFilters] });
+
+            // Lưu snapshot cache hiện tại để rollback nếu lỗi
+            const previousTodos = queryClient.getQueryData<QueryData>(["todos", pagination?.page, pagination?.limit, todoFilters]);
+
+
+            const tempId = `temp-${uuidv4()}`;
+            const now = new Date().toISOString();
+            const optimisticTodo: TodoType = {
+                id: tempId,
+                title: formData.title,
+                description: formData.description || "",
+                status: formData.status,
+                priority: formData.priority,
+                category: formData.category,
+                dueDate: formData.dueDate,
+                notifyEnabled: formData.notifyEnabled,
+                notifyMinutesBefore: formData.notifyMinutesBefore,
+                notificationSent: false,
+                createdAt: now,
+                updatedAt: now,
+            };
+
+            // Cập nhật cache lạc quan
+            queryClient.setQueryData(
+                ["todos", pagination?.page, pagination?.limit, todoFilters],
+                (oldData: QueryData | undefined) => {
+                    if (!oldData) {
+                        return {
+                            data: [optimisticTodo],
+                            pagination: { page: 1, limit: pagination?.limit || 10, total: 1, totalPages: 1 },
+                        };
+                    }
+                    return {
+                        ...oldData,
+                        data: [optimisticTodo, ...oldData.data],
+                        pagination: {
+                            ...oldData.pagination,
+                            total: oldData.pagination.total + 1,
+                            totalPages: Math.ceil((oldData.pagination.total + 1) / oldData.pagination.limit),
+                        },
+                    };
+                }
+            );
+
+            // Trả về context để rollback
+            return { previousTodos };
+        },
+        onSuccess: async (newTodo: TodoType, formData, context) => {
+            console.log("New Todo from server:", newTodo);
+            // Cập nhật cache với newTodo thực từ server
+            queryClient.setQueryData(
+                ["todos", pagination?.page, pagination?.limit, todoFilters],
+                (oldData: QueryData | undefined) => {
+                    if (!oldData) {
+                        return {
+                            data: [newTodo],
+                            pagination: { page: 1, limit: pagination?.limit || 10, total: 1, totalPages: 1 },
+                        };
+                    }
+                    return {
+                        ...oldData,
+                        data: oldData.data.map((todo) =>
+                            todo.id === `temp-${Date.now()}` ? { ...todo, ...newTodo, id: newTodo.id } : todo
+                        ),
+                        pagination: {
+                            ...oldData.pagination,
+                            total: oldData.pagination.total,
+                            totalPages: oldData.pagination.totalPages,
+                        },
+                    };
+                }
+            );
+
+            // Invalidate để đồng bộ nếu cần
             queryClient.invalidateQueries({ queryKey: ["todos"] });
             queryClient.invalidateQueries({ queryKey: ["summaryTodos"] });
             setSnackbar({
@@ -55,14 +142,25 @@ export const useTodoMutations = (
                 message: "Todo added!",
                 severity: "success",
             });
-            resetForm();
+            await Promise.resolve(resetForm());
         },
-        onError: (error: any) => {
+        onError: (error: any, formData, context) => {
+            // Rollback cache nếu lỗi
+            if (context?.previousTodos) {
+                queryClient.setQueryData(
+                    ["todos", pagination?.page, pagination?.limit, todoFilters],
+                    context.previousTodos
+                );
+            }
             setSnackbar({
                 open: true,
                 message: error.message || "Error adding todo",
                 severity: "error",
             });
+        },
+        onSettled: () => {
+            // Đảm bảo invalidate sau khi mutation hoàn tất
+            queryClient.invalidateQueries({ queryKey: ["todos"] });
         },
     });
 
@@ -79,7 +177,7 @@ export const useTodoMutations = (
             }
             return response.json();
         },
-        onSuccess: (updatedTodo: TodoType) => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ["todos"] });
             queryClient.invalidateQueries({ queryKey: ["summaryTodos"] });
             setSnackbar({
@@ -87,7 +185,7 @@ export const useTodoMutations = (
                 message: "Todo updated!",
                 severity: "success",
             });
-            resetForm();
+            await Promise.resolve(resetForm());
         },
         onError: (error: any) => {
             setSnackbar({
@@ -109,7 +207,7 @@ export const useTodoMutations = (
                 throw new Error(errorData.error || "Failed to delete todo");
             }
         },
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ["todos"] });
             queryClient.invalidateQueries({ queryKey: ["summaryTodos"] });
             setSnackbar({
@@ -117,6 +215,7 @@ export const useTodoMutations = (
                 message: "Todo deleted!",
                 severity: "success",
             });
+            await Promise.resolve(resetForm());
         },
         onError: (error: any) => {
             setSnackbar({
@@ -129,7 +228,6 @@ export const useTodoMutations = (
 
     const completeTodoMutation = useMutation({
         mutationFn: async ({ id, statusName }: { id: string; statusName: string }) => {
-            // Fetch the current todo to get all required fields
             const response = await fetch(`${baseUrl}/api/todos/${id}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
@@ -140,7 +238,6 @@ export const useTodoMutations = (
             }
             const todo: TodoType = await response.json();
 
-            // Send updated todo with all required fields
             const updatedData = {
                 title: todo.title,
                 description: todo.description || "",
@@ -164,7 +261,7 @@ export const useTodoMutations = (
             }
             return updateResponse.json();
         },
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ["todos"] });
             queryClient.invalidateQueries({ queryKey: ["summaryTodos"] });
             setSnackbar({
@@ -172,6 +269,7 @@ export const useTodoMutations = (
                 message: "Todo marked as completed!",
                 severity: "success",
             });
+            await Promise.resolve(resetForm());
         },
         onError: (error: any) => {
             setSnackbar({
@@ -184,7 +282,7 @@ export const useTodoMutations = (
 
     return {
         addTodo: async (formData: FormData) => {
-            await addTodoMutation.mutateAsync(formData);
+            return await addTodoMutation.mutateAsync(formData);
         },
         updateTodo: async (formData: FormData) => {
             await updateTodoMutation.mutateAsync(formData);

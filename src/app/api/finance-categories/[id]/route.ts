@@ -1,4 +1,4 @@
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
 import FinanceCategory from "@/models/FinanceCategory";
 import { FinanceCategoryType } from "@/types/interface";
 import { NextRequest, NextResponse } from "next/server";
@@ -84,7 +84,6 @@ export async function PUT(
     }
 }
 
-// DELETE /api/finance-categories/:id
 export async function DELETE(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }

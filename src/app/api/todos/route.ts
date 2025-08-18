@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import Todo from "@/models/Todo";
 import "@/models/Category";
 import { TodoType } from "@/types/interface";
 import mongoose from "mongoose";
 import { defaultStatuses } from "@/utils/constant";
+import { getServerSession } from "next-auth";
 
 export async function GET(request: NextRequest) {
     await dbConnect();
     try {
+
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
@@ -22,20 +25,9 @@ export async function GET(request: NextRequest) {
         const period = searchParams.get("period") || null;
 
         const query: any = {};
-        if (dueDate) {
-            const [year, month] = dueDate.split("-").map(Number);
-            query.dueDate = {
-                $gte: new Date(year, month - 1, 1),
-                $lt: new Date(year, month, 1),
-            };
-        }
-        if (dateTimeRange && dateTimeRange.start && dateTimeRange.end) {
-            query.dueDate = {
-                $gte: new Date(dateTimeRange.start),
-                $lte: new Date(dateTimeRange.end),
-            };
-        }
-        if (period) {
+
+        // Ưu tiên period, chỉ áp dụng dueDate nếu period không được gửi
+        if (period && period !== "all") {
             const now = new Date();
             if (period === "today") {
                 query.dueDate = {
@@ -54,14 +46,28 @@ export async function GET(request: NextRequest) {
                     $lt: new Date(now.getFullYear(), now.getMonth() + 1, 1),
                 };
             }
+        } else if (dueDate) {
+            const [year, month] = dueDate.split("-").map(Number);
+            query.dueDate = {
+                $gte: new Date(year, month - 1, 1),
+                $lt: new Date(year, month, 1),
+            };
         }
+
+        if (dateTimeRange && dateTimeRange.start && dateTimeRange.end) {
+            query.dueDate = {
+                $gte: new Date(dateTimeRange.start),
+                $lte: new Date(dateTimeRange.end),
+            };
+        }
+
         if (status && status !== "all" && defaultStatuses.some((s) => s.name === status)) {
             query.status = status;
         }
         if (priority && ["low", "medium", "high"].includes(priority)) {
             query.priority = priority;
         }
-        if (category && mongoose.Types.ObjectId.isValid(category)) {
+        if (category && category !== "all" && mongoose.Types.ObjectId.isValid(category)) {
             query.category = category;
         }
         if (notifyEnabled !== null) {
@@ -115,9 +121,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Failed to fetch todos", details: error.message }, { status: 500 });
     }
 }
+
 export async function POST(request: NextRequest) {
     await dbConnect();
     try {
+
+
         const { title, description, status, priority, category, dueDate, notifyEnabled, notifyMinutesBefore } = await request.json();
 
         // Validate inputs
@@ -153,6 +162,7 @@ export async function POST(request: NextRequest) {
             notifyEnabled,
             notifyMinutesBefore: notifyEnabled ? notifyMinutesBefore : 15,
             notificationSent: false,
+
         });
 
         const populatedTodo = await Todo.findById(todo._id).populate("category", "name");

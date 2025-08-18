@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import Blog from "@/models/Blog";
 import BlogCategory from "@/models/BlogCategory";
 import mongoose from "mongoose";

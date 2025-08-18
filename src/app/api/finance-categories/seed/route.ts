@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/libs/dbConnect";
+import { dbConnect } from "@/libs/dbConnection";
+
 import FinanceCategory from "@/models/FinanceCategory";
 
 const defaultCategories = [
