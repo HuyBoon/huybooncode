@@ -2,24 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-	LayoutDashboard,
-	NotebookPen,
-	Settings,
-	Shapes,
-	UsersRound,
-	ChevronDown,
-	ChevronRight,
-	Video,
-	FileText,
-	Layout,
-	Calendar,
-	DollarSign,
-	TrendingUp,
-	TrendingDown,
-	CheckSquare,
-	Clock,
-} from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,78 +33,6 @@ export default function AsideCustomer({
 			[label]: !prev[label],
 		}));
 	};
-
-	// const navLinks: NavLink[] = [
-	// 	{
-	// 		url: "/admin/dashboard",
-	// 		icon: <LayoutDashboard size={20} />,
-	// 		label: "Dashboard",
-	// 	},
-	// 	{
-	// 		url: "/admin/todolist",
-	// 		icon: <CheckSquare size={20} />,
-	// 		label: "To-Do List",
-	// 		submenu: [
-	// 			{
-	// 				url: "/admin/todolist/today",
-	// 				label: "Today",
-	// 				icon: <Clock size={16} />,
-	// 			},
-	// 			{
-	// 				url: "/admin/todolist/tomorrow",
-	// 				label: "Tomorrow",
-	// 				icon: <Calendar size={16} />,
-	// 			},
-	// 		],
-	// 	},
-	// 	{
-	// 		url: "/admin/finance",
-	// 		icon: <DollarSign size={20} />,
-	// 		label: "HB's Finance",
-	// 		submenu: [
-	// 			{
-	// 				url: "/admin/finance/categories",
-	// 				label: "Categories",
-	// 				icon: <Shapes size={16} />,
-	// 			},
-	// 			{
-	// 				url: "/admin/finance/income",
-	// 				label: "Income",
-	// 				icon: <TrendingUp size={16} />,
-	// 			},
-	// 			{
-	// 				url: "/admin/finance/expense",
-	// 				label: "Expense",
-	// 				icon: <TrendingDown size={16} />,
-	// 			},
-	// 		],
-	// 	},
-	// 	{
-	// 		url: "/admin/journal",
-	// 		icon: <NotebookPen size={20} />,
-	// 		label: "Journal",
-	// 	},
-	// 	{
-	// 		url: "/admin/manageblogs",
-	// 		icon: <FileText size={20} />,
-	// 		label: "Blogs",
-	// 	},
-	// 	{
-	// 		url: "/admin/calendar",
-	// 		icon: <Calendar size={20} />,
-	// 		label: "Calendar",
-	// 	},
-	// 	{
-	// 		url: "/admin/media",
-	// 		icon: <Video size={20} />,
-	// 		label: "Media",
-	// 	},
-	// 	{
-	// 		url: "/admin/settings",
-	// 		icon: <Settings size={20} />,
-	// 		label: "Settings",
-	// 	},
-	// ];
 
 	const isActive = (url: string) =>
 		pathname === url || pathname.startsWith(url + "/");

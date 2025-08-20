@@ -1,48 +1,61 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
-import { keepPreviousData } from "@tanstack/react-query";
-import { fetchJournals } from "@/utils/apiJournal";
 import { JournalType, MoodType, PaginationType } from "@/types/interface";
+import { fetchJournals } from "@/utils/apiJournal";
 
 interface JournalFilters {
-    period?: string;
     date?: string;
-    mood?: string;
+    mood: string;
+    period: string;
 }
 
 interface UseJournalDataProps {
     initialJournals: JournalType[];
     initialMoods: MoodType[];
     initialPagination: PaginationType;
-    journalFilters: JournalFilters;
     pagination: PaginationType;
+    filters?: JournalFilters;
 }
 
 export const useJournalData = ({
     initialJournals,
     initialMoods,
     initialPagination,
-    journalFilters,
     pagination,
+    filters,
 }: UseJournalDataProps) => {
-    const { data: journalData, isLoading } = useQuery({
-        queryKey: ["journals", pagination.page, pagination.limit, journalFilters],
-        queryFn: () =>
-            fetchJournals({
-                period: journalFilters.period,
-                date: journalFilters.date,
-                mood: journalFilters.mood !== "all" ? journalFilters.mood : undefined,
-                page: pagination.page,
-                limit: pagination.limit,
-            }),
-        initialData: { data: initialJournals, pagination: initialPagination },
-        placeholderData: keepPreviousData,
-        staleTime: 1000 * 60 * 5, // Cache 5 phút
+    // Ensure pagination is always defined
+    const safePagination = pagination || initialPagination;
+
+    const { data, isLoading } = useQuery({
+        queryKey: [
+            "journals",
+            safePagination.page,
+            safePagination.limit,
+            filters?.mood,
+            filters?.period,
+            filters?.date,
+        ],
+        queryFn: async () => {
+            return fetchJournals({
+                page: safePagination.page,
+                limit: safePagination.limit,
+                mood: filters?.mood !== "all" ? filters?.mood : undefined,
+                period: filters?.period,
+                date: filters?.date,
+            });
+        },
+        initialData: {
+            data: initialJournals,
+            pagination: initialPagination,
+        },
     });
 
     return {
-        journals: journalData?.data || [],
+        journals: data?.data || [],
         moods: initialMoods,
         isLoading,
-        pagination: journalData?.pagination || initialPagination,
+        pagination: data?.pagination || initialPagination,
     };
 };

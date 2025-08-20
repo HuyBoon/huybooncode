@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnection";
-
 import Todo from "@/models/Todo";
 import "@/models/Category";
 import { TodoType } from "@/types/interface";
 import mongoose from "mongoose";
 import { defaultStatuses } from "@/utils/constant";
-import { getServerSession } from "next-auth";
+
 
 export async function GET(request: NextRequest) {
     await dbConnect();
     try {
-
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
@@ -26,7 +24,6 @@ export async function GET(request: NextRequest) {
 
         const query: any = {};
 
-        // Ưu tiên period, chỉ áp dụng dueDate nếu period không được gửi
         if (period && period !== "all") {
             const now = new Date();
             if (period === "today") {

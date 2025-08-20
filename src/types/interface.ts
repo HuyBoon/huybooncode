@@ -58,12 +58,18 @@ export interface JournalType {
     updatedAt: string;
 }
 
+
 export interface MoodType {
     id: string;
     name: string;
     emoji: string;
 }
 
+export interface JournalFilters {
+    period?: string;
+    date?: string;
+    mood?: string;
+}
 // TODO Types
 
 export interface TodoType {
@@ -114,7 +120,7 @@ export interface EventType {
     description: string;
     start: string;
     end: string;
-    todo?: string; // References TodoType.id
+    todo?: string;
     createdAt: string;
     updatedAt: string;
 }

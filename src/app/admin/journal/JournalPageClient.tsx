@@ -1,42 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
-import { CircularProgress, Box } from "@mui/material";
+import React, { useState, useEffect, useMemo } from "react";
+import { CircularProgress, Box, Button, Typography } from "@mui/material";
 import { useSnackbar } from "@/context/SnackbarContext";
-import { useQueryClient } from "@tanstack/react-query";
-
-import { JournalType, MoodType, PaginationType } from "@/types/interface";
+import {
+	JournalType,
+	MoodType,
+	PaginationType,
+	JournalFilters,
+} from "@/types/interface";
 import { useJournalData } from "@/hooks/journal/useJournalData";
 import { useJournalMutations } from "@/hooks/journal/useJournalMutations";
 import { useJournalForm } from "@/hooks/journal/useJournalForm";
+import { useJournalFilter } from "@/hooks/journal/useJournalFilter";
 import JournalLayout from "@/components/journal/JournalLayout";
-
-interface JournalFilters {
-	period?: string;
-	date?: string;
-	mood?: string;
-}
+import { fetchJournals } from "@/utils/apiJournal";
 
 interface JournalPageClientProps {
 	initialJournals: JournalType[];
 	initialMoods: MoodType[];
 	initialPagination: PaginationType;
+	initialError: string | null;
 }
 
 const JournalPageClient: React.FC<JournalPageClientProps> = ({
 	initialJournals,
 	initialMoods,
 	initialPagination,
+	initialError,
 }) => {
 	const { showSnackbar } = useSnackbar();
-	const queryClient = useQueryClient();
-	const [journalFilters, setJournalFilters] = useState<JournalFilters>({
-		period: "today",
-		date: new Date().toISOString().slice(0, 7), // Current YYYY-MM
-		mood: "all",
-	});
-	const [pagination, setPagination] =
-		useState<PaginationType>(initialPagination);
+	const { filters, pagination, setPagination, resetFilters } = useJournalFilter(
+		initialMoods,
+		initialPagination
+	);
 	const [editJournal, setEditJournal] = useState<JournalType | undefined>(
 		undefined
 	);
@@ -44,53 +41,119 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 		null
 	);
 
-	const {
-		journals,
-		moods,
-		isLoading,
-		pagination: fetchedPagination,
-	} = useJournalData({
+	// Display initial error if present
+	useEffect(() => {
+		if (initialError) {
+			showSnackbar({
+				open: true,
+				message: initialError,
+				severity: "error",
+			});
+		}
+	}, [initialError, showSnackbar]);
+
+	const { journals, moods, isLoading } = useJournalData({
 		initialJournals,
 		initialMoods,
 		initialPagination,
-		journalFilters,
 		pagination,
+		filters,
 	});
 
 	const { addJournal, updateJournal, deleteJournal, isMutating } =
-		useJournalMutations(
-			(snackbar) => showSnackbar(snackbar),
-			() => {
+		useJournalMutations({
+			setSnackbar: (snackbar: {
+				open: boolean;
+				message: string;
+				severity: "success" | "error" | "warning";
+			}) => showSnackbar(snackbar),
+			resetForm: () => {
 				setEditJournal(undefined);
 				setSelectedJournal(null);
-				setJournalFilters({
-					period: "today",
-					date: new Date().toISOString().slice(0, 7),
-					mood: "all",
-				});
+				resetFilters();
 			},
-			moods
-		);
+			moods,
+			pagination,
+			journalFilters: filters,
+		});
 
-	const { formData, errors, handleSubmit, handleChange } = useJournalForm({
+	// Memoize initialData to prevent new object references
+	const initialFormData = useMemo(
+		() =>
+			editJournal
+				? {
+						id: editJournal.id,
+						title: editJournal.title,
+						content: editJournal.content,
+						mood: editJournal.mood,
+						date: editJournal.date.slice(0, 16),
+				  }
+				: undefined,
+		[
+			editJournal?.id,
+			editJournal?.title,
+			editJournal?.content,
+			editJournal?.mood,
+			editJournal?.date,
+		]
+	);
+
+	const { formData, errors, handleChange, handleSubmit } = useJournalForm({
 		moods,
-		initialData: editJournal
-			? {
-					id: editJournal.id,
-					title: editJournal.title,
-					content: editJournal.content,
-					mood: editJournal.mood,
-					date: editJournal.date.slice(0, 16),
-			  }
-			: undefined,
+		initialData: initialFormData,
 		onSubmit: async (data) => {
-			if (data.id && !data.id.startsWith("temp-")) {
-				await updateJournal(data);
-			} else {
-				await addJournal(data);
+			try {
+				if (data.id && !data.id.startsWith("temp-")) {
+					await updateJournal(data);
+				} else {
+					await addJournal(data);
+				}
+			} catch (error: any) {
+				showSnackbar({
+					open: true,
+					message:
+						error.message ||
+						(data.id ? "Failed to update journal" : "Failed to add journal"),
+					severity: "error",
+				});
 			}
 		},
 	});
+
+	// Notification logic
+	useEffect(() => {
+		const interval = setInterval(async () => {
+			try {
+				const now = new Date();
+				const inOneHour = new Date(now.getTime() + 60 * 60 * 1000);
+
+				const journalsToNotify = await fetchJournals({
+					dateTimeRange: {
+						start: now.toISOString(),
+						end: inOneHour.toISOString(),
+					},
+				});
+
+				for (const journal of journalsToNotify.data) {
+					const journalTime = new Date(journal.date);
+					if (
+						now >= journalTime &&
+						now <= new Date(journalTime.getTime() + 60 * 1000)
+					) {
+						showSnackbar({
+							open: true,
+							message: `Reminder: Journal "${journal.title}" is due now!`,
+							severity: "warning",
+						});
+					}
+				}
+			} catch (error: any) {
+				console.error("Error checking journal notifications:", error);
+			}
+		}, 60 * 1000);
+
+		return () => clearInterval(interval);
+	}, [showSnackbar]);
 
 	const handleEditJournal = (journal: JournalType) => {
 		if (!journal || !journal.id) {
@@ -102,7 +165,7 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 			return;
 		}
 		setEditJournal(journal);
-		setSelectedJournal(journal);
+		setSelectedJournal(null); // Clear selectedJournal to hide from JournalDetail
 		showSnackbar({
 			open: true,
 			message: "Journal loaded for editing",
@@ -127,12 +190,28 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 
 	const handleSelectJournal = (journal: JournalType) => {
 		setSelectedJournal(journal);
+		setEditJournal(undefined); // Clear edit form when viewing details
 	};
 
 	const handleCancel = () => {
 		setEditJournal(undefined);
 		setSelectedJournal(null);
 	};
+
+	if (initialError) {
+		return (
+			<Box sx={{ textAlign: "center", py: 4 }}>
+				<Typography color="error">{initialError}</Typography>
+				<Button
+					onClick={() => window.location.reload()}
+					variant="contained"
+					color="primary"
+				>
+					Retry
+				</Button>
+			</Box>
+		);
+	}
 
 	if (isLoading && !journals.length) {
 		return (
@@ -154,9 +233,7 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 			journals={journals}
 			moods={moods}
 			isLoading={isLoading || isMutating}
-			journalFilters={journalFilters}
-			setJournalFilters={setJournalFilters}
-			pagination={fetchedPagination}
+			pagination={pagination}
 			setPagination={setPagination}
 			handleEditJournal={handleEditJournal}
 			handleDeleteJournal={handleDeleteJournal}

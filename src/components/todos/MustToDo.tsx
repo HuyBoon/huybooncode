@@ -9,13 +9,12 @@ import {
 	TableRow,
 	Checkbox,
 	Typography,
-	IconButton,
 	Card,
 	useMediaQuery,
 	useTheme,
 	Box,
 } from "@mui/material";
-import { Edit, Delete } from "lucide-react";
+
 import { TodoType, StatusType, CategoryType } from "@/types/interface";
 
 interface MustToDoProps {
@@ -23,8 +22,6 @@ interface MustToDoProps {
 	statuses: StatusType[];
 	categories: CategoryType[];
 	loading: boolean;
-	handleEdit: (todo: TodoType) => void;
-	handleDelete: (id: string) => Promise<void>;
 	handleComplete: (id: string) => Promise<void>;
 }
 
@@ -33,8 +30,7 @@ const MustToDo: React.FC<MustToDoProps> = ({
 	statuses,
 	categories,
 	loading,
-	handleEdit,
-	handleDelete,
+
 	handleComplete,
 }) => {
 	const theme = useTheme();
@@ -129,16 +125,6 @@ const MustToDo: React.FC<MustToDoProps> = ({
 									>
 										Due Time
 									</TableCell>
-									<TableCell
-										sx={{
-											fontWeight: 600,
-											color: "#fff",
-											p: { xs: 1, sm: 2 },
-											fontSize: { xs: "0.8rem", sm: "1rem" },
-										}}
-									>
-										Actions
-									</TableCell>
 								</>
 							)}
 						</TableRow>
@@ -215,24 +201,6 @@ const MustToDo: React.FC<MustToDoProps> = ({
 													minute: "2-digit",
 													hour12: true,
 												})}
-											</TableCell>
-											<TableCell sx={{ p: { xs: 1, sm: 2 } }} align="left">
-												<IconButton
-													onClick={() => handleEdit(todo)}
-													disabled={loading}
-													aria-label={`Edit ${todo.title}`}
-													sx={{ color: "#fff" }}
-												>
-													<Edit size={isMobile ? 14 : 16} />
-												</IconButton>
-												<IconButton
-													onClick={() => handleDelete(todo.id)}
-													disabled={loading}
-													aria-label={`Delete ${todo.title}`}
-													sx={{ color: "#f44336" }}
-												>
-													<Delete size={isMobile ? 14 : 16} />
-												</IconButton>
 											</TableCell>
 										</>
 									)}

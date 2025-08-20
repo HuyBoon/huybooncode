@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { fetchCategories, fetchFinances } from "@/utils/financeApi";
-
 import { fetchTodoCategories, fetchTodos } from "@/utils/todoApi";
 import { defaultStatuses } from "@/utils/constant";
 import Loader from "@/components/admin/Loader";
@@ -24,7 +23,7 @@ export default async function DashboardPage() {
 				fetchTodoCategories(),
 				fetchTodos({ period: "today" }),
 			]);
-		console.log(categories, transactionData);
+
 		return (
 			<DashboardPageClient
 				initialFinances={transactionData.data}

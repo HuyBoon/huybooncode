@@ -59,13 +59,13 @@ export default function FooterNavigation() {
 		},
 		{
 			url: "/admin/dashboard",
-			icon: <Calendar size={20} />,
-			label: "Calendar",
+			icon: <LayoutDashboard size={20} />,
+			label: "Dashboard",
 		},
 		{
 			url: "/admin/calendar",
-			icon: <LayoutDashboard size={20} />,
-			label: "Dashboard",
+			icon: <Calendar size={20} />,
+			label: "Calendar",
 		},
 		{
 			url: "/admin/journal",

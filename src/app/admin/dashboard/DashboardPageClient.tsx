@@ -94,7 +94,7 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 	const {
 		addTodo,
 		updateTodo,
-		deleteTodo,
+
 		completeTodo,
 		isMutating: isTodoLoading,
 	} = useTodoMutations({
@@ -275,78 +275,6 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 		}
 	};
 
-	const handleEditFinance = (finance: FinanceType) => {
-		if (!finance || !finance.id) {
-			showSnackbar({
-				open: true,
-				message: "Invalid transaction data",
-				severity: "error",
-			});
-			return;
-		}
-		setEditFinance(finance);
-		showSnackbar({
-			open: true,
-			message: "Transaction loaded for editing",
-			severity: "success",
-		});
-	};
-
-	const handleDeleteFinance = async (id: string) => {
-		try {
-			await deleteMutation.mutateAsync(id);
-			showSnackbar({
-				open: true,
-				message: "Transaction deleted successfully!",
-				severity: "success",
-			});
-		} catch (error) {
-			showSnackbar({
-				open: true,
-				message: (error as Error).message || "Error deleting transaction",
-				severity: "error",
-			});
-		}
-	};
-
-	const handleEditTodo = (todo: TodoType) => {
-		if (!todo || !todo.id) {
-			showSnackbar({
-				open: true,
-				message: "Invalid todo data",
-				severity: "error",
-			});
-			return;
-		}
-		setEditTodo(todo);
-		showSnackbar({
-			open: true,
-			message: "Todo loaded for editing",
-			severity: "success",
-		});
-	};
-
-	const handleDeleteTodo = async (id: string) => {
-		try {
-			const prevTodos = todos;
-			setTodos(todos.filter((todo) => todo.id !== id)); // Optimistic delete
-			await deleteTodo(id);
-			showSnackbar({
-				open: true,
-				message: "Todo deleted successfully!",
-				severity: "success",
-			});
-			await refetchTodos();
-		} catch (error: any) {
-			setTodos(todos); // Revert nếu lỗi
-			showSnackbar({
-				open: true,
-				message: error.message || "Failed to delete todo",
-				severity: "error",
-			});
-		}
-	};
-
 	const handleCompleteTodo = async (id: string) => {
 		const completedStatus = initialStatuses.find((s) => s.name === "Completed");
 		if (!completedStatus) {
@@ -422,11 +350,7 @@ const DashboardPageClient: React.FC<DashboardPageClientProps> = ({
 			setSummaryFilters={setSummaryFilters}
 			setPagination={setPagination}
 			handleAddOrUpdateFinance={handleAddOrUpdateFinance}
-			handleEditFinance={handleEditFinance}
-			handleDeleteFinance={handleDeleteFinance}
 			handleSubmit={handleSubmit}
-			handleEditTodo={handleEditTodo}
-			handleDeleteTodo={handleDeleteTodo}
 			handleCompleteTodo={handleCompleteTodo}
 			handleCancel={handleCancel}
 			initialFinanceData={editFinance}

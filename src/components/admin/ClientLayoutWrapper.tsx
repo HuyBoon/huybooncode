@@ -1,26 +1,20 @@
+// src/components/admin/ClientLayoutWrapper.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import AsideCustomer from "./AsideCustomer";
 import AdminHeader from "./AdminHeader";
 import FooterNavigation from "./FooterNavigation";
-import CustomBreadcrumbs from "./CustomBreadcrumbs";
 import { usePathname } from "next/navigation";
 import { useSnackbar } from "@/context/SnackbarContext";
 
-import { navLinks } from "@/constants/navLinks";
-
-export default function ClientLayoutWrapper({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+function ClientLayoutContent({ children }: { children: ReactNode }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const pathname = usePathname();
 	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
 	return (
-		<div className="relative bg-gradient-to-b from-teal-400 via-blue-200 to-[#135e3d] flex flex-col min-h-screen">
+		<>
 			<div className="hidden md:block">
 				<AsideCustomer collapsed={collapsed} setCollapsed={setCollapsed} />
 			</div>
@@ -33,6 +27,18 @@ export default function ClientLayoutWrapper({
 				{children}
 			</main>
 			<FooterNavigation />
+		</>
+	);
+}
+
+export default function ClientLayoutWrapper({
+	children,
+}: {
+	children: ReactNode;
+}) {
+	return (
+		<div className="relative bg-gradient-to-b from-teal-400 via-blue-200 to-[#135e3d] flex flex-col min-h-screen">
+			<ClientLayoutContent>{children}</ClientLayoutContent>
 		</div>
 	);
 }

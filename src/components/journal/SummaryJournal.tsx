@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { JournalType } from "@/types/interface";
@@ -14,15 +16,19 @@ const SummaryJournal: React.FC<SummaryJournalProps> = ({ journals }) => {
 	}, {} as Record<string, number>);
 
 	return (
-		<Box sx={{ p: 2 }}>
-			<Typography variant="h6">Journal Summary by Day</Typography>
+		<Box sx={{ p: 3 }}>
+			<Typography variant="h6" gutterBottom sx={{ fontWeight: "medium" }}>
+				Journal Summary by Day
+			</Typography>
 			{Object.entries(journalsByDay).map(([date, count]) => (
-				<Typography key={date}>
+				<Typography key={date} variant="body2" sx={{ mb: 1 }}>
 					{date}: {count} journal{count > 1 ? "s" : ""}
 				</Typography>
 			))}
 			{Object.keys(journalsByDay).length === 0 && (
-				<Typography>No journals found</Typography>
+				<Typography variant="body2" color="text.secondary">
+					No journals found
+				</Typography>
 			)}
 		</Box>
 	);

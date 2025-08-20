@@ -1,69 +1,59 @@
-import { JournalType } from "@/types/interface";
+import { JournalType, PaginationType } from "@/types/interface";
 
-export const fetchJournals = async (filters: { period?: string; date?: string; mood?: string; page?: number; limit?: number } = {}) => {
-    const url = new URL("/api/journal", window.location.origin);
-    if (filters.period) url.searchParams.append("period", filters.period);
-    if (filters.date) url.searchParams.append("date", filters.date);
-    if (filters.mood) url.searchParams.append("mood", filters.mood);
-    if (filters.page) url.searchParams.append("page", filters.page.toString());
-    if (filters.limit) url.searchParams.append("limit", filters.limit.toString());
+interface FetchJournalsParams {
+    page?: number;
+    limit?: number;
+    mood?: string;
+    period?: string;
+    date?: string;
+    dateTimeRange?: {
+        start: string;
+        end: string;
+    };
+}
 
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-        throw new Error("Failed to fetch journals");
+export const fetchJournals = async ({
+    page = 1,
+    limit = 10,
+    mood,
+    period,
+    date,
+    dateTimeRange,
+}: FetchJournalsParams): Promise<{ data: JournalType[]; pagination: PaginationType }> => {
+    const queryParams: Record<string, string> = {
+        page: page.toString(),
+        limit: limit.toString(),
+    };
+
+    if (mood && mood !== "all") {
+        queryParams.mood = mood;
     }
-    return (await response.json()) as { data: JournalType[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
-};
-
-export const fetchJournalById = async (id: string) => {
-    const response = await fetch(`/api/journal/${id}`);
-    if (!response.ok) {
-        throw new Error("Failed to fetch journal");
+    if (period && period !== "all") {
+        queryParams.period = period;
     }
-    return (await response.json()) as JournalType;
-};
-
-export const addJournal = async (data: {
-    title: string;
-    content: string;
-    mood: string;
-    date: string;
-}) => {
-    const response = await fetch("/api/journal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        throw new Error("Failed to add journal");
+    if (date) {
+        queryParams.date = date;
     }
-    return (await response.json()) as JournalType;
-};
-
-export const updateJournal = async (data: {
-    id: string;
-    title: string;
-    content: string;
-    mood: string;
-    date: string;
-}) => {
-    const response = await fetch(`/api/journal/${data.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        throw new Error("Failed to update journal");
+    if (dateTimeRange) {
+        queryParams.start = dateTimeRange.start;
+        queryParams.end = dateTimeRange.end;
     }
-    return (await response.json()) as JournalType;
-};
 
-export const deleteJournal = async (id: string) => {
-    const response = await fetch(`/api/journal/${id}`, {
-        method: "DELETE",
-    });
-    if (!response.ok) {
-        throw new Error("Failed to delete journal");
+    const queryString = new URLSearchParams(queryParams).toString();
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+    if (!baseUrl) {
+        throw new Error("NEXT_PUBLIC_API_URL is not defined in environment variables");
     }
-    return await response.json();
+
+    const response = await fetch(`${baseUrl}/api/journal?${queryString}`);
+    if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorData || "Failed to fetch journals"}`);
+    }
+
+    const data = await response.json();
+    return {
+        data: data.data || [],
+        pagination: data.pagination || { page, limit, total: 0, totalPages: 1 },
+    };
 };

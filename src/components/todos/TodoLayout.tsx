@@ -160,7 +160,7 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 						setPagination={setPagination}
 						todoFilters={todoFilters}
 						setTodoFilters={setTodoFilters}
-						resetFilters={resetFilters} // Pass resetFilters to TodoHistory
+						resetFilters={resetFilters}
 					/>
 				</Grid>
 			</Grid>

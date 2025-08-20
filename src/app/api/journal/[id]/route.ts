@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnection";
-
 import Journal from "@/models/Journal";
 import { JournalType } from "@/types/interface";
 import mongoose from "mongoose";
@@ -56,11 +55,11 @@ export async function PUT(
 
         const { title, content, mood, date } = await req.json();
 
-        // Validate inputs
         if (!title || typeof title !== "string" || !title.trim()) {
             return NextResponse.json({ error: "Valid title is required" }, { status: 400 });
         }
-        if (!content || typeof content !== "string" || !content.trim()) {
+        const strippedContent = content.replace(/<[^>]+>/g, "").trim();
+        if (!content || typeof content !== "string" || !strippedContent) {
             return NextResponse.json({ error: "Valid content is required" }, { status: 400 });
         }
         if (!mood || typeof mood !== "string") {
@@ -74,11 +73,11 @@ export async function PUT(
             id,
             {
                 title: title.trim(),
-                content: content.trim(),
+                content: content,
                 mood,
                 date: new Date(date),
             },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!journal) {

@@ -53,11 +53,7 @@ interface DashboardLayoutProps {
 		description?: string;
 		date: string;
 	}) => Promise<void>;
-	handleEditFinance: (finance: FinanceType) => void;
-	handleDeleteFinance: (id: string) => Promise<void>;
 	handleSubmit: (e: React.FormEvent) => Promise<void>;
-	handleEditTodo: (todo: TodoType) => void;
-	handleDeleteTodo: (id: string) => Promise<void>;
 	handleCompleteTodo: (id: string) => Promise<void>;
 	handleCancel: () => void;
 	initialFinanceData?: FinanceType;
@@ -86,22 +82,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 	todoCategories,
 	statuses,
 	todos,
-	finances,
+
 	summaryFinances,
 	isFinanceLoading,
 	isTodoLoading,
-	pagination,
-	transactionFilters,
-	setTransactionFilters,
+
 	summaryFilters,
 	setSummaryFilters,
-	setPagination,
+
 	handleAddOrUpdateFinance,
-	handleEditFinance,
-	handleDeleteFinance,
+
 	handleSubmit,
-	handleEditTodo,
-	handleDeleteTodo,
+
 	handleCompleteTodo,
 	handleCancel,
 	initialFinanceData,
@@ -246,8 +238,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 							statuses={statuses}
 							categories={todoCategories}
 							loading={isTodoLoading}
-							handleEdit={handleEditTodo}
-							handleDelete={handleDeleteTodo}
 							handleComplete={handleCompleteTodo}
 						/>
 					</Card>

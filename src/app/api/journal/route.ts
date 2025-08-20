@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnection";
-
 import Journal from "@/models/Journal";
 import { JournalType } from "@/types/interface";
 
@@ -13,7 +12,6 @@ export async function GET(request: NextRequest) {
         const date = searchParams.get("date") || null;
         const mood = searchParams.get("mood") || null;
 
-        // Build query
         const query: any = {};
         if (date) {
             const [year, month] = date.split("-").map(Number);
@@ -22,16 +20,14 @@ export async function GET(request: NextRequest) {
                 $lt: new Date(year, month, 1),
             };
         }
-        if (mood) {
+        if (mood && mood !== "all") {
             query.mood = mood;
         }
 
-        // Calculate pagination
         const skip = (page - 1) * limit;
         const total = await Journal.countDocuments(query);
         const totalPages = Math.ceil(total / limit);
 
-        // Fetch journals
         const journals = await Journal.find(query)
             .sort({ date: -1 })
             .skip(skip)
@@ -59,9 +55,12 @@ export async function GET(request: NextRequest) {
             },
             { status: 200 }
         );
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error fetching journals:", error);
-        return NextResponse.json({ error: "Failed to fetch journals" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to fetch journals", details: error.message },
+            { status: 500 }
+        );
     }
 }
 
@@ -70,11 +69,11 @@ export async function POST(request: NextRequest) {
     try {
         const { title, content, mood, date } = await request.json();
 
-        // Validate inputs
         if (!title || typeof title !== "string" || !title.trim()) {
             return NextResponse.json({ error: "Valid title is required" }, { status: 400 });
         }
-        if (!content || typeof content !== "string" || !content.trim()) {
+        const strippedContent = content.replace(/<[^>]+>/g, "").trim();
+        if (!content || typeof content !== "string" || !strippedContent) {
             return NextResponse.json({ error: "Valid content is required" }, { status: 400 });
         }
         if (!mood || typeof mood !== "string") {
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
 
         const journal = await Journal.create({
             title: title.trim(),
-            content: content.trim(),
+            content: content, // Lưu HTML từ React Quill
             mood,
             date: new Date(date),
         });
