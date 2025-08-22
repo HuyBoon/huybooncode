@@ -174,6 +174,12 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         setErrors((prev) => ({ ...prev, type: undefined, category: undefined }));
     };
 
+    const handleAmountChange = (value: string | number) => {
+        const formatted = typeof value === "number" ? formatNumber(value.toString()) : value;
+        setFormData((prev) => ({ ...prev, amount: formatted }));
+        setErrors((prev) => ({ ...prev, amount: undefined }));
+    };
+
     const resetForm = () => {
         setFormData({
             id: null,
@@ -196,6 +202,7 @@ export const useTransactionForm = ({ categories, initialData, onSubmit }: UseTra
         handleChange,
         handleCategoryChange,
         handleTypeChange,
+        handleAmountChange,
         resetForm,
     };
 };

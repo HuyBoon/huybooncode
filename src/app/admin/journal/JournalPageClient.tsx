@@ -41,12 +41,11 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 		null
 	);
 
-	// Display initial error if present
 	useEffect(() => {
 		if (initialError) {
 			showSnackbar({
 				open: true,
-				message: initialError,
+				message: `${initialError}. Displaying sample data.`,
 				severity: "error",
 			});
 		}
@@ -120,7 +119,6 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 		},
 	});
 
-	// Notification logic
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			try {
@@ -190,7 +188,7 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 
 	const handleSelectJournal = (journal: JournalType) => {
 		setSelectedJournal(journal);
-		setEditJournal(undefined); // Clear edit form when viewing details
+		setEditJournal(undefined);
 	};
 
 	const handleCancel = () => {
@@ -200,15 +198,35 @@ const JournalPageClient: React.FC<JournalPageClientProps> = ({
 
 	if (initialError) {
 		return (
-			<Box sx={{ textAlign: "center", py: 4 }}>
+			<Box sx={{ textAlign: "center", py: 4, color: "white" }}>
 				<Typography color="error">{initialError}</Typography>
+				<Typography sx={{ mt: 1, color: "rgba(255, 255, 255, 0.7)" }}>
+					Showing sample data. Please try again later.
+				</Typography>
 				<Button
 					onClick={() => window.location.reload()}
 					variant="contained"
-					color="primary"
+					sx={{ mt: 2, backgroundColor: "#3d2352", color: "white" }}
 				>
 					Retry
 				</Button>
+				<JournalLayout
+					journals={initialJournals}
+					moods={initialMoods}
+					isLoading={false}
+					pagination={initialPagination}
+					setPagination={setPagination}
+					handleEditJournal={handleEditJournal}
+					handleDeleteJournal={handleDeleteJournal}
+					handleSelectJournal={handleSelectJournal}
+					handleCancel={handleCancel}
+					initialJournalData={editJournal}
+					selectedJournal={selectedJournal}
+					formData={formData}
+					formErrors={errors}
+					handleFormChange={handleChange}
+					handleSubmit={handleSubmit}
+				/>
 			</Box>
 		);
 	}

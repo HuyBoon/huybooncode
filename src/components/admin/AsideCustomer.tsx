@@ -125,7 +125,12 @@ export default function AsideCustomer({
 
 									{hasSubmenu && !collapsed && (
 										<button
-											onClick={() => toggleMenu(item.label)}
+											type="button"
+											onClick={(e) => {
+												e.stopPropagation();
+												e.preventDefault();
+												toggleMenu(item.label);
+											}}
 											className="ml-auto hover:text-white"
 										>
 											{openMenus[item.label] ? (

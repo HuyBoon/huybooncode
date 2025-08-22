@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
 	Button,
@@ -7,6 +9,7 @@ import {
 	InputLabel,
 	FormControl,
 	Box,
+	Typography,
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { MoodType } from "@/types/interface";
@@ -50,7 +53,17 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 	handleChange,
 }) => {
 	return (
-		<Box component="form" onSubmit={onSubmit} sx={{ p: 2 }}>
+		<Box
+			component="form"
+			onSubmit={onSubmit}
+			sx={{
+				px: 3,
+				pb: 3,
+				color: "white",
+				background: "transparent",
+				boxShadow: "none",
+			}}
+		>
 			<TextField
 				fullWidth
 				label="Title"
@@ -60,6 +73,14 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 				error={!!formErrors.title}
 				helperText={formErrors.title}
 				margin="normal"
+				InputLabelProps={{ style: { color: "white" } }}
+				InputProps={{ style: { color: "white" } }}
+				sx={{
+					"& .MuiOutlinedInput-notchedOutline": {
+						borderColor: "rgba(255, 255, 255, 0.3)",
+					},
+					"& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
+				}}
 			/>
 			<TextField
 				fullWidth
@@ -72,14 +93,55 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 				margin="normal"
 				multiline
 				rows={4}
+				InputLabelProps={{ style: { color: "white" } }}
+				InputProps={{ style: { color: "white" } }}
+				sx={{
+					"& .MuiOutlinedInput-notchedOutline": {
+						borderColor: "rgba(255, 255, 255, 0.3)",
+					},
+					"& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
+				}}
 			/>
 			<FormControl fullWidth margin="normal" error={!!formErrors.mood}>
-				<InputLabel>Mood</InputLabel>
+				<InputLabel sx={{ color: "white" }}>Mood</InputLabel>
 				<Select
 					name="mood"
 					value={formData.mood}
 					onChange={handleChange}
 					label="Mood"
+					MenuProps={{
+						PaperProps: {
+							sx: {
+								backgroundColor: "#2e004f", // tím đậm
+								color: "white",
+								"& .MuiMenuItem-root": {
+									backgroundColor: "#2e004f", // xóa padding trắng
+									"&:hover": {
+										backgroundColor: "#5a189a", // hover tím sáng
+									},
+									"&.Mui-selected": {
+										backgroundColor: "#7b2cbf !important", // màu rõ ràng khi chọn
+										color: "white",
+									},
+								},
+								"& .MuiList-root": {
+									padding: 0, // bỏ khoảng trắng trên/dưới
+								},
+							},
+						},
+					}}
+					sx={{
+						color: "white",
+						"& .MuiOutlinedInput-notchedOutline": {
+							borderColor: "rgba(255, 255, 255, 0.5)",
+						},
+						"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+							borderColor: "#bb86fc",
+						},
+						"& .MuiSvgIcon-root": {
+							color: "white",
+						},
+					}}
 				>
 					{moods.map((mood) => (
 						<MenuItem key={mood.id} value={mood.name}>
@@ -87,10 +149,20 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 						</MenuItem>
 					))}
 				</Select>
+
 				{formErrors.mood && (
-					<p className="text-red-500 text-sm">{formErrors.mood}</p>
+					<Typography
+						sx={{
+							color: "#ffb3b3", // đỏ nhạt dễ đọc trên nền tím
+							fontSize: "0.75rem",
+							mt: 0.5,
+						}}
+					>
+						{formErrors.mood}
+					</Typography>
 				)}
 			</FormControl>
+
 			<TextField
 				fullWidth
 				label="Date"
@@ -101,16 +173,41 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 				error={!!formErrors.date}
 				helperText={formErrors.date}
 				margin="normal"
-				InputLabelProps={{ shrink: true }}
+				InputLabelProps={{ shrink: true, style: { color: "white" } }}
+				InputProps={{ style: { color: "white" } }}
+				sx={{
+					"& .MuiOutlinedInput-notchedOutline": {
+						borderColor: "rgba(255, 255, 255, 0.3)",
+					},
+					"& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
+				}}
 			/>
 			<Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-				<Button type="submit" variant="contained" color="primary">
+				<Button
+					type="submit"
+					variant="contained"
+					sx={{
+						backgroundColor: "#3d2352",
+						color: "white",
+						"&:hover": { backgroundColor: "#4b2e6a" },
+					}}
+				>
 					{formData.id && !formData.id.startsWith("temp-") ? "Update" : "Add"}{" "}
 					Journal
 				</Button>
-				<Button variant="outlined" color="secondary" onClick={onCancel}>
-					Cancel
-				</Button>
+				{onCancel && (
+					<Button
+						variant="outlined"
+						onClick={onCancel}
+						sx={{
+							color: "white",
+							borderColor: "rgba(255, 255, 255, 0.3)",
+							"&:hover": { borderColor: "white" },
+						}}
+					>
+						Cancel
+					</Button>
+				)}
 			</Box>
 		</Box>
 	);

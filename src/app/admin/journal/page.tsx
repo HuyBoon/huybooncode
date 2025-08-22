@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import JournalPageClient from "./JournalPageClient";
 import { moods } from "@/utils/constant";
 import { fetchJournals } from "@/utils/apiJournal";
+import { mockJournals, mockPagination } from "@/constants/mockJournals";
 
 export default async function JournalPage() {
 	const session = await getServerSession();
@@ -29,9 +30,9 @@ export default async function JournalPage() {
 			error instanceof Error ? error.message : "Failed to fetch journals";
 		return (
 			<JournalPageClient
-				initialJournals={[]}
+				initialJournals={mockJournals}
 				initialMoods={moods}
-				initialPagination={{ page: 1, limit: 10, total: 0, totalPages: 1 }}
+				initialPagination={mockPagination}
 				initialError={errorMessage}
 			/>
 		);

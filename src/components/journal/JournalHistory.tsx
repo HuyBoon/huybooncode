@@ -19,6 +19,8 @@ import {
   TextField,
   SelectChangeEvent,
   Button,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Edit, Delete, RefreshCw, Eye } from "lucide-react";
 import { JournalType, MoodType, PaginationType } from "@/types/interface";
@@ -52,6 +54,8 @@ const JournalHistory = forwardRef<
     ref
   ) => {
     const { filters, setFilters, resetFilters, handleFilterChange } = useJournalFilter(moods, initialPagination);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     React.useImperativeHandle(ref, () => ({
       journals,
@@ -90,20 +94,21 @@ const JournalHistory = forwardRef<
     };
 
     return (
-      <Box sx={{ mt: 4, p: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+      <Box sx={{ p: 3, flexGrow: 1 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: "white" }}>
           Journal History
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, sm: 3 }}>
             <FormControl fullWidth variant="outlined">
-              <InputLabel>Mood</InputLabel>
+              <InputLabel sx={{ color: "white" }}>Mood</InputLabel>
               <Select
                 name="mood"
                 value={filters.mood}
                 onChange={handleSelectChange}
                 label="Mood"
                 disabled={loading}
+                sx={{ color: "white", "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" } }}
               >
                 <MenuItem value="all">All</MenuItem>
                 {moods.map((mood) => (
@@ -116,13 +121,14 @@ const JournalHistory = forwardRef<
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
             <FormControl fullWidth variant="outlined">
-              <InputLabel>Period</InputLabel>
+              <InputLabel sx={{ color: "white" }}>Period</InputLabel>
               <Select
                 name="period"
                 value={filters.period}
                 onChange={handleSelectChange}
                 label="Period"
                 disabled={loading}
+                sx={{ color: "white", "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" } }}
               >
                 <MenuItem value="today">Today</MenuItem>
                 <MenuItem value="week">This Week</MenuItem>
@@ -140,8 +146,9 @@ const JournalHistory = forwardRef<
                 onChange={handleInputChange}
                 disabled={loading}
                 type="month"
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, style: { color: "white" } }}
                 variant="outlined"
+                sx={{ color: "white", "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" } }}
               />
             </FormControl>
           </Grid>
@@ -150,28 +157,28 @@ const JournalHistory = forwardRef<
               variant="outlined"
               onClick={resetFilters}
               startIcon={<RefreshCw size={16} />}
-              sx={{ mt: 1 }}
+              sx={{ mt: 1, color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
               disabled={loading}
             >
               Reset Filters
             </Button>
           </Grid>
         </Grid>
-        <Table>
+        <Table sx={{ background: "transparent" }}>
           <TableHead>
             <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Content</TableCell>
-              <TableCell>Mood</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ color: "white" }}>Title</TableCell>
+              {!isMobile && <TableCell sx={{ color: "white" }}>Content</TableCell>}
+              {!isMobile && <TableCell sx={{ color: "white" }}>Mood</TableCell>}
+              {!isMobile && <TableCell sx={{ color: "white" }}>Date</TableCell>}
+              <TableCell sx={{ color: "white" }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {journals.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography variant="body2" color="text.secondary">
+                <TableCell colSpan={isMobile ? 2 : 5} align="center">
+                  <Typography variant="body2" sx={{ color: "rgba(255, 255, 255, 0.7)" }}>
                     No journals found
                   </Typography>
                 </TableCell>
@@ -179,50 +186,56 @@ const JournalHistory = forwardRef<
             ) : (
               journals.map((journal) => (
                 <TableRow key={journal.id}>
-                  <TableCell>{journal.title}</TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: sanitizeHtml(journal.content, {
-                          allowedTags: ["p", "b", "i", "u", "ul", "ol", "li", "a"],
-                          allowedAttributes: { a: ["href"] },
-                        }),
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {moods.find((m) => m.name === journal.mood)?.emoji} {journal.mood}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(journal.date).toLocaleString("en-US", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </TableCell>
+                  <TableCell sx={{ color: "white" }}>{journal.title}</TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ color: "white" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHtml(journal.content, {
+                            allowedTags: ["p", "b", "i", "u", "ul", "ol", "li", "a"],
+                            allowedAttributes: { a: ["href"] },
+                          }),
+                        }}
+                      />
+                    </TableCell>
+                  )}
+                  {!isMobile && (
+                    <TableCell sx={{ color: "white" }}>
+                      {moods.find((m) => m.name === journal.mood)?.emoji} {journal.mood}
+                    </TableCell>
+                  )}
+                  {!isMobile && (
+                    <TableCell sx={{ color: "white" }}>
+                      {new Date(journal.date).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <IconButton
                       onClick={() => handleSelectJournal(journal)}
                       disabled={loading}
                       aria-label={`View ${journal.title}`}
                     >
-                      <Eye size={16} color="blue" />
+                      <Eye size={16} color="white" />
                     </IconButton>
                     <IconButton
                       onClick={() => handleEdit(journal)}
                       disabled={loading}
                       aria-label={`Edit ${journal.title}`}
                     >
-                      <Edit size={16} />
+                      <Edit size={16} color="white" />
                     </IconButton>
                     <IconButton
                       onClick={() => handleDelete(journal.id)}
@@ -245,6 +258,18 @@ const JournalHistory = forwardRef<
           page={pagination.page - 1}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            color: "white",
+            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
+              color: "white",
+            },
+            "& .MuiTablePagination-select": {
+              color: "white",
+            },
+            "& .MuiTablePagination-actions button": {
+              color: "white",
+            },
+          }}
         />
       </Box>
     );

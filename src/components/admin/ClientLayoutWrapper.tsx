@@ -5,13 +5,9 @@ import { useState, ReactNode } from "react";
 import AsideCustomer from "./AsideCustomer";
 import AdminHeader from "./AdminHeader";
 import FooterNavigation from "./FooterNavigation";
-import { usePathname } from "next/navigation";
-import { useSnackbar } from "@/context/SnackbarContext";
 
 function ClientLayoutContent({ children }: { children: ReactNode }) {
 	const [collapsed, setCollapsed] = useState(false);
-	const pathname = usePathname();
-	const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
 	return (
 		<>

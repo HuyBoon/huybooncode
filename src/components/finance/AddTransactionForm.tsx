@@ -79,6 +79,52 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 		} as React.ChangeEvent<HTMLInputElement>);
 	};
 
+	const inputStyles = {
+		"& .MuiInputBase-root": {
+			fontSize: "1rem",
+			backgroundColor: "transparent !important",
+			"&.Mui-focused": {
+				backgroundColor: "transparent !important",
+			},
+			"&.MuiAutocomplete-inputRoot": {
+				backgroundColor: "transparent !important",
+			},
+		},
+		"& .MuiInputBase-input": {
+			color: "#fff",
+			fontSize: "1rem",
+		},
+		"& .MuiOutlinedInput-notchedOutline": {
+			borderColor: "#fff",
+		},
+		"&:hover .MuiOutlinedInput-notchedOutline": {
+			borderColor: "#bb86fc",
+		},
+		"& .MuiSvgIcon-root": {
+			color: "#fff",
+		},
+		"& .MuiAutocomplete-option": {
+			color: "#fff",
+			"&:hover": {
+				backgroundColor: "rgba(187, 134, 252, 0.2)",
+			},
+		},
+	};
+
+	const selectMenuStyles = {
+		"& .MuiMenu-paper": {
+			backgroundColor: "rgba(0,0,0,0.8)",
+			color: "#fff",
+			"& .MuiMenuItem-root": {
+				fontSize: "1rem",
+				color: "#fff",
+				"&:hover": {
+					backgroundColor: "rgba(187, 134, 252, 0.2)",
+				},
+			},
+		},
+	};
+
 	return (
 		<Card
 			sx={{
@@ -93,7 +139,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 			<CardContent
 				sx={{
 					p: { xs: 2, sm: 3 },
-					flexGrow: 1, // Allow content to grow
+					flexGrow: 1,
 					display: "flex",
 					flexDirection: "column",
 				}}
@@ -120,11 +166,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								fullWidth
 								error={!!errors.type}
 								size={isMobile ? "small" : "medium"}
-								sx={{
-									"& .MuiInputBase-root": {
-										fontSize: "1rem",
-									},
-								}}
+								sx={inputStyles}
 							>
 								<InputLabel id="type-label" sx={{ color: "#fff" }}>
 									Type
@@ -139,16 +181,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									label="Type"
 									disabled={loading}
 									aria-label="Select transaction type"
-									sx={{
-										color: "#fff",
-										"& .MuiOutlinedInput-notchedOutline": {
-											borderColor: "#fff",
-										},
-										"&:hover .MuiOutlinedInput-notchedOutline": {
-											borderColor: "#fff",
-										},
-										"& .MuiSvgIcon-root": { color: "#fff" },
-									}}
+									sx={selectMenuStyles}
 								>
 									<MenuItem value="income">Income</MenuItem>
 									<MenuItem value="expense">Expense</MenuItem>
@@ -188,14 +221,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 									handleCategoryChange(newValue?.id || "")
 								}
 								disabled={loading}
-								sx={{
-									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
-									"& .MuiSvgIcon-root": { color: "#fff" },
-									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
-									"&:hover .MuiOutlinedInput-notchedOutline": {
-										borderColor: "#fff",
-									},
-								}}
+								sx={inputStyles}
 								renderInput={(params) => (
 									<TextField
 										{...params}
@@ -206,22 +232,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 										InputLabelProps={{
 											sx: { color: "#fff" },
 										}}
-										sx={{
-											"& .MuiInputBase-root": {
-												fontSize: "1rem",
-											},
-											"& .MuiInputBase-input": {
-												color: "#fff",
-												fontSize: "1rem",
-											},
-											"& .MuiOutlinedInput-notchedOutline": {
-												borderColor: "#fff",
-											},
-											"&:hover .MuiOutlinedInput-notchedOutline": {
-												borderColor: "#fff",
-											},
-											"& .MuiSvgIcon-root": { color: "#fff" },
-										}}
+										sx={inputStyles}
 										aria-label="Select transaction category"
 									/>
 								)}
@@ -232,6 +243,10 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 											color: "#fff",
 											"& .MuiAutocomplete-option": {
 												fontSize: "1rem",
+												color: "#fff",
+												"&:hover": {
+													backgroundColor: "rgba(187, 134, 252, 0.2)",
+												},
 											},
 										},
 									},
@@ -252,19 +267,9 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								InputLabelProps={{
 									sx: { color: "#fff" },
 								}}
-								sx={{
-									"& .MuiInputBase-root": {
-										fontSize: "1rem",
-									},
-									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
-									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
-									"&:hover .MuiOutlinedInput-notchedOutline": {
-										borderColor: "#fff",
-									},
-									"& .MuiSvgIcon-root": { color: "#fff" },
-								}}
+								sx={inputStyles}
 								aria-label="Enter transaction amount"
-								inputProps={{ inputMode: "numeric" }}
+								inputProps={{ inputMode: "numeric", autoComplete: "off" }}
 								placeholder="1.234.567"
 							/>
 						</Grid>
@@ -281,17 +286,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								error={!!errors.date}
 								helperText={errors.date}
 								size={isMobile ? "small" : "medium"}
-								sx={{
-									"& .MuiInputBase-root": {
-										fontSize: "1rem",
-									},
-									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
-									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
-									"&:hover .MuiOutlinedInput-notchedOutline": {
-										borderColor: "#fff",
-									},
-									"& .MuiSvgIcon-root": { color: "#fff" },
-								}}
+								sx={inputStyles}
 								aria-label="Select transaction date"
 							/>
 						</Grid>
@@ -309,17 +304,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								helperText={errors.description}
 								size={isMobile ? "small" : "medium"}
 								InputLabelProps={{ sx: { color: "#fff" } }}
-								sx={{
-									"& .MuiInputBase-root": {
-										fontSize: "1rem",
-									},
-									"& .MuiInputBase-input": { color: "#fff", fontSize: "1rem" },
-									"& .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
-									"&:hover .MuiOutlinedInput-notchedOutline": {
-										borderColor: "#fff",
-									},
-									"& .MuiSvgIcon-root": { color: "#fff" },
-								}}
+								sx={inputStyles}
 								aria-label="Enter transaction description"
 							/>
 						</Grid>
@@ -328,7 +313,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 								direction="row"
 								spacing={isMobile ? 1 : 2}
 								justifyContent="flex-end"
-								sx={{ mt: "auto" }} // Push buttons to bottom
+								sx={{ mt: "auto" }}
 							>
 								{onCancel && (
 									<Button
