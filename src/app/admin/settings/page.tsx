@@ -150,7 +150,7 @@ const SettingPage = () => {
 			window.confirm("Are you sure you want to delete all journal entries?")
 		) {
 			apiAction(
-				"/api/journals/delete-all",
+				"/api/journal/delete-all",
 				"DELETE",
 				"All journal entries deleted",
 				"Failed to delete journals",

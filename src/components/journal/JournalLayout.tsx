@@ -6,7 +6,12 @@ import { SelectChangeEvent } from "@mui/material/Select";
 import AddJournalForm from "@/components/journal/AddJournalForm";
 import JournalHistory from "@/components/journal/JournalHistory";
 import JournalDetail from "@/components/journal/JournalDetail";
-import { JournalType, MoodType, PaginationType } from "@/types/interface";
+import {
+	JournalType,
+	MoodType,
+	PaginationType,
+	JournalFilters,
+} from "@/types/interface";
 
 interface FormData {
 	id?: string;
@@ -43,6 +48,8 @@ interface JournalLayoutProps {
 			| SelectChangeEvent<string>
 	) => void;
 	handleSubmit: (e: React.FormEvent) => Promise<void>;
+	filters: JournalFilters;
+	setFilters: React.Dispatch<React.SetStateAction<JournalFilters>>;
 }
 
 const JournalLayout: React.FC<JournalLayoutProps> = ({
@@ -61,6 +68,8 @@ const JournalLayout: React.FC<JournalLayoutProps> = ({
 	formErrors,
 	handleFormChange,
 	handleSubmit,
+	filters,
+	setFilters,
 }) => {
 	return (
 		<Box
@@ -168,6 +177,8 @@ const JournalLayout: React.FC<JournalLayoutProps> = ({
 								loading={isLoading}
 								pagination={pagination}
 								setPagination={setPagination}
+								filters={filters}
+								setFilters={setFilters}
 							/>
 						</Box>
 					</Card>

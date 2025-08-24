@@ -19,7 +19,7 @@ interface FormData {
 	title: string;
 	content: string;
 	mood: string;
-	date: string;
+	date: string; // Format: YYYY-MM-DD
 }
 
 interface FormErrors {
@@ -112,20 +112,20 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 					MenuProps={{
 						PaperProps: {
 							sx: {
-								backgroundColor: "#2e004f", // tím đậm
+								backgroundColor: "#2e004f",
 								color: "white",
 								"& .MuiMenuItem-root": {
-									backgroundColor: "#2e004f", // xóa padding trắng
+									backgroundColor: "#2e004f",
 									"&:hover": {
-										backgroundColor: "#5a189a", // hover tím sáng
+										backgroundColor: "#5a189a",
 									},
 									"&.Mui-selected": {
-										backgroundColor: "#7b2cbf !important", // màu rõ ràng khi chọn
+										backgroundColor: "#7b2cbf !important",
 										color: "white",
 									},
 								},
 								"& .MuiList-root": {
-									padding: 0, // bỏ khoảng trắng trên/dưới
+									padding: 0,
 								},
 							},
 						},
@@ -149,11 +149,10 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 						</MenuItem>
 					))}
 				</Select>
-
 				{formErrors.mood && (
 					<Typography
 						sx={{
-							color: "#ffb3b3", // đỏ nhạt dễ đọc trên nền tím
+							color: "#ffb3b3",
 							fontSize: "0.75rem",
 							mt: 0.5,
 						}}
@@ -162,12 +161,11 @@ const AddJournalForm: React.FC<AddJournalFormProps> = ({
 					</Typography>
 				)}
 			</FormControl>
-
 			<TextField
 				fullWidth
 				label="Date"
 				name="date"
-				type="datetime-local"
+				type="date"
 				value={formData.date}
 				onChange={handleChange}
 				error={!!formErrors.date}

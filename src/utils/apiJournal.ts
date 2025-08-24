@@ -35,8 +35,8 @@ export const fetchJournals = async ({
         queryParams.date = date;
     }
     if (dateTimeRange) {
-        queryParams.start = dateTimeRange.start;
-        queryParams.end = dateTimeRange.end;
+        queryParams["dateTimeRange[start]"] = dateTimeRange.start;
+        queryParams["dateTimeRange[end]"] = dateTimeRange.end;
     }
 
     const queryString = new URLSearchParams(queryParams).toString();
@@ -45,7 +45,11 @@ export const fetchJournals = async ({
         throw new Error("NEXT_PUBLIC_API_URL is not defined in environment variables");
     }
 
-    const response = await fetch(`${baseUrl}/api/journal?${queryString}`);
+    const response = await fetch(`${baseUrl}/api/journal?${queryString}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // For NextAuth session
+    });
     if (!response.ok) {
         const errorData = await response.text();
         throw new Error(`HTTP ${response.status}: ${errorData || "Failed to fetch journals"}`);

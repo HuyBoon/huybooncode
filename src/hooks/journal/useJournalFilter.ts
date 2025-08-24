@@ -11,23 +11,27 @@ interface JournalFilters {
 
 export const useJournalFilter = (initialMoods: MoodType[], initialPagination: PaginationType) => {
     const [filters, setFilters] = useState<JournalFilters>({
-        date: new Date().toISOString().slice(0, 7), // YYYY-MM
+        date: "",
         mood: "all",
-        period: "today",
+        period: "all",
     });
-    const [pagination, setPagination] = useState<PaginationType>(initialPagination);
+    const [pagination, setPagination] = useState<PaginationType>({
+        ...initialPagination,
+        page: 1,
+        limit: initialPagination.limit || 10,
+    });
 
     const resetFilters = () => {
         setFilters({
-            date: new Date().toISOString().slice(0, 7),
+            date: "",
             mood: "all",
-            period: "today",
+            period: "all",
         });
         setPagination({ ...initialPagination, page: 1 });
     };
 
     const handleFilterChange = (name: keyof JournalFilters, value: string) => {
-        setFilters((prev) => ({ ...prev, [name]: value }));
+        setFilters((prev) => ({ ...prev, [name]: value || "" })); // Handle empty value
         setPagination((prev) => ({ ...prev, page: 1 }));
     };
 
