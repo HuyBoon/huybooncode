@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnection";
-
 import Blog from "@/models/Blog";
 import BlogCategory from "@/models/BlogCategory";
 import mongoose from "mongoose";
 import { BlogType } from "@/types/interface";
 
-export async function GET(req: NextRequest,
-    context: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     await dbConnect();
     try {
-        const { id } = await context.params;
-
+        const { id } = await params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({ error: "Valid blog ID is required" }, { status: 400 });
         }
 
-        const blog = await Blog.findById(id)
-            .populate("blogcategory", "name")
-            .populate("author", "name");
+        const blog = await Blog.findById(id).populate("blogcategory", "name");
         if (!blog) {
             return NextResponse.json({ error: "Blog not found" }, { status: 404 });
         }
@@ -30,12 +25,11 @@ export async function GET(req: NextRequest,
             slug: blog.slug,
             description: blog.description || "",
             introductions: blog.introductions || "",
-            blogcategory: blog.blogcategory._id.toString(),
+            blogcategory: blog.blogcategory?._id.toString() || "",
             thumbnail: blog.thumbnail || "",
             content: blog.content,
             status: blog.status,
             tags: blog.tags,
-            author: blog.author ? blog.author._id.toString() : undefined,
             views: blog.views,
             createdAt: blog.createdAt.toISOString(),
             updatedAt: blog.updatedAt.toISOString(),
@@ -53,12 +47,10 @@ export async function GET(req: NextRequest,
     }
 }
 
-export async function PUT(req: NextRequest,
-    context: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     await dbConnect();
     try {
-
-        const { id } = await context.params;
+        const { id } = await params;
         const {
             title,
             slug,
@@ -69,8 +61,7 @@ export async function PUT(req: NextRequest,
             content,
             status,
             tags,
-            author,
-        } = await req.json();
+        } = await request.json();
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({ error: "Valid blog ID is required" }, { status: 400 });
@@ -93,13 +84,15 @@ export async function PUT(req: NextRequest,
                 { status: 400 }
             );
         }
-        if (author && !mongoose.Types.ObjectId.isValid(author)) {
-            return NextResponse.json({ error: "Valid author ID is required" }, { status: 400 });
-        }
 
         const categoryExists = await BlogCategory.findById(blogcategory);
         if (!categoryExists) {
             return NextResponse.json({ error: "Category not found" }, { status: 404 });
+        }
+
+        const existingSlug = await Blog.findOne({ slug: slug.trim(), _id: { $ne: id } });
+        if (existingSlug) {
+            return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
         }
 
         const blog = await Blog.findByIdAndUpdate(
@@ -114,12 +107,9 @@ export async function PUT(req: NextRequest,
                 content: content.trim(),
                 status: status || "draft",
                 tags: tags || [],
-                author: author || null,
             },
             { new: true, runValidators: true }
-        )
-            .populate("blogcategory", "name")
-            .populate("author", "name");
+        ).populate("blogcategory", "name");
 
         if (!blog) {
             return NextResponse.json({ error: "Blog not found" }, { status: 404 });
@@ -131,12 +121,11 @@ export async function PUT(req: NextRequest,
             slug: blog.slug,
             description: blog.description || "",
             introductions: blog.introductions || "",
-            blogcategory: blog.blogcategory._id.toString(),
+            blogcategory: blog.blogcategory?._id.toString() || "",
             thumbnail: blog.thumbnail || "",
             content: blog.content,
             status: blog.status,
             tags: blog.tags,
-            author: blog.author ? blog.author._id.toString() : undefined,
             views: blog.views,
             createdAt: blog.createdAt.toISOString(),
             updatedAt: blog.updatedAt.toISOString(),
@@ -152,12 +141,10 @@ export async function PUT(req: NextRequest,
     }
 }
 
-export async function DELETE(req: NextRequest,
-    context: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     await dbConnect();
     try {
-
-        const { id } = await context.params;
+        const { id } = await params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return NextResponse.json({ error: "Valid blog ID is required" }, { status: 400 });

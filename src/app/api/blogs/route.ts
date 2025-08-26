@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnection";
-
 import Blog from "@/models/Blog";
-import Category from "@/models/Category";
+import BlogCategory from "@/models/BlogCategory";
 import mongoose from "mongoose";
 import { BlogType } from "@/types/interface";
 
@@ -14,6 +13,8 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get("limit") || "10");
         const category = searchParams.get("category") || null;
         const status = searchParams.get("status") || null;
+        const date = searchParams.get("date") || null;
+        const period = searchParams.get("period") || null;
 
         const query: any = {};
         if (category && mongoose.Types.ObjectId.isValid(category)) {
@@ -22,6 +23,32 @@ export async function GET(request: NextRequest) {
         if (status && ["draft", "published", "archived"].includes(status)) {
             query.status = status;
         }
+        if (date) {
+            const [year, month] = date.split("-").map(Number);
+            query.createdAt = {
+                $gte: new Date(year, month - 1, 1),
+                $lt: new Date(year, month, 1),
+            };
+        }
+        if (period && period !== "all") {
+            const now = new Date();
+            if (period === "today") {
+                const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                query.createdAt = { $gte: startOfDay, $lt: endOfDay };
+            } else if (period === "week") {
+                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+                query.createdAt = {
+                    $gte: startOfWeek,
+                    $lt: new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000),
+                };
+            } else if (period === "month") {
+                query.createdAt = {
+                    $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                    $lt: new Date(now.getFullYear(), now.getMonth() + 1, 1),
+                };
+            }
+        }
 
         const skip = (page - 1) * limit;
         const total = await Blog.countDocuments(query);
@@ -29,7 +56,6 @@ export async function GET(request: NextRequest) {
 
         const blogs = await Blog.find(query)
             .populate("blogcategory", "name")
-            .populate("author", "name")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
@@ -40,12 +66,11 @@ export async function GET(request: NextRequest) {
             slug: blog.slug,
             description: blog.description || "",
             introductions: blog.introductions || "",
-            blogcategory: blog.blogcategory._id.toString(),
+            blogcategory: blog.blogcategory?._id.toString() || "",
             thumbnail: blog.thumbnail || "",
             content: blog.content,
             status: blog.status,
             tags: blog.tags,
-            author: blog.author ? blog.author._id.toString() : undefined,
             views: blog.views,
             createdAt: blog.createdAt.toISOString(),
             updatedAt: blog.updatedAt.toISOString(),
@@ -80,7 +105,6 @@ export async function POST(request: NextRequest) {
             content,
             status,
             tags,
-            author,
         } = await request.json();
 
         if (!title || typeof title !== "string" || !title.trim()) {
@@ -101,13 +125,15 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        if (author && !mongoose.Types.ObjectId.isValid(author)) {
-            return NextResponse.json({ error: "Valid author ID is required" }, { status: 400 });
-        }
 
-        const categoryExists = await Category.findById(blogcategory);
+        const categoryExists = await BlogCategory.findById(blogcategory);
         if (!categoryExists) {
             return NextResponse.json({ error: "Category not found" }, { status: 404 });
+        }
+
+        const existingSlug = await Blog.findOne({ slug: slug.trim() });
+        if (existingSlug) {
+            return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
         }
 
         const blog = await Blog.create({
@@ -120,13 +146,10 @@ export async function POST(request: NextRequest) {
             content: content.trim(),
             status: status || "draft",
             tags: tags || [],
-            author: author || null,
             views: 0,
         });
 
-        const populatedBlog = await Blog.findById(blog._id)
-            .populate("blogcategory", "name")
-            .populate("author", "name");
+        const populatedBlog = await Blog.findById(blog._id).populate("blogcategory", "name");
 
         const formattedBlog: BlogType = {
             id: populatedBlog._id.toString(),
@@ -134,12 +157,11 @@ export async function POST(request: NextRequest) {
             slug: populatedBlog.slug,
             description: populatedBlog.description || "",
             introductions: populatedBlog.introductions || "",
-            blogcategory: populatedBlog.blogcategory._id.toString(),
+            blogcategory: populatedBlog.blogcategory?._id.toString() || "",
             thumbnail: populatedBlog.thumbnail || "",
             content: populatedBlog.content,
             status: populatedBlog.status,
             tags: populatedBlog.tags,
-            author: populatedBlog.author ? populatedBlog.author._id.toString() : undefined,
             views: populatedBlog.views,
             createdAt: populatedBlog.createdAt.toISOString(),
             updatedAt: populatedBlog.updatedAt.toISOString(),

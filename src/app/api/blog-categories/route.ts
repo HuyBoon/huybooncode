@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/libs/dbConnection";
 import BlogCategory from "@/models/BlogCategory";
-import { CategoryBlogType } from "@/types/interface";
+import { BlogCategoryType } from "@/types/interface";
+
 
 export async function GET() {
     await dbConnect();
     try {
         const categories = await BlogCategory.find().sort({ name: 1 });
-        const formattedCategories: CategoryBlogType[] = categories.map((cat) => ({
+        const formattedCategories: BlogCategoryType[] = categories.map((cat) => ({
             id: cat._id.toString(),
             name: cat.name,
 
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
 
         const category = await BlogCategory.create({ name: name.trim() });
 
-        const formattedCategory: CategoryBlogType = {
+        const formattedCategory: BlogCategoryType = {
             id: category._id.toString(),
             name: category.name,
 

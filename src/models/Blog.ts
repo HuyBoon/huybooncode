@@ -15,7 +15,6 @@ const BlogSchema = new Schema(
             default: "draft",
         },
         tags: { type: [String], default: [] },
-        author: { type: Schema.Types.ObjectId, ref: "User", default: null },
         views: { type: Number, default: 0 },
     },
     { timestamps: true }

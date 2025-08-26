@@ -125,24 +125,74 @@ export interface EventType {
     updatedAt: string;
 }
 
-export interface CategoryBlogType {
-    id: string;
-    name: string;
-}
-
 export interface BlogType {
     id: string;
     title: string;
     slug: string;
     description: string;
     introductions: string;
-    blogcategory: string; // References CategoryBlogType.id
-    thumbnail: string;
     content: string;
-    status: "draft" | "published" | "archived";
+    blogcategory: string;
+    status: string;
     tags: string[];
-    author?: string; // References UserType._id
+    thumbnail: string;
     views: number;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface BlogFilters {
+    date: string;
+    status: string;
+    category: string;
+    period: string;
+}
+export interface FormData {
+    id?: string;
+    title: string;
+    slug: string;
+    description: string;
+    introductions: string;
+    content: string;
+    blogcategory: string;
+    status: string;
+    tags: string;
+    thumbnail: string;
+}
+export interface FormErrors {
+    title?: string;
+    slug?: string;
+    description?: string;
+    introductions?: string;
+    content?: string;
+    blogcategory?: string;
+    status?: string;
+    tags?: string;
+    thumbnail?: string;
+}
+export interface BlogCategoryType {
+    id: string;
+    name: string;
+}
+
+export interface BlogFilters {
+    date: string;
+    status: string;
+    category: string;
+    period: string;
+}
+
+export interface QuickNoteType {
+    id: string;
+    content: string;
+    date: string;
+    category: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface QuickNoteFilters {
+    date?: string;
+    period: string;
+    category?: string;
 }

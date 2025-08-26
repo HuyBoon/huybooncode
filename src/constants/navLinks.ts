@@ -8,6 +8,7 @@ import {
     Video,
     Settings,
     Clock,
+    Pencil,
     Shapes,
     TrendingUp,
     TrendingDown,
@@ -31,6 +32,11 @@ export const navLinks: NavLink[] = [
         url: "/admin/dashboard",
         label: "Dashboard",
         icon: React.createElement(LayoutDashboard, { size: 20 }),
+    },
+    {
+        url: "/admin/quicknotes",
+        label: "Quick Notes",
+        icon: React.createElement(Pencil, { size: 20 }),
     },
     {
         url: "/admin/todolist",
@@ -80,6 +86,13 @@ export const navLinks: NavLink[] = [
         url: "/admin/manageblogs",
         label: "Blogs",
         icon: React.createElement(FileText, { size: 20 }),
+        submenu: [
+            {
+                url: "/admin/manageblogs/blogcategories",
+                label: "Categories",
+                icon: React.createElement(Shapes, { size: 16 }),
+            },
+        ]
     },
     {
         url: "/admin/calendar",
