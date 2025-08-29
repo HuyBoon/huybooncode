@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -8,9 +8,15 @@ import {
   FormControl,
   Box,
   Typography,
+  Avatar,
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { BlogCategoryType, BlogType } from "@/types/interface";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import sanitizeHtml from "sanitize-html";
+import { Upload } from "lucide-react";
 
 interface FormData {
   id?: string;
@@ -23,6 +29,7 @@ interface FormData {
   status: string;
   tags: string;
   thumbnail: string;
+  thumbnailFile?: File | null;
 }
 
 interface FormErrors {
@@ -45,7 +52,10 @@ interface AddBlogFormProps {
   formData: FormData;
   formErrors: FormErrors;
   handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | SelectChangeEvent<string>
+      | { name: string; value: string | File | null }
   ) => void;
 }
 
@@ -58,6 +68,183 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
   formErrors,
   handleChange,
 }) => {
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+    formData.thumbnail || null
+  );
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure editor is only initialized on client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Tiptap editor setup
+  const editor = useEditor({
+    extensions: [
+      StarterKit, // Basic formatting (bold, italic, headings, lists, etc.)
+      Image.configure({
+        inline: true,
+        allowBase64: false,
+      }),
+    ],
+    content: formData.content || "<p>Start typing...</p>",
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      const sanitizedContent = sanitizeHtml(html, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
+        allowedAttributes: {
+          ...sanitizeHtml.defaults.allowedAttributes,
+          img: ["src", "alt"],
+        },
+      });
+      handleChange({ name: "content", value: sanitizedContent });
+    },
+    editable: true,
+    immediatelyRender: false, // Fix for SSR hydration mismatch
+  });
+
+  // Handle image upload for both thumbnail and content
+  const handleImageUpload = async (
+    file: File,
+    isContentImage: boolean = false
+  ): Promise<string> => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      throw new Error("Only JPEG or PNG images are allowed");
+    }
+    if (file.size > maxSize) {
+      throw new Error("Image size must be less than 5MB");
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error("Failed to upload image");
+    }
+    const { url } = await response.json();
+    return url;
+  };
+
+  // Handle thumbnail file input
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const url = await handleImageUpload(file);
+        setThumbnailPreview(URL.createObjectURL(file));
+        handleChange({ name: "thumbnailFile", value: file });
+        handleChange({ name: "thumbnail", value: url });
+      } catch (error: any) {
+        handleChange({ name: "thumbnail", value: "" });
+        setThumbnailPreview(null);
+        handleChange({ name: "thumbnailFile", value: null });
+        alert(error.message || "Failed to upload thumbnail");
+      }
+    }
+  };
+
+  // Handle image upload for Tiptap editor
+  const handleAddImageToContent = async () => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/jpeg,image/png");
+    input.click();
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (file && editor) {
+        try {
+          const url = await handleImageUpload(file, true);
+          editor.chain().focus().setImage({ src: url }).run();
+        } catch (error: any) {
+          alert(error.message || "Failed to upload image to content");
+        }
+      }
+    };
+  };
+
+  // Custom toolbar for Tiptap
+  const Toolbar = () => (
+    <Box sx={{ mb: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => editor?.chain().focus().toggleBold().run()}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        Bold
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => editor?.chain().focus().toggleItalic().run()}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        Italic
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        H1
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        H2
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => editor?.chain().focus().toggleBulletList().run()}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        Bullet List
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={handleAddImageToContent}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        Image
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => editor?.chain().focus().setParagraph().run()}
+        sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+      >
+        Clear Format
+      </Button>
+    </Box>
+  );
+
+  // Render nothing or a fallback during SSR
+  if (!isClient) {
+    return (
+      <Box
+        sx={{
+          px: 3,
+          pb: 3,
+          color: "white",
+          background: "transparent",
+          boxShadow: "none",
+        }}
+      >
+        <Typography>Loading editor...</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box
       component="form"
@@ -146,26 +333,26 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
           "& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
         }}
       />
-      <TextField
-        fullWidth
-        label="Content"
-        name="content"
-        value={formData.content}
-        onChange={handleChange}
-        error={!!formErrors.content}
-        helperText={formErrors.content}
-        margin="normal"
-        multiline
-        rows={4}
-        InputLabelProps={{ style: { color: "white" } }}
-        InputProps={{ style: { color: "white" } }}
-        sx={{
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(255, 255, 255, 0.3)",
-          },
-          "& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
-        }}
-      />
+      <Box sx={{ mt: 2, mb: 1 }}>
+        <Typography sx={{ color: "white", mb: 1 }}>Content</Typography>
+        <Toolbar />
+        <EditorContent
+          editor={editor}
+          style={{
+            backgroundColor: "white",
+            color: "black",
+            borderRadius: "4px",
+            padding: "8px",
+            minHeight: "200px",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+          }}
+        />
+        {formErrors.content && (
+          <Typography sx={{ color: "#ffb3b3", fontSize: "0.75rem", mt: 0.5 }}>
+            {formErrors.content}
+          </Typography>
+        )}
+      </Box>
       <FormControl fullWidth margin="normal" error={!!formErrors.blogcategory}>
         <InputLabel sx={{ color: "white" }}>Category</InputLabel>
         <Select
@@ -180,31 +367,18 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
                 color: "white",
                 "& .MuiMenuItem-root": {
                   backgroundColor: "#2e004f",
-                  "&:hover": {
-                    backgroundColor: "#5a189a",
-                  },
-                  "&.Mui-selected": {
-                    backgroundColor: "#7b2cbf !important",
-                    color: "white",
-                  },
+                  "&:hover": { backgroundColor: "#5a189a" },
+                  "&.Mui-selected": { backgroundColor: "#7b2cbf !important", color: "white" },
                 },
-                "& .MuiList-root": {
-                  padding: 0,
-                },
+                "& .MuiList-root": { padding: 0 },
               },
             },
           }}
           sx={{
             color: "white",
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(255, 255, 255, 0.5)",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#bb86fc",
-            },
-            "& .MuiSvgIcon-root": {
-              color: "white",
-            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#bb86fc" },
+            "& .MuiSvgIcon-root": { color: "white" },
           }}
         >
           {categories.map((category) => (
@@ -214,13 +388,7 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
           ))}
         </Select>
         {formErrors.blogcategory && (
-          <Typography
-            sx={{
-              color: "#ffb3b3",
-              fontSize: "0.75rem",
-              mt: 0.5,
-            }}
-          >
+          <Typography sx={{ color: "#ffb3b3", fontSize: "0.75rem", mt: 0.5 }}>
             {formErrors.blogcategory}
           </Typography>
         )}
@@ -239,31 +407,18 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
                 color: "white",
                 "& .MuiMenuItem-root": {
                   backgroundColor: "#2e004f",
-                  "&:hover": {
-                    backgroundColor: "#5a189a",
-                  },
-                  "&.Mui-selected": {
-                    backgroundColor: "#7b2cbf !important",
-                    color: "white",
-                  },
+                  "&:hover": { backgroundColor: "#5a189a" },
+                  "&.Mui-selected": { backgroundColor: "#7b2cbf !important", color: "white" },
                 },
-                "& .MuiList-root": {
-                  padding: 0,
-                },
+                "& .MuiList-root": { padding: 0 },
               },
             },
           }}
           sx={{
             color: "white",
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(255, 255, 255, 0.5)",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#bb86fc",
-            },
-            "& .MuiSvgIcon-root": {
-              color: "white",
-            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.5)" },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#bb86fc" },
+            "& .MuiSvgIcon-root": { color: "white" },
           }}
         >
           {["draft", "published", "archived"].map((status) => (
@@ -273,13 +428,7 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
           ))}
         </Select>
         {formErrors.status && (
-          <Typography
-            sx={{
-              color: "#ffb3b3",
-              fontSize: "0.75rem",
-              mt: 0.5,
-            }}
-          >
+          <Typography sx={{ color: "#ffb3b3", fontSize: "0.75rem", mt: 0.5 }}>
             {formErrors.status}
           </Typography>
         )}
@@ -296,30 +445,45 @@ const AddBlogForm: React.FC<AddBlogFormProps> = ({
         InputLabelProps={{ style: { color: "white" } }}
         InputProps={{ style: { color: "white" } }}
         sx={{
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(255, 255, 255, 0.3)",
-          },
+          "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255, 255, 255, 0.3)" },
           "& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
         }}
       />
-      <TextField
-        fullWidth
-        label="Thumbnail URL"
-        name="thumbnail"
-        value={formData.thumbnail}
-        onChange={handleChange}
-        error={!!formErrors.thumbnail}
-        helperText={formErrors.thumbnail}
-        margin="normal"
-        InputLabelProps={{ style: { color: "white" } }}
-        InputProps={{ style: { color: "white" } }}
-        sx={{
-          "& .MuiOutlinedInput-notchedOutline": {
+      <Box sx={{ mt: 2 }}>
+        <Typography sx={{ color: "white", mb: 1 }}>Thumbnail</Typography>
+        <Button
+          variant="outlined"
+          component="label"
+          startIcon={<Upload size={16} />}
+          sx={{
+            color: "white",
             borderColor: "rgba(255, 255, 255, 0.3)",
-          },
-          "& .MuiFormHelperText-root": { color: "rgba(255, 255, 255, 0.7)" },
-        }}
-      />
+            "&:hover": { borderColor: "white" },
+          }}
+        >
+          Upload Thumbnail
+          <input
+            type="file"
+            accept="image/jpeg,image/png"
+            hidden
+            onChange={handleThumbnailChange}
+          />
+        </Button>
+        {thumbnailPreview && (
+          <Box sx={{ mt: 1 }}>
+            <Avatar
+              src={thumbnailPreview}
+              alt="Thumbnail Preview"
+              sx={{ width: 100, height: 100, borderRadius: "8px" }}
+            />
+          </Box>
+        )}
+        {formErrors.thumbnail && (
+          <Typography sx={{ color: "#ffb3b3", fontSize: "0.75rem", mt: 0.5 }}>
+            {formErrors.thumbnail}
+          </Typography>
+        )}
+      </Box>
       <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
         <Button
           type="submit"

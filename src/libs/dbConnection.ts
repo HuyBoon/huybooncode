@@ -198,8 +198,10 @@ export async function closeDatabaseConnections(): Promise<void> {
     }
 }
 
-if (process.env.NODE_ENV !== 'test') {
-    process.on('SIGINT', closeDatabaseConnections);
-    process.on('SIGTERM', closeDatabaseConnections);
-    process.on('beforeExit', closeDatabaseConnections);
+if (process.env.NODE_ENV !== "test" && !(global as any).__db_listeners_added) {
+    process.on("SIGINT", closeDatabaseConnections);
+    process.on("SIGTERM", closeDatabaseConnections);
+    process.on("beforeExit", closeDatabaseConnections);
+
+    (global as any).__db_listeners_added = true;
 }

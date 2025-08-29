@@ -11,7 +11,7 @@ import { useQuickNoteData } from "@/hooks/quicknote/useQuickNoteData";
 import { useQuickNoteMutations } from "@/hooks/quicknote/useQuickNoteMutations";
 import { useQuickNoteForm } from "@/hooks/quicknote/useQuickNoteForm";
 import QuickNoteLayout from "@/components/quicknote/QuickNoteLayout";
-import { fetchQuickNotes } from "@/utils/apiQuickNote";
+import { fetchQuickNotes } from "@/services/quicknote/apiQuickNote";
 
 interface QuickNotePageClientProps {
 	initialQuickNotes: QuickNoteType[];

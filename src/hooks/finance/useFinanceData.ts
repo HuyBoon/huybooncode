@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FinanceType, FinanceCategoryType, PaginationType, TransactionFilters, SummaryFilters } from "@/types/interface";
-import { fetchFinances, fetchSummaryFinances, addOrUpdateFinance, deleteFinance } from "@/utils/financeApi";
+import { fetchFinances, fetchSummaryFinances, addOrUpdateFinance, deleteFinance } from "@/services/finances/financeApi";
 
 interface UseFinanceDataProps {
     initialFinances: FinanceType[];

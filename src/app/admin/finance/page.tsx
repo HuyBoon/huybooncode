@@ -4,7 +4,7 @@ import {
 	fetchCategories,
 	fetchFinances,
 	fetchSummaryFinances,
-} from "@/utils/financeApi";
+} from "@/services/finances/financeApi";
 import FinancePageClient from "./FinancePageClient";
 
 export const dynamic = "force-dynamic";

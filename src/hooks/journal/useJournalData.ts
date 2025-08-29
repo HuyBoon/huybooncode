@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { JournalType, MoodType, PaginationType, JournalFilters } from "@/types/interface";
-import { fetchJournals } from "@/utils/apiJournal";
+import { fetchJournals } from "@/services/journals/apiJournal";
 
 interface UseJournalDataProps {
     initialJournals: JournalType[];

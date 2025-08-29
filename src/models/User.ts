@@ -21,18 +21,18 @@ const UserSchema = new Schema({
 
     avatar: {
         type: String,
-        default: "", // URL ảnh đại diện nếu có
+        default: "",
     },
 
     phone: {
         type: String,
-        default: "", // khách đặt lịch có thể điền số điện thoại
+        default: "",
     },
 
     role: {
         type: String,
         enum: ["user", "admin"],
-        default: "user", // admin mới có quyền quản trị
+        default: "user",
     },
 
     isActive: {

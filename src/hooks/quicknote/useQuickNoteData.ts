@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { QuickNoteType, PaginationType, QuickNoteFilters } from "@/types/interface";
-import { fetchQuickNotes } from "@/utils/apiQuickNote";
+import { fetchQuickNotes } from "@/services/quicknote/apiQuickNote";
 
 interface UseQuickNoteDataProps {
     initialQuickNotes: QuickNoteType[];

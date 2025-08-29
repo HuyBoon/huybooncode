@@ -1,4 +1,3 @@
-// src/app/finance/FinancePageClient.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -48,7 +47,7 @@ const FinancePageClient: React.FC<FinancePageClientProps> = ({
 
 	const [pagination, setPagination] =
 		useState<PaginationType>(initialPagination);
-		
+
 	const [editFinance, setEditFinance] = useState<FinanceType | undefined>(
 		undefined
 	);

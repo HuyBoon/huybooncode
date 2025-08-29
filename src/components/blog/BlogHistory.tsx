@@ -30,7 +30,7 @@ import {
 	PaginationType,
 	BlogFilters,
 } from "@/types/interface";
-import { fetchBlogs } from "@/utils/apiBlog";
+import { fetchBlogs } from "@/services/blogs/apiBlog";
 import sanitizeHtml from "sanitize-html";
 
 interface BlogHistoryProps {

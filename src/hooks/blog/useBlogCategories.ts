@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { BlogCategoryType } from "@/types/interface";
-import { fetchBlogCategories } from "@/utils/apiBlog";
+import { fetchBlogCategories } from "@/services/blogs/apiBlog";
 
 interface UseBlogCategoriesResult {
     categories: BlogCategoryType[];

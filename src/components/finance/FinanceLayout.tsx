@@ -1,4 +1,3 @@
-// src/components/finance/FinanceLayout.tsx
 import React from "react";
 import { Box, Grid, Card, CardContent, Snackbar, Alert } from "@mui/material";
 import AddTransactionForm from "./AddTransactionForm";

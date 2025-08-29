@@ -53,6 +53,7 @@ interface BlogLayoutProps {
 		e:
 			| React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 			| import("@mui/material").SelectChangeEvent<string>
+			| { name: string; value: string | File | null }
 	) => void;
 	handleSubmit: (e: React.FormEvent) => Promise<void>;
 	filters: BlogFilters;
@@ -89,7 +90,7 @@ const BlogLayout: React.FC<BlogLayoutProps> = ({
 			}}
 		>
 			<Grid container spacing={{ xs: 2, sm: 3 }}>
-				<Grid size={{ xs: 12, md: 6 }}>
+				<Grid size={{ xs: 12, md: 12 }}>
 					<Card
 						sx={{
 							borderRadius: "24px",
@@ -126,7 +127,7 @@ const BlogLayout: React.FC<BlogLayoutProps> = ({
 						</Box>
 					</Card>
 				</Grid>
-				<Grid size={{ xs: 12, md: 6 }}>
+				<Grid size={{ xs: 12, md: 12 }}>
 					<Card
 						sx={{
 							borderRadius: "24px",

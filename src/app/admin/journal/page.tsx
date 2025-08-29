@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import JournalPageClient from "./JournalPageClient";
 import { moods } from "@/utils/constant";
-import { fetchJournals } from "@/utils/apiJournal";
+import { fetchJournals } from "@/services/journals/apiJournal";
 import { mockJournals, mockPagination } from "@/constants/mockJournals";
 
 export default async function JournalPage() {

@@ -18,7 +18,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useFinanceData } from "@/hooks/finance/useFinanceData";
 import { useTodoMutations } from "@/hooks/todos/useTodoMutations";
 import { useTodoForm } from "@/hooks/todos/useTodoForm";
-import { fetchTodos } from "@/utils/todoApi";
+import { fetchTodos } from "@/services/todos/todoApi";
 
 interface DashboardPageClientProps {
 	initialFinances: FinanceType[];

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchBlogs, fetchBlogCategories } from "@/utils/apiBlog";
+import { fetchBlogs, fetchBlogCategories } from "@/services/blogs/apiBlog";
 import { BlogType, BlogCategoryType, PaginationType, BlogFilters } from "@/types/interface";
 
 interface UseBlogDataProps {

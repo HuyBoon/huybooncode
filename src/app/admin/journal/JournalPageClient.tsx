@@ -13,7 +13,7 @@ import { useJournalData } from "@/hooks/journal/useJournalData";
 import { useJournalMutations } from "@/hooks/journal/useJournalMutations";
 import { useJournalForm } from "@/hooks/journal/useJournalForm";
 import JournalLayout from "@/components/journal/JournalLayout";
-import { fetchJournals } from "@/utils/apiJournal";
+import { fetchJournals } from "@/services/journals/apiJournal";
 
 interface JournalPageClientProps {
 	initialJournals: JournalType[];

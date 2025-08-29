@@ -1,7 +1,8 @@
-import { getServerSession } from "next-auth";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 import TodoPageClient from "./TodoPageClient";
-import { fetchTodoCategories, fetchTodos } from "@/utils/todoApi";
+import { getInitialTodos } from "@/services/todos/todoService";
 import { defaultStatuses } from "@/utils/constant";
 import Loader from "@/components/admin/Loader";
 
@@ -11,27 +12,35 @@ export default async function TodoPage() {
 		redirect("/login");
 	}
 
-	try {
-		const [categories, todosData] = await Promise.all([
-			fetchTodoCategories(),
-			fetchTodos({ page: 1, limit: 10, period: "today" }),
-		]);
+	const {
+		initialTodos,
+		initialTodoCategories,
+		initialPagination,
+		initialError,
+	} = await getInitialTodos(10);
 
-		return (
-			<TodoPageClient
-				initialTodos={todosData.data}
-				initialCategories={categories}
-				initialStatuses={defaultStatuses}
-				initialPagination={todosData.pagination}
-			/>
-		);
-	} catch (error: any) {
-		console.error("Error in TodoPage:", error.message);
-
+	if (initialError) {
+		console.error("Error in TodoPage:", initialError);
 		return (
 			<div>
 				<Loader />
 			</div>
 		);
 	}
+
+	return (
+		<Suspense fallback={<Loader />}>
+			<TodoPageClient
+				initialTodos={initialTodos.map((todo) => ({
+					...todo,
+					priority: (["low", "medium", "high"].includes(todo.priority)
+						? todo.priority
+						: "low") as "low" | "medium" | "high",
+				}))}
+				initialCategories={initialTodoCategories}
+				initialStatuses={defaultStatuses}
+				initialPagination={initialPagination}
+			/>
+		</Suspense>
+	);
 }

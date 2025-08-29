@@ -1,3 +1,4 @@
+// hooks/todos/useTodoData.ts
 import { useQuery } from "@tanstack/react-query";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
@@ -7,7 +8,8 @@ import {
     PaginationType,
     TodoFilters,
 } from "@/types/interface";
-import { fetchTodos, fetchTodoCategories } from "@/utils/todoApi";
+import { fetchTodos } from "@/services/todos/todoApi";
+import { useCategories } from "./useCategories";
 
 interface UseTodoDataProps {
     initialTodos: TodoType[];
@@ -26,6 +28,8 @@ export const useTodoData = ({
     todoFilters,
     pagination,
 }: UseTodoDataProps) => {
+    const { categories, isLoading: isCategoriesLoading } = useCategories(initialCategories);
+
     const { data: todoData, isLoading: isTodoLoading } = useQuery({
         queryKey: ["todos", pagination.page, pagination.limit, todoFilters],
         queryFn: () =>
@@ -34,24 +38,20 @@ export const useTodoData = ({
                 limit: pagination.limit,
                 status: todoFilters.status !== "all" ? todoFilters.status : undefined,
                 category: todoFilters.category !== "all" ? todoFilters.category : undefined,
-                priority: todoFilters.priority !== "all" ? (todoFilters.priority as "low" | "medium" | "high") : undefined,
+                priority:
+                    todoFilters.priority !== "all"
+                        ? (todoFilters.priority as "low" | "medium" | "high")
+                        : undefined,
                 dueDate: todoFilters.dueDate,
-                period: todoFilters.period, // Use period from todoFilters
+                period: todoFilters.period,
             }),
         initialData: { data: initialTodos, pagination: initialPagination },
         placeholderData: keepPreviousData,
     });
 
-    const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
-        queryKey: ["categories"],
-        queryFn: fetchTodoCategories,
-        initialData: initialCategories,
-        placeholderData: keepPreviousData,
-    });
-
     return {
         statuses: initialStatuses,
-        categories: categoriesData || [],
+        categories,
         todos: todoData?.data || [],
         isLoading: isTodoLoading || isCategoriesLoading,
         pagination: todoData?.pagination || pagination,

@@ -1,19 +1,20 @@
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import { fetchCategories, fetchFinances } from "@/utils/financeApi";
-import { fetchTodoCategories, fetchTodos } from "@/utils/todoApi";
+import { fetchCategories, fetchFinances } from "@/services/finances/financeApi";
+import { fetchTodoCategories, fetchTodos } from "@/services/todos/todoApi";
 import { defaultStatuses } from "@/utils/constant";
 import Loader from "@/components/admin/Loader";
 import DashboardPageClient from "./DashboardPageClient";
+import { dbConnect } from "@/libs/dbConnection";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
 	const session = await getServerSession();
-	console.log("session", session);
 	if (!session) {
 		redirect("/login");
 	}
+	await dbConnect();
 
 	try {
 		const [categories, transactionData, todocategories, todoData] =
@@ -35,7 +36,6 @@ export default async function DashboardPage() {
 			/>
 		);
 	} catch (error: any) {
-		console.error("Error in DashboardPage:", error.message);
 		return (
 			<div>
 				<Loader />

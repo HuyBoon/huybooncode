@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { CircularProgress, Box } from "@mui/material";
 import { useSnackbar } from "@/context/SnackbarContext";
 import {
@@ -11,7 +11,7 @@ import {
 	TodoFilters,
 } from "@/types/interface";
 import TodoLayout from "@/components/todos/TodoLayout";
-import { fetchTodos } from "@/utils/todoApi";
+import { fetchTodos } from "@/services/todos/todoApi";
 import { useTodoData } from "@/hooks/todos/useTodoData";
 import { useTodoMutations } from "@/hooks/todos/useTodoMutations";
 import { useTodoForm } from "@/hooks/todos/useTodoForm";
@@ -56,6 +56,21 @@ const TodoPageClient: React.FC<{
 		pagination,
 	});
 
+	const initialFormData = useMemo(() => {
+		if (!editTodo) return undefined;
+		return {
+			id: editTodo.id,
+			title: editTodo.title,
+			description: editTodo.description || "",
+			status: editTodo.status,
+			priority: editTodo.priority,
+			category: editTodo.category,
+			dueDate: editTodo.dueDate.slice(0, 16),
+			notifyEnabled: editTodo.notifyEnabled,
+			notifyMinutesBefore: editTodo.notifyMinutesBefore,
+		};
+	}, [editTodo]);
+
 	const { addTodo, updateTodo, deleteTodo, completeTodo, isMutating } =
 		useTodoMutations({
 			setSnackbar: (snackbar: {
@@ -81,19 +96,7 @@ const TodoPageClient: React.FC<{
 	const { formData, errors, handleSubmit, handleChange } = useTodoForm({
 		statuses,
 		categories,
-		initialData: editTodo
-			? {
-					id: editTodo.id,
-					title: editTodo.title,
-					description: editTodo.description || "",
-					status: editTodo.status,
-					priority: editTodo.priority,
-					category: editTodo.category,
-					dueDate: editTodo.dueDate.slice(0, 16),
-					notifyEnabled: editTodo.notifyEnabled,
-					notifyMinutesBefore: editTodo.notifyMinutesBefore,
-			  }
-			: undefined,
+		initialData: initialFormData,
 		onSubmit: async (data) => {
 			try {
 				if (data.id) {
