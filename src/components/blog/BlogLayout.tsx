@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Card, Grid, Typography } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material/Select";
 import AddBlogForm from "@/components/blog/AddBlogForm";
 import BlogHistory from "@/components/blog/BlogHistory";
 import BlogDetail from "@/components/blog/BlogDetail";
@@ -49,11 +50,11 @@ interface BlogLayoutProps {
 	selectedBlog: BlogType | null;
 	formData: FormData;
 	formErrors: FormErrors;
-	handleFormChange: (
+	handleChange: (
 		e:
 			| React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-			| import("@mui/material").SelectChangeEvent<string>
-			| { name: string; value: string | File | null }
+			| SelectChangeEvent<string>
+			| { target: { name: string; value: any } }
 	) => void;
 	handleSubmit: (e: React.FormEvent) => Promise<void>;
 	filters: BlogFilters;
@@ -74,7 +75,7 @@ const BlogLayout: React.FC<BlogLayoutProps> = ({
 	selectedBlog,
 	formData,
 	formErrors,
-	handleFormChange,
+	handleChange,
 	handleSubmit,
 	filters,
 	setFilters,
@@ -122,7 +123,7 @@ const BlogLayout: React.FC<BlogLayoutProps> = ({
 								onCancel={handleCancel}
 								formData={formData}
 								formErrors={formErrors}
-								handleChange={handleFormChange}
+								handleChange={handleChange}
 							/>
 						</Box>
 					</Card>

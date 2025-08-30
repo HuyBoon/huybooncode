@@ -1,17 +1,5 @@
-import { TodoType, CategoryType, PaginationType } from "@/types/interface";
+import { TodoType, CategoryType, PaginationType, FetchTodosParams } from "@/types/interface";
 
-interface FetchTodosParams {
-    page?: number;
-    limit?: number;
-    status?: string;
-    category?: string;
-    priority?: "low" | "medium" | "high";
-    dueDate?: string;
-    dateTimeRange?: { start: string; end: string };
-    period?: string;
-    notifyEnabled?: boolean;
-    notificationSent?: boolean;
-}
 
 export const fetchTodos = async ({
     page = 1,

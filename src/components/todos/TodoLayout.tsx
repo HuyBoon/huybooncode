@@ -1,13 +1,19 @@
-"use client";
-
 import React from "react";
-import { Box, Grid, Snackbar, Alert, Button, Typography } from "@mui/material";
+import {
+	Box,
+	Grid,
+	Snackbar,
+	Alert,
+	Button,
+	Typography,
+	Card,
+} from "@mui/material";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "@/context/SnackbarContext";
-import AddTodoForm from "./AddTodoForm";
-import TodoSummary from "./TodoSummary";
-import TodoHistory from "./TodoHistory";
+import AddTodoForm from "@/components/todos/AddTodoForm";
+import TodoSummary from "@/components/todos/TodoSummary";
+import TodoHistory from "@/components/todos/TodoHistory";
 import {
 	TodoType,
 	StatusType,
@@ -58,7 +64,7 @@ interface TodoLayoutProps {
 			| React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 			| { target: { name?: string; value: unknown } }
 	) => void;
-	resetFilters: () => void; // Add resetFilters to interface
+	resetFilters: () => void;
 }
 
 const TodoLayout: React.FC<TodoLayoutProps> = ({
@@ -79,43 +85,42 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 	formData,
 	formErrors,
 	handleFormChange,
-	resetFilters, // Destructure resetFilters
+	resetFilters,
 }) => {
 	const { snackbar, closeSnackbar } = useSnackbar();
 	const router = useRouter();
 
 	return (
-		<Box sx={{ maxWidth: "lg", mx: "auto", mt: 2, minHeight: "100vh" }}>
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-					mb: 4,
-				}}
-			>
-				<Typography variant="h4" sx={{ fontWeight: 600 }}>
-					Todo List
-				</Typography>
-				<Button
-					variant="outlined"
-					onClick={() => router.push("/admin/todolist/categories")}
-					startIcon={<Settings size={20} />}
-					sx={{ textTransform: "none", fontWeight: 500 }}
-					aria-label="Manage categories"
-				>
-					Manage Categories
-				</Button>
-			</Box>
-			<Grid container spacing={2}>
-				<Grid container spacing={2}>
-					<Grid size={{ xs: 12, md: 6 }}>
+		<Box
+			sx={{
+				maxWidth: "1400px",
+				mx: "auto",
+				mt: 4,
+				mb: 4,
+				bgcolor: "transparent",
+				p: 2,
+			}}
+		>
+			<Grid container spacing={{ xs: 2, sm: 3 }}>
+				<Grid size={{ xs: 12, md: 6 }}>
+					<Card
+						sx={{
+							borderRadius: "24px",
+							overflow: "hidden",
+							background: "linear-gradient(135deg, #2e003e, #3d2352, #1b1b2f)",
+
+							boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+							minHeight: { xs: "300px", sm: "350px", md: "400px" },
+							display: "flex",
+							flexDirection: "column",
+						}}
+					>
 						<AddTodoForm
 							categories={categories}
 							statuses={statuses}
 							loading={isLoading}
 							onSubmit={handleSubmit}
-							onCancel={handleCancel}
+							onCancel={initialFormData ? handleCancel : undefined}
 							initialData={
 								initialFormData
 									? {
@@ -127,7 +132,7 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 											category: initialFormData.category,
 											dueDate: new Date(initialFormData.dueDate)
 												.toISOString()
-												.split("T")[0],
+												.slice(0, 16),
 											notifyEnabled: initialFormData.notifyEnabled,
 											notifyMinutesBefore: initialFormData.notifyMinutesBefore,
 									  }
@@ -137,31 +142,57 @@ const TodoLayout: React.FC<TodoLayoutProps> = ({
 							formErrors={formErrors}
 							handleChange={handleFormChange}
 						/>
-					</Grid>
-					<Grid size={{ xs: 12, md: 6 }}>
+					</Card>
+				</Grid>
+				<Grid size={{ xs: 12, md: 6 }}>
+					<Card
+						sx={{
+							borderRadius: "24px",
+							overflow: "hidden",
+							background: "linear-gradient(135deg, #00695c 0%, #004d40 100%)",
+
+							boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+							minHeight: { xs: "300px", sm: "350px", md: "400px" },
+							display: "flex",
+							flexDirection: "column",
+						}}
+					>
 						<TodoSummary
 							todos={todos}
 							statuses={statuses}
 							todoFilters={todoFilters}
 							setTodoFilters={setTodoFilters}
 						/>
-					</Grid>
+					</Card>
 				</Grid>
-				<Grid size={{ xs: 12, md: 12 }}>
-					<TodoHistory
-						todos={todos}
-						statuses={statuses}
-						categories={categories}
-						loading={isLoading}
-						handleEdit={handleEdit}
-						handleDelete={handleDelete}
-						handleComplete={handleComplete}
-						pagination={pagination}
-						setPagination={setPagination}
-						todoFilters={todoFilters}
-						setTodoFilters={setTodoFilters}
-						resetFilters={resetFilters}
-					/>
+				<Grid size={{ xs: 12 }}>
+					<Card
+						sx={{
+							borderRadius: "24px",
+							overflow: "hidden",
+							background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+
+							boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+							minHeight: { xs: "300px", sm: "350px", md: "400px" },
+							display: "flex",
+							flexDirection: "column",
+						}}
+					>
+						<TodoHistory
+							todos={todos}
+							statuses={statuses}
+							categories={categories}
+							loading={isLoading}
+							handleEdit={handleEdit}
+							handleDelete={handleDelete}
+							handleComplete={handleComplete}
+							pagination={pagination}
+							setPagination={setPagination}
+							todoFilters={todoFilters}
+							setTodoFilters={setTodoFilters}
+							resetFilters={resetFilters}
+						/>
+					</Card>
 				</Grid>
 			</Grid>
 			<Snackbar

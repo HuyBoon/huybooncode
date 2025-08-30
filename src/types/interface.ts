@@ -111,7 +111,18 @@ export interface TodoFilters {
 export interface SummaryToDoFilters {
     period: string;
 }
-
+export interface FetchTodosParams {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    priority?: "low" | "medium" | "high";
+    dueDate?: string;
+    dateTimeRange?: { start: string; end: string };
+    period?: string;
+    notifyEnabled?: boolean;
+    notificationSent?: boolean;
+}
 // Event Types
 
 export interface EventType {

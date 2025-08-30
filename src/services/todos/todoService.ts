@@ -4,20 +4,7 @@ import Category from "@/models/Category";
 import Todo from "@/models/Todo";
 import { TodoType, CategoryType, PaginationType } from "@/types/interface";
 
-interface FetchTodosParams {
-    page?: number;
-    limit?: number;
-    status?: string;
-    category?: string;
-    priority?: "low" | "medium" | "high";
-    dueDate?: string;
-    dateTimeRange?: { start: string; end: string };
-    period?: string;
-    notifyEnabled?: boolean;
-    notificationSent?: boolean;
-}
 
-// Server-side function: getInitialTodos
 export async function getInitialTodos(limit = 10) {
     await dbConnect();
 
